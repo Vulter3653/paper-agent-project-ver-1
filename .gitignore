@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.wrangler/
+.dev.vars
+.env
+.env.*
+!.env.example
+service-account.json
+AI_Agent_Development_Environment_Report.pdf
+*.local
+*.log
+.DS_Store

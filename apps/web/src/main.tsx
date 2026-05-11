@@ -1,0 +1,176 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { FileText, Play, RefreshCw, Search } from "lucide-react";
+import type { PaperSummary, SearchJob } from "@paper-agent/shared";
+import "./styles.css";
+
+type JobResponse = {
+  job: SearchJob;
+  papers: PaperSummary[];
+};
+
+const demoPapers: PaperSummary[] = [
+  {
+    id: "demo-1",
+    rank: 1,
+    title: "Automated Scholarly Paper Discovery with Agentic Workflows",
+    authors: "Kim, Lee, Park",
+    year: 2025,
+    journalName: "Journal of AI Research",
+    doi: "10.0000/demo.1",
+    oaStatus: "unknown",
+    abstractScore: 0.91,
+    finalScore: 0.88,
+    includeStatus: "include",
+    relevanceReason: "Keyword, abstract, and method terms are directly aligned."
+  },
+  {
+    id: "demo-2",
+    rank: 2,
+    title: "Large Language Models for Literature Review Automation",
+    authors: "Choi, Han",
+    year: 2024,
+    journalName: "Information Systems Review",
+    doi: "10.0000/demo.2",
+    oaStatus: "oa",
+    abstractScore: 0.86,
+    finalScore: 0.82,
+    includeStatus: "include",
+    relevanceReason: "The paper covers literature review automation and evaluation."
+  }
+];
+
+function App() {
+  const [keyword, setKeyword] = useState("AI interview employer branding");
+  const [job, setJob] = useState<SearchJob | null>(null);
+  const [papers, setPapers] = useState<PaperSummary[]>(demoPapers);
+  const [selectedId, setSelectedId] = useState<string>(demoPapers[0].id);
+  const [loading, setLoading] = useState(false);
+  const selected = useMemo(() => papers.find((paper) => paper.id === selectedId) ?? papers[0], [papers, selectedId]);
+
+  useEffect(() => {
+    if (!job || job.status === "completed" || job.status === "failed") return;
+    const timer = window.setInterval(async () => {
+      const response = await fetch(`/api/search-jobs/${job.id}`);
+      if (!response.ok) return;
+      const data = (await response.json()) as JobResponse;
+      setJob(data.job);
+      setPapers(data.papers);
+    }, 2500);
+    return () => window.clearInterval(timer);
+  }, [job]);
+
+  async function startSearch() {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/search-jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, yearStart: 2020, maxResults: 20 })
+      });
+      if (!response.ok) throw new Error("Failed to create search job");
+      const data = (await response.json()) as JobResponse;
+      setJob(data.job);
+      setPapers(data.papers);
+      setSelectedId(data.papers[0]?.id ?? "");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="shell">
+      <section className="toolbar">
+        <div>
+          <h1>Paper Agent Dashboard</h1>
+          <p>Search jobs, ranked papers, relevance reasons, and report links.</p>
+        </div>
+        <div className="searchBox">
+          <Search size={18} />
+          <input value={keyword} onChange={(event) => setKeyword(event.target.value)} aria-label="Research keyword" />
+          <button onClick={startSearch} disabled={loading}>
+            {loading ? <RefreshCw size={18} className="spin" /> : <Play size={18} />}
+            Run
+          </button>
+        </div>
+      </section>
+
+      <section className="statusBand">
+        <Metric label="Status" value={job?.status ?? "demo"} />
+        <Metric label="Step" value={job?.currentStep ?? "ranking preview"} />
+        <Metric label="Papers" value={String(papers.length)} />
+        <Metric label="Top Score" value={papers[0] ? papers[0].finalScore.toFixed(2) : "-"} />
+      </section>
+
+      <section className="contentGrid">
+        <div className="tablePanel">
+          <div className="panelTitle">
+            <h2>Ranked Papers</h2>
+            <button className="iconButton" aria-label="Refresh job">
+              <RefreshCw size={18} />
+            </button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>OA</th>
+                <th>Abstract</th>
+                <th>Final</th>
+              </tr>
+            </thead>
+            <tbody>
+              {papers.map((paper) => (
+                <tr key={paper.id} className={paper.id === selected?.id ? "selected" : ""} onClick={() => setSelectedId(paper.id)}>
+                  <td>{paper.rank}</td>
+                  <td>{paper.title}</td>
+                  <td>{paper.year}</td>
+                  <td>{paper.oaStatus}</td>
+                  <td>{paper.abstractScore.toFixed(2)}</td>
+                  <td>{paper.finalScore.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <aside className="detailPanel">
+          <div className="panelTitle">
+            <h2>Paper Detail</h2>
+            <FileText size={18} />
+          </div>
+          {selected ? (
+            <>
+              <h3>{selected.title}</h3>
+              <dl>
+                <dt>Authors</dt>
+                <dd>{selected.authors}</dd>
+                <dt>Journal</dt>
+                <dd>{selected.journalName}</dd>
+                <dt>DOI</dt>
+                <dd>{selected.doi}</dd>
+                <dt>Relevance</dt>
+                <dd>{selected.relevanceReason}</dd>
+              </dl>
+            </>
+          ) : (
+            <p>No paper selected.</p>
+          )}
+        </aside>
+      </section>
+    </main>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="metric">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(<App />);
