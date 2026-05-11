@@ -1,6 +1,6 @@
 name = "paper-agent-worker"
 main = "src/index.ts"
-compatibility_date = "2026-05-11"
+compatibility_date = "2026-05-03"
 
 [[d1_databases]]
 binding = "DB"
