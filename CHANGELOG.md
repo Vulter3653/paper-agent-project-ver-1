@@ -17,6 +17,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 - `Added`: Added `apps/worker/schema.sql` with D1 tables and indexes for search jobs, papers, and evaluations.
 - `Fixed`: Added Worker route error responses and D1 column backfill checks so older Cloudflare D1 tables can accept search job inserts.
+- `Fixed`: Included `created_at` values when inserting papers and evaluations to satisfy existing Cloudflare D1 constraints.
 - `Changed`: Updated `apps/web/src/main.tsx` to show API errors when search creation or refresh fails.
 - `Changed`: Updated `apps/worker/src/index.ts` so search job POST/GET routes persist demo results to D1 and read them back by job ID.
 - `Changed`: Connected the dashboard refresh button in `apps/web/src/main.tsx` to reload the active search job from the Worker API.

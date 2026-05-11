@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS papers (
   journal_name TEXT NOT NULL,
   doi TEXT NOT NULL,
   oa_status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
   FOREIGN KEY (job_id) REFERENCES search_jobs(id) ON DELETE CASCADE
 );
 
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS evaluations (
   final_score REAL NOT NULL,
   include_status TEXT NOT NULL,
   relevance_reason TEXT NOT NULL,
+  created_at TEXT NOT NULL,
   FOREIGN KEY (paper_id) REFERENCES papers(id) ON DELETE CASCADE
 );
 

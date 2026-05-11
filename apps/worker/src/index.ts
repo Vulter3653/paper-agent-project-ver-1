@@ -186,6 +186,7 @@ async function ensureSchema(db: D1Database): Promise<void> {
   await ensureColumn(db, "papers", "journal_name", "TEXT DEFAULT ''");
   await ensureColumn(db, "papers", "doi", "TEXT DEFAULT ''");
   await ensureColumn(db, "papers", "oa_status", "TEXT DEFAULT 'unknown'");
+  await ensureColumn(db, "papers", "created_at", "TEXT");
 
   await ensureColumn(db, "evaluations", "id", "TEXT");
   await ensureColumn(db, "evaluations", "paper_id", "TEXT");
@@ -193,6 +194,7 @@ async function ensureSchema(db: D1Database): Promise<void> {
   await ensureColumn(db, "evaluations", "final_score", "REAL DEFAULT 0");
   await ensureColumn(db, "evaluations", "include_status", "TEXT DEFAULT 'review'");
   await ensureColumn(db, "evaluations", "relevance_reason", "TEXT DEFAULT ''");
+  await ensureColumn(db, "evaluations", "created_at", "TEXT");
 
   await db.batch([
     db.prepare("CREATE INDEX IF NOT EXISTS idx_papers_job_id ON papers(job_id)"),
@@ -207,6 +209,7 @@ async function ensureColumn(db: D1Database, tableName: string, columnName: strin
 }
 
 async function saveDemoSearchResult(db: D1Database, job: SearchJob, papers: PaperSummary[]): Promise<void> {
+  const now = new Date().toISOString();
   const statements: D1PreparedStatement[] = [
     db
       .prepare(
@@ -221,16 +224,16 @@ async function saveDemoSearchResult(db: D1Database, job: SearchJob, papers: Pape
     statements.push(
       db
         .prepare(
-          `INSERT INTO papers (id, job_id, rank, title, authors, year, journal_name, doi, oa_status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO papers (id, job_id, rank, title, authors, year, journal_name, doi, oa_status, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
-        .bind(paperId, job.id, paper.rank, paper.title, paper.authors, paper.year, paper.journalName, paper.doi, paper.oaStatus)
+        .bind(paperId, job.id, paper.rank, paper.title, paper.authors, paper.year, paper.journalName, paper.doi, paper.oaStatus, now)
     );
     statements.push(
       db
         .prepare(
-          `INSERT INTO evaluations (id, paper_id, abstract_score, final_score, include_status, relevance_reason)
-           VALUES (?, ?, ?, ?, ?, ?)`
+          `INSERT INTO evaluations (id, paper_id, abstract_score, final_score, include_status, relevance_reason, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`
         )
         .bind(
           `${job.id}-evaluation-${paper.rank}`,
@@ -238,7 +241,8 @@ async function saveDemoSearchResult(db: D1Database, job: SearchJob, papers: Pape
           paper.abstractScore,
           paper.finalScore,
           paper.includeStatus,
-          paper.relevanceReason
+          paper.relevanceReason,
+          now
         )
     );
   }
