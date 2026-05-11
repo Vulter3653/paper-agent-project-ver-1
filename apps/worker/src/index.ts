@@ -73,21 +73,29 @@ export default {
     }
 
     if (url.pathname === "/api/search-jobs" && request.method === "POST") {
-      const body = await readJson<CreateSearchJobRequest>(request);
-      if (!env.DB) return json({ error: "D1 database binding is not configured" }, 503);
-      await ensureSchema(env.DB);
-      const job = createDemoJob(body.keyword ?? "AI interview employer branding");
-      await saveDemoSearchResult(env.DB, job, demoPapers);
-      return json((await getSearchResult(env.DB, job.id)) ?? { job, papers: demoPapers });
+      try {
+        const body = await readJson<CreateSearchJobRequest>(request);
+        if (!env.DB) return json({ error: "D1 database binding is not configured" }, 503);
+        await ensureSchema(env.DB);
+        const job = createDemoJob(body.keyword ?? "AI interview employer branding");
+        await saveDemoSearchResult(env.DB, job, demoPapers);
+        return json((await getSearchResult(env.DB, job.id)) ?? { job, papers: demoPapers });
+      } catch (error) {
+        return json({ error: getErrorMessage(error) }, 500);
+      }
     }
 
     const jobMatch = url.pathname.match(/^\/api\/search-jobs\/([^/]+)$/);
     if (jobMatch && request.method === "GET") {
-      if (!env.DB) return json({ error: "D1 database binding is not configured" }, 503);
-      await ensureSchema(env.DB);
-      const result = await getSearchResult(env.DB, jobMatch[1]);
-      if (!result) return json({ error: "Search job not found" }, 404);
-      return json(result);
+      try {
+        if (!env.DB) return json({ error: "D1 database binding is not configured" }, 503);
+        await ensureSchema(env.DB);
+        const result = await getSearchResult(env.DB, jobMatch[1]);
+        if (!result) return json({ error: "Search job not found" }, 404);
+        return json(result);
+      } catch (error) {
+        return json({ error: getErrorMessage(error) }, 500);
+      }
     }
 
     return json({ error: "Not found" }, 404);
@@ -116,8 +124,8 @@ function createDemoJob(keyword: string, id = `job-${crypto.randomUUID()}`): Sear
 }
 
 async function ensureSchema(db: D1Database): Promise<void> {
-  await db.batch([
-    db.prepare(
+  await db
+    .prepare(
       `CREATE TABLE IF NOT EXISTS search_jobs (
         id TEXT PRIMARY KEY,
         keyword TEXT NOT NULL,
@@ -128,8 +136,10 @@ async function ensureSchema(db: D1Database): Promise<void> {
         completed_at TEXT,
         error_message TEXT
       )`
-    ),
-    db.prepare(
+    )
+    .run();
+  await db
+    .prepare(
       `CREATE TABLE IF NOT EXISTS papers (
         id TEXT PRIMARY KEY,
         job_id TEXT NOT NULL,
@@ -142,8 +152,10 @@ async function ensureSchema(db: D1Database): Promise<void> {
         oa_status TEXT NOT NULL,
         FOREIGN KEY (job_id) REFERENCES search_jobs(id) ON DELETE CASCADE
       )`
-    ),
-    db.prepare(
+    )
+    .run();
+  await db
+    .prepare(
       `CREATE TABLE IF NOT EXISTS evaluations (
         id TEXT PRIMARY KEY,
         paper_id TEXT NOT NULL,
@@ -153,10 +165,45 @@ async function ensureSchema(db: D1Database): Promise<void> {
         relevance_reason TEXT NOT NULL,
         FOREIGN KEY (paper_id) REFERENCES papers(id) ON DELETE CASCADE
       )`
-    ),
+    )
+    .run();
+
+  await ensureColumn(db, "search_jobs", "id", "TEXT");
+  await ensureColumn(db, "search_jobs", "keyword", "TEXT DEFAULT ''");
+  await ensureColumn(db, "search_jobs", "status", "TEXT DEFAULT 'completed'");
+  await ensureColumn(db, "search_jobs", "current_step", "TEXT DEFAULT 'ranking'");
+  await ensureColumn(db, "search_jobs", "total_steps", "INTEGER DEFAULT 12");
+  await ensureColumn(db, "search_jobs", "created_at", "TEXT");
+  await ensureColumn(db, "search_jobs", "completed_at", "TEXT");
+  await ensureColumn(db, "search_jobs", "error_message", "TEXT");
+
+  await ensureColumn(db, "papers", "id", "TEXT");
+  await ensureColumn(db, "papers", "job_id", "TEXT");
+  await ensureColumn(db, "papers", "rank", "INTEGER DEFAULT 0");
+  await ensureColumn(db, "papers", "title", "TEXT DEFAULT ''");
+  await ensureColumn(db, "papers", "authors", "TEXT DEFAULT ''");
+  await ensureColumn(db, "papers", "year", "INTEGER DEFAULT 0");
+  await ensureColumn(db, "papers", "journal_name", "TEXT DEFAULT ''");
+  await ensureColumn(db, "papers", "doi", "TEXT DEFAULT ''");
+  await ensureColumn(db, "papers", "oa_status", "TEXT DEFAULT 'unknown'");
+
+  await ensureColumn(db, "evaluations", "id", "TEXT");
+  await ensureColumn(db, "evaluations", "paper_id", "TEXT");
+  await ensureColumn(db, "evaluations", "abstract_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "final_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "include_status", "TEXT DEFAULT 'review'");
+  await ensureColumn(db, "evaluations", "relevance_reason", "TEXT DEFAULT ''");
+
+  await db.batch([
     db.prepare("CREATE INDEX IF NOT EXISTS idx_papers_job_id ON papers(job_id)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_evaluations_paper_id ON evaluations(paper_id)")
   ]);
+}
+
+async function ensureColumn(db: D1Database, tableName: string, columnName: string, definition: string): Promise<void> {
+  const columns = await db.prepare(`PRAGMA table_info(${tableName})`).all<{ name: string }>();
+  if (columns.results.some((column) => column.name === columnName)) return;
+  await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition}`).run();
 }
 
 async function saveDemoSearchResult(db: D1Database, job: SearchJob, papers: PaperSummary[]): Promise<void> {
@@ -278,4 +325,8 @@ function corsHeaders(): HeadersInit {
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization"
   };
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unexpected Worker error";
 }

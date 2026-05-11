@@ -53,6 +53,7 @@ function App() {
   const [selectedId, setSelectedId] = useState<string>(demoPapers[0].id);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const selected = useMemo(() => papers.find((paper) => paper.id === selectedId) ?? papers[0], [papers, selectedId]);
 
   useEffect(() => {
@@ -70,13 +71,16 @@ function App() {
   async function refreshJob() {
     if (!job) return;
     setRefreshing(true);
+    setErrorMessage("");
     try {
       const response = await fetch(apiUrl(`/api/search-jobs/${job.id}`));
-      if (!response.ok) throw new Error("Failed to refresh search job");
+      if (!response.ok) throw new Error(await readApiError(response, "Failed to refresh search job"));
       const data = (await response.json()) as JobResponse;
       setJob(data.job);
       setPapers(data.papers);
       setSelectedId((current) => (data.papers.some((paper) => paper.id === current) ? current : data.papers[0]?.id ?? ""));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Failed to refresh search job");
     } finally {
       setRefreshing(false);
     }
@@ -84,17 +88,20 @@ function App() {
 
   async function startSearch() {
     setLoading(true);
+    setErrorMessage("");
     try {
       const response = await fetch(apiUrl("/api/search-jobs"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ keyword, yearStart: 2020, maxResults: 20 })
       });
-      if (!response.ok) throw new Error("Failed to create search job");
+      if (!response.ok) throw new Error(await readApiError(response, "Failed to create search job"));
       const data = (await response.json()) as JobResponse;
       setJob(data.job);
       setPapers(data.papers);
       setSelectedId(data.papers[0]?.id ?? "");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Failed to create search job");
     } finally {
       setLoading(false);
     }
@@ -123,6 +130,7 @@ function App() {
         <Metric label="Papers" value={String(papers.length)} />
         <Metric label="Top Score" value={papers[0] ? papers[0].finalScore.toFixed(2) : "-"} />
       </section>
+      {errorMessage ? <p className="errorMessage">{errorMessage}</p> : null}
 
       <section className="contentGrid">
         <div className="tablePanel">
@@ -193,6 +201,15 @@ function Metric({ label, value }: { label: string; value: string }) {
       <strong>{value}</strong>
     </div>
   );
+}
+
+async function readApiError(response: Response, fallback: string): Promise<string> {
+  try {
+    const data = (await response.json()) as { error?: string };
+    return data.error ?? fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 createRoot(document.getElementById("root")!).render(<App />);

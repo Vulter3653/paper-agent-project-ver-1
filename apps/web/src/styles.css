@@ -114,6 +114,15 @@ h1 {
   line-height: 1.2;
 }
 
+.errorMessage {
+  background: #fff1f1;
+  border: 1px solid #f4b8b8;
+  border-radius: 8px;
+  color: #9b1c1c;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+}
+
 .contentGrid {
   align-items: start;
   display: grid;
