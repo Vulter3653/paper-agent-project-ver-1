@@ -98,6 +98,12 @@ Every meaningful repository change must update `CHANGELOG.md` in the same commit
 
 Pull requests must use `.github/pull_request_template.md` and confirm the changelog update checklist before merge.
 
+## Session Handoff
+
+Before ending any work session, update `docs/progress.md`. This file is the required handoff source for the next session and must include current status, verification results, deployment URLs, blockers, local-only state, and the next concrete tasks.
+
+Any update to `docs/progress.md` must also be recorded in `CHANGELOG.md`.
+
 ## GitHub Remote
 
 The personal repository is configured as `origin`:
