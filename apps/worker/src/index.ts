@@ -4,6 +4,7 @@ export interface Env {
   DB?: D1Database;
   REPORTS?: R2Bucket;
   OPENALEX_EMAIL?: string;
+  OPENALEX_API_KEY?: string;
   UNPAYWALL_EMAIL?: string;
   GOOGLE_CLIENT_EMAIL?: string;
   GOOGLE_PRIVATE_KEY?: string;
@@ -103,6 +104,7 @@ export default {
         await saveSearchJob(env.DB, job);
         const papers = await searchOpenAlex(keyword, {
           email: env.OPENALEX_EMAIL,
+          apiKey: env.OPENALEX_API_KEY,
           maxResults,
           yearStart: body.yearStart,
           yearEnd: body.yearEnd
@@ -334,12 +336,28 @@ async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRec
 
 async function searchOpenAlex(
   keyword: string,
-  options: { email?: string; maxResults: number; yearStart?: number; yearEnd?: number }
+  options: { email?: string; apiKey?: string; maxResults: number; yearStart?: number; yearEnd?: number }
 ): Promise<PaperRecord[]> {
   const url = new URL("https://api.openalex.org/works");
   url.searchParams.set("search", keyword);
   url.searchParams.set("per-page", String(options.maxResults));
   url.searchParams.set("sort", "cited_by_count:desc");
+  url.searchParams.set(
+    "select",
+    [
+      "id",
+      "doi",
+      "display_name",
+      "title",
+      "publication_year",
+      "cited_by_count",
+      "abstract_inverted_index",
+      "authorships",
+      "primary_location",
+      "open_access"
+    ].join(",")
+  );
+  if (options.apiKey) url.searchParams.set("api_key", options.apiKey);
   if (options.email) url.searchParams.set("mailto", options.email);
 
   const filters: string[] = [];
@@ -347,16 +365,46 @@ async function searchOpenAlex(
   if (options.yearEnd) filters.push(`to_publication_date:${Math.trunc(options.yearEnd)}-12-31`);
   if (filters.length) url.searchParams.set("filter", filters.join(","));
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": options.email ? `paper-agent-project (${options.email})` : "paper-agent-project"
-    }
-  });
-  if (!response.ok) throw new Error(`OpenAlex request failed with ${response.status}`);
+  const response = await fetchOpenAlexWithRetry(url, options.email);
 
   const data = (await response.json()) as OpenAlexResponse;
   return (data.results ?? []).slice(0, options.maxResults).map((work, index) => mapOpenAlexWork(work, keyword, index + 1));
+}
+
+async function fetchOpenAlexWithRetry(url: URL, email: string | undefined): Promise<Response> {
+  const maxAttempts = 3;
+  let lastResponse: Response | null = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const response = await fetch(url.toString(), {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": email ? `paper-agent-project (${email})` : "paper-agent-project"
+      }
+    });
+
+    if (response.ok) return response;
+    lastResponse = response;
+
+    if (response.status !== 429 && response.status < 500) break;
+    await sleep(2 ** attempt * 1000);
+  }
+
+  if (lastResponse?.status === 429) {
+    const reset = lastResponse.headers.get("X-RateLimit-Reset");
+    const remaining = lastResponse.headers.get("X-RateLimit-Remaining");
+    const resetText = reset ? ` Reset in ${reset} seconds.` : "";
+    const remainingText = remaining ? ` Remaining credits: ${remaining}.` : "";
+    throw new Error(
+      `OpenAlex rate limit reached (429). Add OPENALEX_API_KEY and OPENALEX_EMAIL in Cloudflare Worker variables/secrets, then redeploy.${remainingText}${resetText}`
+    );
+  }
+
+  throw new Error(`OpenAlex request failed with ${lastResponse?.status ?? "unknown status"}`);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function mapOpenAlexWork(work: OpenAlexWork, keyword: string, rank: number): PaperRecord {

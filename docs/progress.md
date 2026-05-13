@@ -35,11 +35,11 @@ Worker health: https://paper-agent-project.shch3653.workers.dev/api/health
 
 Current next implementation target:
 
-1. Verify the deployed Worker after Cloudflare finishes building the latest `main` commit.
-2. Click `Run` on the dashboard and confirm returned papers are real OpenAlex results, not demo titles.
-3. Confirm new D1 columns `openalex_id`, `abstract`, and `cited_by_count` are present and populated for new rows.
-4. Add CSV download endpoint while R2 remains disabled.
-5. Add Crossref metadata enrichment after OpenAlex flow is confirmed stable.
+1. Add `OPENALEX_API_KEY` and `OPENALEX_EMAIL` to the Cloudflare Worker variables/secrets for `paper-agent-project`.
+2. Verify the deployed Worker after Cloudflare finishes building the latest `main` commit.
+3. Click `Run` on the dashboard and confirm returned papers are real OpenAlex results, not demo titles.
+4. Confirm new D1 columns `openalex_id`, `abstract`, and `cited_by_count` are present and populated for new rows.
+5. Add CSV download endpoint while R2 remains disabled.
 
 ## Current Status
 
@@ -102,6 +102,8 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - D1 binding validation.
 - D1 schema creation/backfill checks.
 - OpenAlex Works API search using the dashboard keyword.
+- OpenAlex API key support through `OPENALEX_API_KEY`.
+- OpenAlex retry/backoff handling for 429 and 5xx responses.
 - OpenAlex result mapping for title, authors, year, journal/source, DOI, OA status, abstract, OpenAlex ID, and citation count.
 - Basic relevance scoring based on title keyword overlap, abstract keyword overlap, citation count, and recency.
 - Search job persistence into D1.
@@ -146,6 +148,7 @@ The deployed D1 database already had some existing schema constraints, including
 - Worker POST route fixed after Cloudflare error 1101 by returning JSON errors and handling D1 schema drift.
 - D1 insert fixed for `papers.created_at NOT NULL`.
 - Demo-only persistence was replaced with OpenAlex search and D1 persistence.
+- OpenAlex 429 errors now return a clearer message asking for `OPENALEX_API_KEY` and `OPENALEX_EMAIL`.
 
 ## Verification Completed
 
@@ -155,6 +158,30 @@ These commands passed after recent code changes:
 npm run typecheck
 npm run build
 npx wrangler deploy --dry-run
+```
+
+## Manual Cloudflare Settings Required
+
+For real OpenAlex search, configure these on the Worker service:
+
+```text
+Workers & Pages
+-> paper-agent-project
+-> Settings
+-> Variables and Secrets
+```
+
+Add:
+
+```text
+OPENALEX_EMAIL=<contact email>
+OPENALEX_API_KEY=<OpenAlex API key>
+```
+
+OpenAlex API key can be created from:
+
+```text
+https://openalex.org/settings/api
 ```
 
 Cloud behavior was also verified:
