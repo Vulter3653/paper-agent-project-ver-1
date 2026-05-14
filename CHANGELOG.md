@@ -15,6 +15,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Changed`: Expanded Markdown report generation in `apps/worker/src/index.ts` with Report Agent sections for key findings, common themes, method/context differences, research gaps, suggested reading order, screening notes, and limitations.
+- `Docs`: Recorded Report Agent Markdown enhancement in `docs/debug-log.md` and `docs/progress.md`.
 - `Added`: Added `apps/mcp/scripts/e2e-check.mjs` and `npm run e2e:reports` to verify deployed Worker API, MCP tools, download endpoints, and R2 report objects for the latest completed job.
 - `Docs`: Recorded OpenAlex deployed e2e report verification in `docs/debug-log.md`, `docs/progress.md`, `docs/mcp.md`, and `README.md`.
 - `Added`: Added temporary `SEARCH_PROVIDER=openalex` support in `apps/worker/src/index.ts` so integration testing can run before `WOS_API_KEY` is issued.

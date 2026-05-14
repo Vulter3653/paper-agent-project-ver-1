@@ -1646,6 +1646,7 @@ function markdownReport(result: SearchResult): Response {
 
 function getMarkdownReportBody(result: SearchResult): string {
   const summary = summarizeReport(result.papers);
+  const reportInsights = buildReportInsights(result.papers);
   const lines = [
     `# Paper Agent Report`,
     "",
@@ -1668,6 +1669,35 @@ function getMarkdownReportBody(result: SearchResult): string {
     `This report contains ${result.papers.length} allowlisted journal result${result.papers.length === 1 ? "" : "s"} for the search keyword "${result.job.keyword}".`,
     `The highest ranked result is ${summary.topPaper ? `"${summary.topPaper.title}" with a final score of ${formatReportScore(summary.topPaper.finalScore)}.` : "not available because no papers were saved."}`,
     `Crossref verification found ${summary.verifiedCount} verified result${summary.verifiedCount === 1 ? "" : "s"}, and Unpaywall found ${summary.oaPdfCount} result${summary.oaPdfCount === 1 ? "" : "s"} with a direct PDF URL.`,
+    `The corpus spans ${summary.yearRange} and includes ${summary.journalCount} distinct journal${summary.journalCount === 1 ? "" : "s"}.`,
+    "",
+    "## Key Findings",
+    "",
+    ...formatBulletList(reportInsights.keyFindings),
+    "",
+    "## Common Themes",
+    "",
+    ...formatBulletList(reportInsights.commonThemes),
+    "",
+    "## Method / Context Differences",
+    "",
+    ...formatBulletList(reportInsights.differences),
+    "",
+    "## Research Gaps",
+    "",
+    ...formatBulletList(reportInsights.researchGaps),
+    "",
+    "## Suggested Reading Order",
+    "",
+    ...formatNumberedList(reportInsights.readingOrder),
+    "",
+    "## Screening Notes",
+    "",
+    ...formatBulletList(reportInsights.screeningNotes),
+    "",
+    "## Limitations",
+    "",
+    ...formatBulletList(reportInsights.limitations),
     "",
     "## Top Ranked Table",
     "",
@@ -1737,6 +1767,9 @@ function summarizeReport(papers: PaperSummary[]) {
   const verifiedCount = papers.filter((paper) => paper.verificationStatus === "verified").length;
   const oaPdfCount = papers.filter((paper) => Boolean(paper.oaPdfUrl)).length;
   const averageFinalScore = papers.length ? papers.reduce((total, paper) => total + paper.finalScore, 0) / papers.length : 0;
+  const years = papers.map((paper) => paper.year).filter((year) => year > 0);
+  const yearRange = years.length ? `${Math.min(...years)}-${Math.max(...years)}` : "unknown years";
+  const journalCount = new Set(papers.map((paper) => paper.journalName).filter(Boolean)).size;
   return {
     includeCount,
     reviewCount,
@@ -1744,8 +1777,134 @@ function summarizeReport(papers: PaperSummary[]) {
     verifiedCount,
     oaPdfCount,
     averageFinalScore,
+    yearRange,
+    journalCount,
     topPaper: papers[0]
   };
+}
+
+function buildReportInsights(papers: PaperSummary[]) {
+  if (!papers.length) {
+    return {
+      keyFindings: ["No allowlisted journal results were saved, so substantive synthesis is not available."],
+      commonThemes: ["No recurring themes can be inferred from an empty result set."],
+      differences: ["No method or context differences can be compared from an empty result set."],
+      researchGaps: ["Repeat the search with broader terms, adjusted years, or a different source provider."],
+      readingOrder: ["Run a search that returns allowlisted journal results before using the reading order."],
+      screeningNotes: ["All downstream interpretation is blocked because no papers passed the journal allowlist."],
+      limitations: ["This report is generated from metadata and simple scoring rules, not a full-text qualitative review."]
+    };
+  }
+
+  const topPapers = papers.slice(0, 5);
+  const includePapers = papers.filter((paper) => paper.includeStatus === "include");
+  const reviewPapers = papers.filter((paper) => paper.includeStatus === "review");
+  const verifiedShare = papers.filter((paper) => paper.verificationStatus === "verified").length / papers.length;
+  const oaPdfPapers = papers.filter((paper) => Boolean(paper.oaPdfUrl));
+  const journals = getTopCounts(papers.map((paper) => paper.journalName).filter(Boolean), 5);
+  const years = papers.map((paper) => paper.year).filter((year) => year > 0);
+  const newestYear = years.length ? Math.max(...years) : null;
+  const oldestYear = years.length ? Math.min(...years) : null;
+  const topicTerms = getTopTopicTerms(papers, 8);
+
+  return {
+    keyFindings: [
+      `${papers.length} allowlisted result${papers.length === 1 ? "" : "s"} were retained after source search, journal filtering, metadata enrichment, and ranking.`,
+      `${includePapers.length} paper${includePapers.length === 1 ? "" : "s"} met the automatic include threshold; ${reviewPapers.length} require manual review before final use.`,
+      `${Math.round(verifiedShare * 100)}% of retained results were verified by Crossref at the metadata level.`,
+      oaPdfPapers.length
+        ? `${oaPdfPapers.length} result${oaPdfPapers.length === 1 ? "" : "s"} include a direct open-access PDF URL for immediate reading.`
+        : "No retained result currently has a direct open-access PDF URL; use DOI or landing pages for access checks."
+    ],
+    commonThemes: [
+      topicTerms.length
+        ? `Recurring title terms include ${formatInlineList(topicTerms)}, suggesting the dominant topical clusters in the retained set.`
+        : "The retained titles do not provide enough repeated terms for a reliable theme signal.",
+      journals.length
+        ? `The most frequent journal source${journals.length === 1 ? " is" : "s are"} ${journals.map((item) => `${item.label} (${item.count})`).join(", ")}.`
+        : "Journal concentration could not be assessed.",
+      "The ranked set is restricted to the approved business school journal list, so the themes should be interpreted as top-journal signals rather than a complete field map."
+    ],
+    differences: [
+      newestYear && oldestYear
+        ? `Publication years range from ${oldestYear} to ${newestYear}, so older high-citation papers and newer emerging papers should be interpreted separately.`
+        : "Publication year coverage is incomplete.",
+      "Citation score and recency score may favor different papers; prioritize papers that are strong on both when selecting core readings.",
+      "Open-access availability differs across papers, so download readiness should not be treated as evidence quality."
+    ],
+    researchGaps: [
+      reviewPapers.length
+        ? `${reviewPapers.length} result${reviewPapers.length === 1 ? "" : "s"} remain in review status; manual screening should check conceptual fit, empirical context, and method relevance.`
+        : "No papers remain in review status, but manual screening is still required before final inclusion.",
+      "The current relevance score is metadata-based. Full abstract or full-text embedding review should be added before final literature synthesis.",
+      "Provider differences remain a known gap: OpenAlex is currently used for testing, and final quality checks must be repeated after switching to Web of Science."
+    ],
+    readingOrder: topPapers.map((paper) => `${paper.title} (${paper.year || "unknown year"}) - final score ${formatReportScore(paper.finalScore)}, ${paper.includeStatus}.`),
+    screeningNotes: [
+      "Use include status as a triage signal, not as a final acceptance decision.",
+      "Check Crossref verification reason for title, year, and journal mismatches before citing a paper.",
+      "Prioritize papers with direct OA PDF links for fast first-pass reading, then use DOI landing pages for closed-access papers."
+    ],
+    limitations: [
+      "This report is generated from bibliographic metadata, ranking features, and OA checks; it is not a substitute for full-text expert review.",
+      "Current OpenAlex-based test runs are for workflow validation while WoS API approval is pending.",
+      "Journal allowlist filtering intentionally excludes non-allowlisted venues, which improves scope control but may omit relevant interdisciplinary work.",
+      "The report does not yet generate narrative claims from abstracts or full texts; those should be added with a future summarization or embedding stage."
+    ]
+  };
+}
+
+function getTopCounts(values: string[], limit: number): Array<{ label: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+  return Array.from(counts.entries())
+    .map(([label, count]) => ({ label, count }))
+    .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label))
+    .slice(0, limit);
+}
+
+function getTopTopicTerms(papers: PaperSummary[], limit: number): string[] {
+  const stopWords = new Set([
+    "about",
+    "after",
+    "analysis",
+    "based",
+    "between",
+    "business",
+    "case",
+    "effect",
+    "effects",
+    "from",
+    "into",
+    "journal",
+    "management",
+    "market",
+    "marketing",
+    "paper",
+    "review",
+    "study",
+    "systematic",
+    "theory",
+    "through",
+    "using",
+    "with"
+  ]);
+  const terms = papers.flatMap((paper) => tokenize(paper.title)).filter((term) => term.length > 3 && !stopWords.has(term));
+  return getTopCounts(terms, limit).map((item) => item.label);
+}
+
+function formatInlineList(values: string[]): string {
+  if (values.length <= 1) return values[0] ?? "";
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(", ")}, and ${values[values.length - 1]}`;
+}
+
+function formatBulletList(items: string[]): string[] {
+  return items.map((item) => `- ${item}`);
+}
+
+function formatNumberedList(items: string[]): string[] {
+  return items.map((item, index) => `${index + 1}. ${item}`);
 }
 
 function formatReportScore(value: number): string {

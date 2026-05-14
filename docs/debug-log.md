@@ -2,6 +2,38 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Report Agent Markdown Enhancement
+
+### Context
+
+The search, D1, R2, dashboard, and MCP flow is stable under the OpenAlex fallback provider. The next requested task was to improve the report artifact so it reads more like a literature review report rather than only a metadata export.
+
+### Code Changes Under Test
+
+The Markdown report now adds these sections before the ranked table:
+
+```text
+Key Findings
+Common Themes
+Method / Context Differences
+Research Gaps
+Suggested Reading Order
+Screening Notes
+Limitations
+```
+
+The new sections are generated from the saved paper metadata, ranking scores, include/review decisions, Crossref verification status, Open Access status, journals, years, and recurring title terms.
+
+### Verification Commands
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run --config apps/worker/wrangler.toml
+```
+
+All passed. Runtime verification should be done after deployment by running a new search job and checking `GET /api/search-jobs/<job_id>/report.md` or R2 `reports/<job_id>/report.md` for the new sections.
+
 ## 2026-05-14 - Worker MCP R2 End-To-End Report Verification
 
 ### Context

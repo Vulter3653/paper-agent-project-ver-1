@@ -45,7 +45,7 @@ Current next implementation target:
 7. Confirm D1 `papers.openalex_id` stores the external source identifier. The column name is retained for schema compatibility.
 8. Verify deployed CSV and Markdown report downloads include Crossref, Unpaywall, and evaluation score data.
 9. In R2 bucket `paper-agent-outputs`, confirm `reports/<job_id>/papers.csv` and `reports/<job_id>/report.md` are created for completed jobs.
-10. Confirm the Markdown report includes executive summary metrics, top-ranked table, paper details, OA landing page, and license details.
+10. Confirm the Markdown report includes executive summary metrics, Report Agent synthesis sections, top-ranked table, paper details, OA landing page, and license details.
 11. Confirm the dashboard Recent Jobs panel lists saved jobs and can reload prior job results.
 12. Confirm new jobs use persisted component-score final ranking: relevance 35%, journal fit 20%, Crossref verification 15%, OA 10%, citation 10%, recency 10%.
 13. Use `docs/mcp.md` as the current source of truth for MCP attachment and the implemented read-only MCP Worker.
@@ -146,6 +146,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - Recent search job listing from D1.
 - CSV generation from persisted D1 results, with R2 storage under `reports/<job_id>/papers.csv` when available.
 - Markdown report generation from persisted D1 results, with R2 storage under `reports/<job_id>/report.md` when available.
+- Report Agent Markdown sections for key findings, common themes, method/context differences, research gaps, suggested reading order, screening notes, and limitations.
 - CSV and Markdown download endpoints serve the R2 object first and fall back to direct generation if no object exists.
 - Crossref DOI lookup after Web of Science search.
 - Crossref metadata enrichment for publisher, ISSN, publication type, and published date.
@@ -244,7 +245,7 @@ The deployed D1 database already had some existing schema constraints, including
 - Score component values are now persisted in `evaluations` and returned through API/CSV so the dashboard can prefer stored scores over frontend estimates.
 - Diagnostics were added so D1 schema drift and environment readiness can be checked from the API and dashboard before running jobs.
 - Markdown report download was added and CSV/Markdown outputs are stored in R2 when the `REPORTS` binding is available.
-- Markdown report output now includes an executive summary, include/review/exclude counts, OA PDF count, average score, top-ranked table, OA landing page, and license details.
+- Markdown report output now includes an executive summary, include/review/exclude counts, OA PDF count, average score, Report Agent synthesis sections, top-ranked table, OA landing page, and license details.
 - Integrated workflow design from `AI_Agent_프로젝트_전체_통합본.pdf` is now tracked in `docs/workflow.md`.
 - Read-only Cloudflare Remote MCP Worker was added in `apps/mcp`.
 
