@@ -2,6 +2,27 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Integrated Project PDF Workflow Reflection
+
+### Context
+
+The file `AI_Agent_프로젝트_전체_통합본.pdf` was added locally and requested as the basis for the overall workflow design. The PDF defines the project as a top-journal-aware multi-agent literature review assistant with Planner, Journal Selector, Search/Retriever, Verifier, OA Download, Journal Evaluation, Relevance, Ranking, Summarizer, Comparator, Critic, and Report agents.
+
+### Extraction Notes
+
+- `pdftotext` was not available in the environment.
+- The PDF text was extracted by reading PDF streams and applying embedded ToUnicode CMaps.
+- The source PDF remains untracked unless explicitly requested.
+
+### Reflected Design Decisions
+
+- Added `docs/workflow.md` as the implementation-facing workflow source of truth.
+- Captured the 12-stage workflow from user input through R2 report output.
+- Mapped each target agent to current implementation status.
+- Preserved D1 as operational metadata storage and R2 as output artifact storage.
+- Recorded the WoS API approval as the current live-search blocker.
+- Listed WoS-excluded next priorities: ranking formula, Recent Jobs filters, report sections, PDF/XLSX output, Vectorize relevance, Drive OA PDF upload, and tests.
+
 ## 2026-05-14 - Recent Jobs Dashboard Recovery
 
 ### Context

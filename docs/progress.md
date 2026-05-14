@@ -47,6 +47,7 @@ Current next implementation target:
 9. Confirm the Markdown report includes executive summary metrics, top-ranked table, paper details, OA landing page, and license details.
 10. Confirm the dashboard Recent Jobs panel lists saved jobs and can reload prior job results.
 11. Start the next major implementation phase: ranking formula improvements or PDF report generation.
+12. Use `docs/workflow.md` as the current source of truth for the integrated multi-agent target workflow.
 
 ## Current Status
 
@@ -91,6 +92,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - `apps/worker` for the Cloudflare Worker API.
 - `packages/shared` for shared TypeScript types and scoring helpers.
 - `docs` and `benchmark` directories for project references.
+- `docs/workflow.md` reflects `AI_Agent_프로젝트_전체_통합본.pdf` into the active implementation roadmap.
 
 ### Dashboard
 
@@ -213,6 +215,7 @@ The deployed D1 database already had some existing schema constraints, including
 - Diagnostics were added so D1 schema drift and environment readiness can be checked from the API and dashboard before running jobs.
 - Markdown report download was added and CSV/Markdown outputs are stored in R2 when the `REPORTS` binding is available.
 - Markdown report output now includes an executive summary, include/review/exclude counts, OA PDF count, average score, top-ranked table, OA landing page, and license details.
+- Integrated workflow design from `AI_Agent_프로젝트_전체_통합본.pdf` is now tracked in `docs/workflow.md`.
 
 ## Verification Completed
 
