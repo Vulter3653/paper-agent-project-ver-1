@@ -309,14 +309,16 @@ h1 {
   padding: 16px;
 }
 
-.recentJobsHeader {
+.recentJobsHeader,
+.reportPreviewHeader {
   align-items: center;
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
 }
 
-.recentJobsHeader p {
+.recentJobsHeader p,
+.reportPreviewHeader p {
   color: #607080;
   font-size: 13px;
   margin-top: 4px;
@@ -375,6 +377,58 @@ h1 {
   color: #607080;
   font-size: 12px;
   margin-top: 3px;
+}
+
+.reportPreviewPanel {
+  background: #ffffff;
+  border: 1px solid #d9e0e7;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  padding: 16px;
+}
+
+.reportSectionChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.reportSectionChips span {
+  background: #eef3f8;
+  border-radius: 999px;
+  color: #415264;
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
+.reportPreviewBody {
+  background: #fbfcfd;
+  border: 1px solid #e8edf2;
+  border-radius: 8px;
+  max-height: 460px;
+  overflow: auto;
+}
+
+.reportPreviewBody pre {
+  color: #243241;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  padding: 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.reportPreviewEmpty {
+  align-items: center;
+  color: #607080;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 120px;
+  padding: 18px;
 }
 
 .contentGrid {

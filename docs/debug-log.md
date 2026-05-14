@@ -2,6 +2,29 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Dashboard Report Preview
+
+### Context
+
+Markdown reports were available only as downloads. The requested next step was to expose the generated `report.md` directly in the dashboard so users can inspect the Report Agent output without leaving the page.
+
+### Code Changes Under Test
+
+- Added a Report Preview panel to the dashboard.
+- The panel fetches `GET /api/search-jobs/:id/report.md` for completed jobs.
+- The panel displays detected Markdown sections as chips.
+- The full Markdown is shown in a scrollable preview area.
+- Refresh and download controls share the existing report endpoint.
+
+### Verification Commands
+
+```bash
+npm run typecheck
+npm run build
+```
+
+Both passed. Runtime verification should be done after Cloudflare Pages deploy by opening the dashboard, loading a completed job, and confirming the Report Preview panel renders the Markdown sections.
+
 ## 2026-05-14 - Report Agent Markdown Enhancement
 
 ### Context

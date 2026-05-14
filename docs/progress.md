@@ -117,6 +117,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - Pipeline Progress panel visualizes Web of Science search, journal filtering, Crossref enrichment, Unpaywall check, ranking, and completion status.
 - Paper Detail panel shows Score Breakdown for relevance, journal fit, Crossref verification, open access, citations, and recency.
 - System Checks panel calls `GET /api/diagnostics` to display D1 schema readiness and Worker environment variable presence.
+- Report Preview panel fetches `GET /api/search-jobs/:id/report.md` for completed jobs and displays the Markdown report in the dashboard before download.
 
 ### Worker API
 
@@ -246,6 +247,7 @@ The deployed D1 database already had some existing schema constraints, including
 - Diagnostics were added so D1 schema drift and environment readiness can be checked from the API and dashboard before running jobs.
 - Markdown report download was added and CSV/Markdown outputs are stored in R2 when the `REPORTS` binding is available.
 - Markdown report output now includes an executive summary, include/review/exclude counts, OA PDF count, average score, Report Agent synthesis sections, top-ranked table, OA landing page, and license details.
+- Dashboard now previews Markdown reports for completed jobs without requiring a file download.
 - Integrated workflow design from `AI_Agent_프로젝트_전체_통합본.pdf` is now tracked in `docs/workflow.md`.
 - Read-only Cloudflare Remote MCP Worker was added in `apps/mcp`.
 

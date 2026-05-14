@@ -15,6 +15,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Added`: Added dashboard Markdown report preview in `apps/web/src/main.tsx` and `apps/web/src/styles.css` so completed job reports can be inspected before download.
+- `Docs`: Recorded dashboard report preview work in `docs/debug-log.md` and `docs/progress.md`.
 - `Changed`: Expanded Markdown report generation in `apps/worker/src/index.ts` with Report Agent sections for key findings, common themes, method/context differences, research gaps, suggested reading order, screening notes, and limitations.
 - `Docs`: Recorded Report Agent Markdown enhancement in `docs/debug-log.md` and `docs/progress.md`.
 - `Added`: Added `apps/mcp/scripts/e2e-check.mjs` and `npm run e2e:reports` to verify deployed Worker API, MCP tools, download endpoints, and R2 report objects for the latest completed job.

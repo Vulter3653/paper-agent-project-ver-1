@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Download, FileText, History, Play, RefreshCw, Search } from "lucide-react";
+import { Download, Eye, FileText, History, Play, RefreshCw, Search } from "lucide-react";
 import type { PaperSummary, SearchJob } from "@paper-agent/shared";
 import "./styles.css";
 
@@ -110,6 +110,9 @@ function App() {
   const [recentJobs, setRecentJobs] = useState<SearchJob[]>([]);
   const [recentJobsError, setRecentJobsError] = useState("");
   const [loadingJobId, setLoadingJobId] = useState("");
+  const [reportPreview, setReportPreview] = useState("");
+  const [reportPreviewError, setReportPreviewError] = useState("");
+  const [reportPreviewLoading, setReportPreviewLoading] = useState(false);
   const selected = useMemo(() => papers.find((paper) => paper.id === selectedId) ?? papers[0], [papers, selectedId]);
 
   useEffect(() => {
@@ -130,6 +133,12 @@ function App() {
     }, 2500);
     return () => window.clearInterval(timer);
   }, [job]);
+
+  useEffect(() => {
+    setReportPreview("");
+    setReportPreviewError("");
+    if (job?.status === "completed") void refreshReportPreview(job.id);
+  }, [job?.id, job?.status]);
 
   async function refreshJob() {
     if (!job) return;
@@ -180,6 +189,21 @@ function App() {
   function downloadReport() {
     if (!job) return;
     window.location.href = apiUrl(`/api/search-jobs/${job.id}/report.md`);
+  }
+
+  async function refreshReportPreview(jobId = job?.id) {
+    if (!jobId) return;
+    setReportPreviewLoading(true);
+    setReportPreviewError("");
+    try {
+      const response = await fetch(apiUrl(`/api/search-jobs/${jobId}/report.md`));
+      if (!response.ok) throw new Error(await readTextError(response, "Failed to load Markdown report"));
+      setReportPreview(await response.text());
+    } catch (error) {
+      setReportPreviewError(error instanceof Error ? error.message : "Failed to load Markdown report");
+    } finally {
+      setReportPreviewLoading(false);
+    }
   }
 
   async function refreshDiagnostics() {
@@ -249,6 +273,14 @@ function App() {
       <PipelineProgress job={job} loading={loading} />
       <DiagnosticsPanel diagnostics={diagnostics} errorMessage={diagnosticsError} onRefresh={refreshDiagnostics} />
       <RecentJobsPanel jobs={recentJobs} activeJobId={job?.id} loadingJobId={loadingJobId} errorMessage={recentJobsError} onLoad={loadSearchJob} onRefresh={refreshRecentJobs} />
+      <ReportPreviewPanel
+        job={job}
+        report={reportPreview}
+        loading={reportPreviewLoading}
+        errorMessage={reportPreviewError}
+        onRefresh={() => refreshReportPreview()}
+        onDownload={downloadReport}
+      />
       {errorMessage ? <p className="errorMessage">{errorMessage}</p> : null}
 
       <section className="contentGrid">
@@ -462,6 +494,68 @@ function RecentJobsPanel({
   );
 }
 
+function ReportPreviewPanel({
+  job,
+  report,
+  loading,
+  errorMessage,
+  onRefresh,
+  onDownload
+}: {
+  job: SearchJob | null;
+  report: string;
+  loading: boolean;
+  errorMessage: string;
+  onRefresh: () => void;
+  onDownload: () => void;
+}) {
+  const sections = useMemo(() => extractReportSections(report), [report]);
+  const canLoad = Boolean(job);
+  const isCompleted = job?.status === "completed";
+
+  return (
+    <section className="reportPreviewPanel">
+      <div className="reportPreviewHeader">
+        <div>
+          <h2>Report Preview</h2>
+          <p>{job ? (isCompleted ? `${sections.length || 0} sections` : `Waiting for ${job.status}`) : "No active job"}</p>
+        </div>
+        <div className="panelActions">
+          <button className="iconButton" onClick={onRefresh} disabled={!canLoad || loading} aria-label="Refresh report preview">
+            <RefreshCw size={18} className={loading ? "spin" : undefined} />
+          </button>
+          <button className="iconButton" onClick={onDownload} disabled={!canLoad} aria-label="Download Markdown report">
+            <Download size={18} />
+          </button>
+        </div>
+      </div>
+      {errorMessage ? <p className="diagnosticsError">{errorMessage}</p> : null}
+      {sections.length ? (
+        <div className="reportSectionChips">
+          {sections.map((section) => (
+            <span key={section}>{section}</span>
+          ))}
+        </div>
+      ) : null}
+      <div className="reportPreviewBody">
+        {loading ? (
+          <div className="reportPreviewEmpty">
+            <RefreshCw size={18} className="spin" />
+            <span>Loading report</span>
+          </div>
+        ) : report ? (
+          <pre>{report}</pre>
+        ) : (
+          <div className="reportPreviewEmpty">
+            <Eye size={18} />
+            <span>{job ? "Report preview appears after the job completes." : "Select or run a job to preview its report."}</span>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function ScoreBreakdown({ paper }: { paper: PaperSummary }) {
   const items = getScoreBreakdown(paper);
   return (
@@ -596,6 +690,23 @@ async function readApiError(response: Response, fallback: string): Promise<strin
   } catch {
     return fallback;
   }
+}
+
+async function readTextError(response: Response, fallback: string): Promise<string> {
+  try {
+    const data = (await response.json()) as { error?: string };
+    return data.error ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function extractReportSections(report: string): string[] {
+  return report
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith("## "))
+    .map((line) => line.replace(/^##\s+/, "").trim())
+    .slice(0, 10);
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
