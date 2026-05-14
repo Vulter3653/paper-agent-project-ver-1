@@ -36,10 +36,11 @@ Worker health: https://paper-agent-project.shch3653.workers.dev/api/health
 Current next implementation target:
 
 1. Wait for Cloudflare to deploy the next `main` commit.
-2. Click `Run` on the dashboard and confirm search output contains only journals in `packages/shared/src/businessSchoolJournals.ts`.
-3. Confirm non-allowlisted journals are absent from API, dashboard, CSV, and D1 `papers` rows.
-4. Verify deployed CSV download still includes Crossref and Unpaywall columns.
-5. Start the next major implementation phase: scoring/evaluation improvements or report generation.
+2. Click `Run` on the dashboard and confirm the Pipeline Progress panel shows the run lifecycle.
+3. Confirm search output contains only journals in `packages/shared/src/businessSchoolJournals.ts`.
+4. Confirm non-allowlisted journals are absent from API, dashboard, CSV, and D1 `papers` rows.
+5. Verify deployed CSV download still includes Crossref and Unpaywall columns.
+6. Start the next major implementation phase: asynchronous job progress updates, scoring/evaluation improvements, or report generation.
 
 ## Current Status
 
@@ -92,6 +93,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - Refresh button calls `GET /api/search-jobs/:id`.
 - API error messages are shown in the page when search creation or refresh fails.
 - Dashboard API base URL supports `VITE_API_BASE_URL`, with a deployed Worker default.
+- Pipeline Progress panel visualizes OpenAlex search, journal filtering, Crossref enrichment, Unpaywall check, ranking, and completion status.
 
 ### Worker API
 
@@ -175,6 +177,7 @@ The deployed D1 database already had some existing schema constraints, including
 - Crossref enrichment was added after OpenAlex mapping so DOI-backed results carry publisher, ISSN, publication type, published date, and verification reasons.
 - Unpaywall enrichment was added after Crossref mapping so DOI-backed results carry OA PDF/page metadata without requiring R2 storage.
 - Journal allowlist filtering was added so only journals from `packages/shared/src/businessSchoolJournals.ts` appear in search results.
+- Pipeline Progress was added to the dashboard so users can see where a run is in the paper discovery flow.
 
 ## Verification Completed
 
@@ -232,13 +235,14 @@ After clicking `Run`, these queries returned stored data.
 
 ## Remaining Work
 
-OpenAlex search, D1 persistence, CSV export, Crossref enrichment, Unpaywall metadata lookup, and business school journal allowlist filtering are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
+OpenAlex search, D1 persistence, CSV export, Crossref enrichment, Unpaywall metadata lookup, business school journal allowlist filtering, and dashboard pipeline visualization are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
 
-1. Confirm deployed allowlist filtering from the dashboard, CSV endpoint, and D1 Console.
-2. Improve scoring and evaluation rows beyond basic lexical scoring.
-3. Add report generation.
-4. Add job progress states instead of immediately marking jobs as `completed`.
-5. Add tests around Worker API persistence, OpenAlex mapping, journal allowlist filtering, Crossref enrichment, Unpaywall enrichment, CSV generation, and D1 row mapping.
+1. Confirm deployed pipeline progress visualization after clicking `Run`.
+2. Confirm deployed allowlist filtering from the dashboard, CSV endpoint, and D1 Console.
+3. Improve scoring and evaluation rows beyond basic lexical scoring.
+4. Add report generation.
+5. Add asynchronous job progress states instead of waiting for the POST request to finish before showing results.
+6. Add tests around Worker API persistence, OpenAlex mapping, journal allowlist filtering, Crossref enrichment, Unpaywall enrichment, CSV generation, and D1 row mapping.
 
 ## Useful D1 Checks
 

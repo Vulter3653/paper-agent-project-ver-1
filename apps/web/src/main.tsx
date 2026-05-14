@@ -9,11 +9,25 @@ type JobResponse = {
   papers: PaperSummary[];
 };
 
+type PipelineStep = {
+  id: string;
+  label: string;
+};
+
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "https://paper-agent-project.shch3653.workers.dev").replace(/\/$/, "");
 
 function apiUrl(path: string): string {
   return `${apiBaseUrl}${path}`;
 }
+
+const pipelineSteps: PipelineStep[] = [
+  { id: "openalex_search", label: "OpenAlex" },
+  { id: "journal_filter", label: "Journal Filter" },
+  { id: "crossref_enrichment", label: "Crossref" },
+  { id: "unpaywall_check", label: "Unpaywall" },
+  { id: "ranking", label: "Ranking" },
+  { id: "completed", label: "Complete" }
+];
 
 const demoPapers: PaperSummary[] = [
   {
@@ -140,6 +154,7 @@ function App() {
         <Metric label="Papers" value={String(papers.length)} />
         <Metric label="Top Score" value={papers[0] ? papers[0].finalScore.toFixed(2) : "-"} />
       </section>
+      <PipelineProgress job={job} loading={loading} />
       {errorMessage ? <p className="errorMessage">{errorMessage}</p> : null}
 
       <section className="contentGrid">
@@ -237,6 +252,62 @@ function App() {
       </section>
     </main>
   );
+}
+
+function PipelineProgress({ job, loading }: { job: SearchJob | null; loading: boolean }) {
+  const activeIndex = getActiveStepIndex(job, loading);
+  const completedCount = getCompletedStepCount(job, loading, activeIndex);
+  const progress = Math.round((completedCount / pipelineSteps.length) * 100);
+
+  return (
+    <section className="pipelinePanel" aria-label="Search pipeline progress">
+      <div className="pipelineHeader">
+        <div>
+          <h2>Pipeline Progress</h2>
+          <p>{loading ? "Running" : job ? `${progress}% complete` : "Ready"}</p>
+        </div>
+        <strong>{completedCount}/{pipelineSteps.length}</strong>
+      </div>
+      <div className="progressTrack">
+        <span style={{ width: `${progress}%` }} />
+      </div>
+      <ol className="pipelineSteps">
+        {pipelineSteps.map((step, index) => {
+          const state = getStepState(index, activeIndex, completedCount, job, loading);
+          return (
+            <li key={step.id} className={state}>
+              <span>{index + 1}</span>
+              <strong>{step.label}</strong>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+function getActiveStepIndex(job: SearchJob | null, loading: boolean): number {
+  if (loading) return 0;
+  if (!job) return -1;
+  if (job.status === "completed") return pipelineSteps.length - 1;
+  if (job.status === "failed") return Math.max(0, pipelineSteps.findIndex((step) => step.id === job.currentStep));
+  const index = pipelineSteps.findIndex((step) => step.id === job.currentStep);
+  return index >= 0 ? index : 0;
+}
+
+function getCompletedStepCount(job: SearchJob | null, loading: boolean, activeIndex: number): number {
+  if (!job && !loading) return 0;
+  if (job?.status === "completed") return pipelineSteps.length;
+  if (job?.status === "failed") return Math.max(0, activeIndex);
+  if (loading) return 0;
+  return Math.max(0, activeIndex);
+}
+
+function getStepState(index: number, activeIndex: number, completedCount: number, job: SearchJob | null, loading: boolean): string {
+  if (job?.status === "failed" && index === activeIndex) return "failed";
+  if (index < completedCount) return "done";
+  if ((loading && index === 0) || index === activeIndex) return "active";
+  return "pending";
 }
 
 function Metric({ label, value }: { label: string; value: string }) {

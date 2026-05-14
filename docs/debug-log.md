@@ -2,6 +2,25 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Dashboard Pipeline Progress Visualization
+
+### Context
+
+After clicking `Run`, the dashboard needed to show where the paper discovery process is in the workflow. The current Worker still processes a job synchronously, so the UI can show the active run state during the request and the completed lifecycle after the response returns.
+
+### Code Changes Under Test
+
+- Added a Pipeline Progress panel in `apps/web/src/main.tsx`.
+- Added six visible stages: OpenAlex, Journal Filter, Crossref, Unpaywall, Ranking, and Complete.
+- Added progress bar and step state styles in `apps/web/src/styles.css`.
+
+### Expected Behavior
+
+- Before a run, the panel shows a ready state.
+- While `Run` is waiting on the Worker response, OpenAlex is highlighted as active.
+- When a job returns `completed`, all six stages are shown as complete.
+- Future asynchronous backend progress can reuse the same panel by updating `job.currentStep`.
+
 ## 2026-05-14 - Business School Journal Allowlist
 
 ### Context

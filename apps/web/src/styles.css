@@ -123,6 +123,116 @@ h1 {
   padding: 12px 14px;
 }
 
+.pipelinePanel {
+  background: #ffffff;
+  border: 1px solid #d9e0e7;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  padding: 16px;
+}
+
+.pipelineHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.pipelineHeader p {
+  color: #607080;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.pipelineHeader strong {
+  color: #1d5fd1;
+  font-size: 18px;
+}
+
+.progressTrack {
+  background: #e8edf2;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progressTrack span {
+  background: #1d5fd1;
+  display: block;
+  height: 100%;
+  transition: width 220ms ease;
+}
+
+.pipelineSteps {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.pipelineSteps li {
+  align-items: center;
+  border: 1px solid #d9e0e7;
+  border-radius: 8px;
+  display: flex;
+  gap: 8px;
+  min-height: 46px;
+  min-width: 0;
+  padding: 8px;
+}
+
+.pipelineSteps span {
+  align-items: center;
+  background: #eef3f8;
+  border-radius: 999px;
+  color: #607080;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.pipelineSteps strong {
+  display: block;
+  font-size: 12px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.pipelineSteps .done {
+  background: #f1fbf5;
+  border-color: #b9e3c8;
+}
+
+.pipelineSteps .done span {
+  background: #238548;
+  color: #ffffff;
+}
+
+.pipelineSteps .active {
+  background: #eef5ff;
+  border-color: #9bc2ff;
+}
+
+.pipelineSteps .active span {
+  background: #1d5fd1;
+  color: #ffffff;
+}
+
+.pipelineSteps .failed {
+  background: #fff1f1;
+  border-color: #f4b8b8;
+}
+
+.pipelineSteps .failed span {
+  background: #b42318;
+  color: #ffffff;
+}
+
 .contentGrid {
   align-items: start;
   display: grid;
@@ -238,6 +348,10 @@ dd {
   }
 
   .statusBand {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pipelineSteps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
