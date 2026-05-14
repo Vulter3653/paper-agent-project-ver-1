@@ -15,6 +15,9 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Added`: Added `packages/shared/src/businessSchoolJournals.ts` allowlist extracted from `경영대학 학술지 목록.docx`.
+- `Changed`: Updated `apps/worker/src/index.ts` so only allowed business school journals are saved and returned from search results.
+- `Changed`: Updated `apps/web/src/main.tsx` and `apps/web/src/styles.css` to handle empty results after journal allowlist filtering.
 - `Added`: Added Unpaywall DOI open access metadata lookup in `apps/worker/src/index.ts` with D1 persistence and CSV output.
 - `Changed`: Updated `apps/web/src/main.tsx` to display OA PDF/page availability, Unpaywall status, license, host type, and repository metadata.
 - `Docs`: Added `apps/worker/migrations/0003_add_unpaywall_columns.sql` for manual D1 repair when deployed tables predate Unpaywall columns.

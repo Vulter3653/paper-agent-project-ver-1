@@ -2,6 +2,83 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Business School Journal Allowlist
+
+### Context
+
+The search result must include only journals listed in `경영대학 학술지 목록.docx`. Results from any other journal must fail the selection step and not appear in API, dashboard, CSV, or D1 paper rows.
+
+### Source Extraction
+
+The `.docx` file was inspected as Word XML:
+
+```bash
+unzip -l "경영대학 학술지 목록.docx"
+unzip -p "경영대학 학술지 목록.docx" word/document.xml
+```
+
+Numbered list entries were extracted from the document. The extracted `research article only` entry was treated as a note, not a journal, and was excluded from the allowlist.
+
+### Code Changes Under Test
+
+- Added `packages/shared/src/businessSchoolJournals.ts`.
+- Added normalized journal name matching helpers.
+- Updated Worker search flow to fetch more OpenAlex candidates, filter by the allowlist, then run Crossref and Unpaywall only for allowed journals.
+- Updated dashboard empty state for searches where all candidates are filtered out.
+
+### Expected Behavior
+
+- Allowed journals continue through Crossref, Unpaywall, D1 persistence, API output, dashboard output, and CSV output.
+- Non-allowlisted journals are removed before persistence and do not appear in outputs.
+- If no allowed journals are found, the job returns an empty `papers` array and the dashboard shows an empty state.
+
+### Verification Commands
+
+Static checks:
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run
+```
+
+All three passed.
+
+Runtime check:
+
+```bash
+npx wrangler dev --port 8787 --ip 127.0.0.1 \
+  --var UNPAYWALL_EMAIL:<contact email> \
+  --var CROSSREF_EMAIL:<contact email> \
+  --var OPENALEX_EMAIL:<contact email>
+```
+
+Create a local search job:
+
+```bash
+curl -s -X POST http://127.0.0.1:8787/api/search-jobs \
+  -H 'Content-Type: application/json' \
+  -d '{"keyword":"AI interview employer branding","maxResults":5}'
+```
+
+Observed:
+
+- HTTP 200.
+- Response returned only allowlisted journals.
+- Verified local output included `Journal of the Academy of Marketing Science` and `Journal of Business Ethics`.
+- The previously observed non-allowlisted `International Journal of Information Management` result did not appear.
+
+CSV check:
+
+```bash
+curl -s -D - http://127.0.0.1:8787/api/search-jobs/job-13ef9a4e-a6c7-4114-8e99-03779cca2152/papers.csv
+```
+
+Observed:
+
+- HTTP 200.
+- CSV contained only allowlisted journals from the filtered job.
+
 ## 2026-05-14 - Unpaywall OA Metadata Foundation
 
 ### Context

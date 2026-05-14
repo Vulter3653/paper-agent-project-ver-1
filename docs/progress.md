@@ -36,11 +36,10 @@ Worker health: https://paper-agent-project.shch3653.workers.dev/api/health
 Current next implementation target:
 
 1. Wait for Cloudflare to deploy the next `main` commit.
-2. Repair the deployed D1 `papers` table if Unpaywall columns are missing.
-3. Click `Run` on the dashboard and confirm each returned paper can show Unpaywall OA metadata where DOI lookup succeeds.
-4. Confirm new D1 columns `oa_pdf_url`, `oa_landing_page_url`, `oa_license`, `oa_host_type`, `oa_repository`, `unpaywall_status`, and `unpaywall_reason` are present and populated for new rows.
-5. Verify the deployed CSV download includes Unpaywall columns.
-6. Start the next major implementation phase: scoring/evaluation improvements or report generation.
+2. Click `Run` on the dashboard and confirm search output contains only journals in `packages/shared/src/businessSchoolJournals.ts`.
+3. Confirm non-allowlisted journals are absent from API, dashboard, CSV, and D1 `papers` rows.
+4. Verify deployed CSV download still includes Crossref and Unpaywall columns.
+5. Start the next major implementation phase: scoring/evaluation improvements or report generation.
 
 ## Current Status
 
@@ -116,6 +115,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - Basic DOI/title/year/journal verification status and reason fields.
 - Unpaywall DOI lookup after Crossref enrichment.
 - Unpaywall open access metadata persistence for PDF URL, landing page URL, license, host type, repository, status, and reason.
+- Business school journal allowlist filtering based on `경영대학 학술지 목록.docx`; non-allowlisted journals are removed before D1 persistence and API/CSV output.
 - JSON error responses for API failures.
 
 ### D1 Schema
@@ -174,6 +174,7 @@ The deployed D1 database already had some existing schema constraints, including
 - CSV export endpoint and dashboard CSV button were added and locally verified.
 - Crossref enrichment was added after OpenAlex mapping so DOI-backed results carry publisher, ISSN, publication type, published date, and verification reasons.
 - Unpaywall enrichment was added after Crossref mapping so DOI-backed results carry OA PDF/page metadata without requiring R2 storage.
+- Journal allowlist filtering was added so only journals from `packages/shared/src/businessSchoolJournals.ts` appear in search results.
 
 ## Verification Completed
 
@@ -190,6 +191,8 @@ CSV endpoint was also locally verified with `wrangler dev`, `POST /api/search-jo
 Crossref enrichment was locally verified with `wrangler dev`, `POST /api/search-jobs`, and `GET /api/search-jobs/:id/papers.csv`. The local JSON and CSV responses included `publisher`, `issn`, `publication_type`, `published_date`, `verification_status`, and `verification_reason`.
 
 Unpaywall enrichment was locally verified with `wrangler dev --var UNPAYWALL_EMAIL:...`, `POST /api/search-jobs`, and `GET /api/search-jobs/:id/papers.csv`. The local JSON and CSV responses included `oa_pdf_url`, `oa_landing_page_url`, `oa_license`, `oa_host_type`, `oa_repository`, `unpaywall_status`, and `unpaywall_reason`.
+
+Business school journal allowlist filtering was locally verified with `wrangler dev`, `POST /api/search-jobs`, and `GET /api/search-jobs/:id/papers.csv`. The local JSON and CSV responses contained only allowlisted journals, including `Journal of the Academy of Marketing Science` and `Journal of Business Ethics`, and excluded the previously observed non-allowlisted `International Journal of Information Management` result.
 
 ## Manual Cloudflare Settings Required
 
@@ -229,13 +232,13 @@ After clicking `Run`, these queries returned stored data.
 
 ## Remaining Work
 
-OpenAlex search, D1 persistence, CSV export, Crossref enrichment, and Unpaywall metadata lookup are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
+OpenAlex search, D1 persistence, CSV export, Crossref enrichment, Unpaywall metadata lookup, and business school journal allowlist filtering are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
 
-1. Confirm deployed Unpaywall enrichment from the dashboard, CSV endpoint, and D1 Console.
+1. Confirm deployed allowlist filtering from the dashboard, CSV endpoint, and D1 Console.
 2. Improve scoring and evaluation rows beyond basic lexical scoring.
 3. Add report generation.
 4. Add job progress states instead of immediately marking jobs as `completed`.
-5. Add tests around Worker API persistence, OpenAlex mapping, Crossref enrichment, Unpaywall enrichment, CSV generation, and D1 row mapping.
+5. Add tests around Worker API persistence, OpenAlex mapping, journal allowlist filtering, Crossref enrichment, Unpaywall enrichment, CSV generation, and D1 row mapping.
 
 ## Useful D1 Checks
 
@@ -305,6 +308,16 @@ Then add only the missing Unpaywall columns from:
 ```text
 apps/worker/migrations/0003_add_unpaywall_columns.sql
 ```
+
+Business school journal allowlist check:
+
+```sql
+SELECT DISTINCT journal_name
+FROM papers
+ORDER BY journal_name ASC;
+```
+
+Every returned `journal_name` should correspond to `packages/shared/src/businessSchoolJournals.ts`.
 
 CSV check:
 

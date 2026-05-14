@@ -1,3 +1,5 @@
+export { BUSINESS_SCHOOL_JOURNALS, isBusinessSchoolJournal, normalizeJournalName } from "./businessSchoolJournals";
+
 export type SearchJobStatus =
   | "queued"
   | "searching"

@@ -1,4 +1,4 @@
-import { calculateFinalScore, type PaperSummary, type SearchJob } from "@paper-agent/shared";
+import { calculateFinalScore, isBusinessSchoolJournal, normalizeJournalName, type PaperSummary, type SearchJob } from "@paper-agent/shared";
 
 export interface Env {
   DB?: D1Database;
@@ -30,6 +30,7 @@ type PaperRecord = PaperSummary & {
   publishedDate: string;
   verificationStatus: "verified" | "partial" | "unverified";
   verificationReason: string;
+  crossrefJournalName: string;
   oaPdfUrl: string;
   oaLandingPageUrl: string;
   oaLicense: string;
@@ -465,8 +466,9 @@ async function searchOpenAlex(
   }
 ): Promise<PaperRecord[]> {
   const url = new URL("https://api.openalex.org/works");
+  const candidateLimit = Math.min(100, Math.max(options.maxResults, options.maxResults * 5));
   url.searchParams.set("search", keyword);
-  url.searchParams.set("per-page", String(options.maxResults));
+  url.searchParams.set("per-page", String(candidateLimit));
   url.searchParams.set("sort", "cited_by_count:desc");
   url.searchParams.set(
     "select",
@@ -494,8 +496,9 @@ async function searchOpenAlex(
   const response = await fetchOpenAlexWithRetry(url, options.email);
 
   const data = (await response.json()) as OpenAlexResponse;
-  const papers = (data.results ?? []).slice(0, options.maxResults).map((work, index) => mapOpenAlexWork(work, keyword, index + 1));
-  const crossrefEnriched = await enrichPapersWithCrossref(papers, options.crossrefEmail);
+  const papers = (data.results ?? []).slice(0, candidateLimit).map((work, index) => mapOpenAlexWork(work, keyword, index + 1));
+  const allowedPapers = filterAllowedBusinessSchoolJournals(papers).slice(0, options.maxResults);
+  const crossrefEnriched = await enrichPapersWithCrossref(allowedPapers, options.crossrefEmail);
   return enrichPapersWithUnpaywall(crossrefEnriched, options.unpaywallEmail);
 }
 
@@ -565,6 +568,7 @@ function mapOpenAlexWork(work: OpenAlexWork, keyword: string, rank: number): Pap
     publishedDate: "",
     verificationStatus: normalizeDoi(work.doi) ? "unverified" : "partial",
     verificationReason: normalizeDoi(work.doi) ? "Crossref verification pending." : "No DOI available for Crossref verification.",
+    crossrefJournalName: "",
     oaPdfUrl: "",
     oaLandingPageUrl: "",
     oaLicense: "",
@@ -647,8 +651,25 @@ function applyCrossrefMetadata(paper: PaperRecord, crossref: CrossrefWork): Pape
     publicationType: crossref.type ?? "",
     publishedDate: getCrossrefDate(crossref),
     verificationStatus: matchCount >= 2 ? "verified" : matchCount >= 1 ? "partial" : "unverified",
-    verificationReason: checks.join("; ")
+    verificationReason: checks.join("; "),
+    crossrefJournalName: crossrefJournal
   };
+}
+
+function filterAllowedBusinessSchoolJournals(papers: PaperRecord[]): PaperRecord[] {
+  return papers
+    .filter((paper) => isAllowedBusinessSchoolJournal(paper))
+    .map((paper, index) => ({ ...paper, rank: index + 1 }));
+}
+
+function isAllowedBusinessSchoolJournal(paper: PaperRecord): boolean {
+  const sourceNames = [paper.journalName, paper.crossrefJournalName].filter(Boolean);
+  return sourceNames.some((sourceName) => isBusinessSchoolJournal(sourceName) || isCloseJournalNameMatch(sourceName));
+}
+
+function isCloseJournalNameMatch(sourceName: string): boolean {
+  const normalized = normalizeJournalName(sourceName);
+  return normalized.endsWith("s") && isBusinessSchoolJournal(normalized.slice(0, -1));
 }
 
 async function enrichPapersWithUnpaywall(papers: PaperRecord[], email: string | undefined): Promise<PaperRecord[]> {

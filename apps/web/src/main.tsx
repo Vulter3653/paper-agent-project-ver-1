@@ -22,7 +22,7 @@ const demoPapers: PaperSummary[] = [
     title: "Automated Scholarly Paper Discovery with Agentic Workflows",
     authors: "Kim, Lee, Park",
     year: 2025,
-    journalName: "Journal of AI Research",
+    journalName: "Information Systems Research",
     doi: "10.0000/demo.1",
     oaStatus: "unknown",
     abstractScore: 0.91,
@@ -168,17 +168,25 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {papers.map((paper) => (
-                <tr key={paper.id} className={paper.id === selected?.id ? "selected" : ""} onClick={() => setSelectedId(paper.id)}>
-                  <td>{paper.rank}</td>
-                  <td>{paper.title}</td>
-                  <td>{paper.year}</td>
-                  <td>{paper.oaStatus}</td>
-                  <td>{paper.oaPdfUrl ? "yes" : paper.oaLandingPageUrl ? "page" : "-"}</td>
-                  <td>{paper.abstractScore.toFixed(2)}</td>
-                  <td>{paper.finalScore.toFixed(2)}</td>
+              {papers.length ? (
+                papers.map((paper) => (
+                  <tr key={paper.id} className={paper.id === selected?.id ? "selected" : ""} onClick={() => setSelectedId(paper.id)}>
+                    <td>{paper.rank}</td>
+                    <td>{paper.title}</td>
+                    <td>{paper.year}</td>
+                    <td>{paper.oaStatus}</td>
+                    <td>{paper.oaPdfUrl ? "yes" : paper.oaLandingPageUrl ? "page" : "-"}</td>
+                    <td>{paper.abstractScore.toFixed(2)}</td>
+                    <td>{paper.finalScore.toFixed(2)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="emptyCell">
+                    No allowed journal results.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -223,7 +231,7 @@ function App() {
               </dl>
             </>
           ) : (
-            <p>No paper selected.</p>
+            <p className="emptyState">No allowed journal result selected.</p>
           )}
         </aside>
       </section>
