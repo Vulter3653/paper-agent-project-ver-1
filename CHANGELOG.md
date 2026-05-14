@@ -15,6 +15,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Changed`: Updated `packages/shared/src/index.ts` and `apps/worker/src/index.ts` so final ranking uses persisted relevance, journal fit, Crossref verification, OA, citation, and recency score components.
+- `Docs`: Added `docs/mcp.md` with a phased MCP attachment plan, safe tool boundaries, deployment options, required bindings/secrets, and audit requirements.
 - `Docs`: Added `docs/workflow.md` and updated `docs/benchmark.md` to reflect `AI_Agent_프로젝트_전체_통합본.pdf` into the target multi-agent workflow, data architecture, output standard, evaluation plan, blocker status, and WoS-excluded implementation priorities.
 - `Added`: Added `GET /api/search-jobs?limit=` in `apps/worker/src/index.ts` for recent search job listing.
 - `Added`: Added a Recent Jobs panel in `apps/web/src/main.tsx` and `apps/web/src/styles.css` so saved jobs can be reloaded without starting a new search.

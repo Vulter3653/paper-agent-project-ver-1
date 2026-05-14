@@ -700,9 +700,10 @@ async function processSearchJob(
     const unpaywallEnriched = await enrichPapersWithUnpaywall(crossrefEnriched, options.unpaywallEmail);
 
     job = await updateSearchJobProgress(db, job, "ranking", "ranking");
+    const rankedPapers = rankPapers(unpaywallEnriched);
     const completedJob = completeSearchJob(job);
-    await saveSearchResult(db, completedJob, unpaywallEnriched);
-    await persistSearchOutputs(options.reports, { job: completedJob, papers: unpaywallEnriched });
+    await saveSearchResult(db, completedJob, rankedPapers);
+    await persistSearchOutputs(options.reports, { job: completedJob, papers: rankedPapers });
   } catch (error) {
     await saveSearchFailure(db, job, error);
   }
@@ -1068,18 +1069,21 @@ function getWosAbstract(document: WosDocument): string {
 function scorePaper(input: { keyword: string; title: string; abstract: string; citedByCount: number; year: number }) {
   const titleScore = keywordOverlap(input.keyword, input.title);
   const abstractScore = keywordOverlap(input.keyword, input.abstract);
+  const relevanceScore = scoreRelevance(titleScore, abstractScore);
   const citationScore = Math.min(input.citedByCount / 100, 1);
   const recencyScore = scoreRecency(input.year);
   const finalScore = calculateFinalScore({
-    abstractRelevance: abstractScore,
-    titleRelevance: titleScore,
-    journalQuality: 0.5,
-    citationInfluence: citationScore,
+    relevance: relevanceScore,
+    journalFit: 0.5,
+    verification: 0,
+    openAccess: 0,
+    citation: citationScore,
     recency: recencyScore
   });
   const reason = [
     `title keyword overlap ${titleScore.toFixed(2)}`,
     `abstract keyword overlap ${abstractScore.toFixed(2)}`,
+    `combined relevance ${relevanceScore.toFixed(2)}`,
     `citations ${input.citedByCount}`,
     `year ${input.year || "unknown"}`
   ].join("; ");
@@ -1088,6 +1092,10 @@ function scorePaper(input: { keyword: string; title: string; abstract: string; c
     finalScore: roundScore(finalScore),
     reason
   };
+}
+
+function scoreRelevance(titleScore: number, abstractScore: number): number {
+  return Math.max(titleScore, 0.7 * abstractScore + 0.3 * titleScore);
 }
 
 function keywordOverlap(keyword: string, text: string): number {
@@ -1117,6 +1125,36 @@ function calculateEvaluationScores(paper: PaperSummary): EvaluationScores {
     citationScore: roundScore(Math.min((paper.citedByCount ?? 0) / 100, 1)),
     recencyScore: roundScore(scoreRecency(paper.year))
   };
+}
+
+function rankPapers(papers: PaperRecord[]): PaperRecord[] {
+  return papers
+    .map((paper) => {
+      const scores = calculateEvaluationScores(paper);
+      const finalScore = roundScore(
+        calculateFinalScore({
+          relevance: scores.relevanceScore,
+          journalFit: scores.journalFitScore,
+          verification: scores.verificationScore,
+          openAccess: scores.oaScore,
+          citation: scores.citationScore,
+          recency: scores.recencyScore
+        })
+      );
+      return {
+        ...paper,
+        finalScore,
+        includeStatus: getIncludeStatus(finalScore, scores.verificationScore)
+      };
+    })
+    .sort((left, right) => right.finalScore - left.finalScore || right.year - left.year || (right.citedByCount ?? 0) - (left.citedByCount ?? 0))
+    .map((paper, index) => ({ ...paper, rank: index + 1 }));
+}
+
+function getIncludeStatus(finalScore: number, verificationScore: number): PaperSummary["includeStatus"] {
+  if (finalScore >= 0.72 && verificationScore >= 0.5) return "include";
+  if (finalScore < 0.35) return "exclude";
+  return "review";
 }
 
 function roundScore(score: number): number {

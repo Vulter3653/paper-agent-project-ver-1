@@ -2,6 +2,50 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Component-Based Ranking Formula And MCP Plan
+
+### Context
+
+WoS API approval is delayed, so implementation proceeded on ranking quality and MCP attachment planning without requiring live search execution.
+
+### Code Changes Under Test
+
+- Updated shared score input and weights:
+
+```text
+relevance: 0.35
+journalFit: 0.20
+verification: 0.15
+openAccess: 0.10
+citation: 0.10
+recency: 0.10
+```
+
+- Worker now recalculates `finalScore` after Crossref and Unpaywall enrichment, then reranks papers before D1/R2 persistence.
+- Include status now requires both score and minimum verification confidence:
+  - `include`: final score >= 0.72 and verification score >= 0.5
+  - `exclude`: final score < 0.35
+  - otherwise `review`
+
+### MCP Planning
+
+- Added `docs/mcp.md`.
+- Recommended read-only MCP first, then controlled write tools.
+- Recommended separate Worker for safer MCP experimentation.
+- Added an audit-table proposal for future MCP tool calls.
+
+### Verification Commands
+
+Static checks should be run:
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run
+```
+
+All passed. The dry-run output showed `env.DB` and `env.REPORTS` bindings.
+
 ## 2026-05-14 - Integrated Project PDF Workflow Reflection
 
 ### Context

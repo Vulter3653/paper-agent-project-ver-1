@@ -171,10 +171,14 @@ After approval:
 
 ## Next Implementation Priorities Excluding WoS
 
-1. Refine final ranking formula using persisted score components.
-2. Add failed/completed filters to Recent Jobs.
-3. Add report sections for summary, comparison, research gap, and critic note.
-4. Add PDF/XLSX output generation to R2.
+1. Add failed/completed filters to Recent Jobs.
+2. Add report sections for summary, comparison, research gap, and critic note.
+3. Add PDF/XLSX output generation to R2.
+4. Add read-only MCP tools following `docs/mcp.md`.
 5. Add Vectorize-backed relevance scoring.
 6. Add Google Drive OA PDF upload for Unpaywall-confirmed PDFs.
 7. Add benchmark fixtures and automated tests for CSV, Markdown, D1 mapping, scoring, and diagnostics.
+
+Completed WoS-excluded hardening:
+
+- Final ranking formula now uses persisted score components.

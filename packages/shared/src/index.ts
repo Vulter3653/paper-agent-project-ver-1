@@ -58,19 +58,30 @@ export type PaperSummary = {
 };
 
 export type ScoreInput = {
-  abstractRelevance: number;
-  titleRelevance: number;
-  journalQuality: number;
-  citationInfluence: number;
+  relevance: number;
+  journalFit: number;
+  verification: number;
+  openAccess: number;
+  citation: number;
   recency: number;
 };
 
+export const SCORE_WEIGHTS = {
+  relevance: 0.35,
+  journalFit: 0.2,
+  verification: 0.15,
+  openAccess: 0.1,
+  citation: 0.1,
+  recency: 0.1
+} as const;
+
 export function calculateFinalScore(input: ScoreInput): number {
   return (
-    0.45 * input.abstractRelevance +
-    0.2 * input.titleRelevance +
-    0.15 * input.journalQuality +
-    0.1 * input.citationInfluence +
-    0.1 * input.recency
+    SCORE_WEIGHTS.relevance * input.relevance +
+    SCORE_WEIGHTS.journalFit * input.journalFit +
+    SCORE_WEIGHTS.verification * input.verification +
+    SCORE_WEIGHTS.openAccess * input.openAccess +
+    SCORE_WEIGHTS.citation * input.citation +
+    SCORE_WEIGHTS.recency * input.recency
   );
 }

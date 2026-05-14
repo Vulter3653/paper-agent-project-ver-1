@@ -29,6 +29,7 @@ packages/
   shared/       # Shared types and scoring helpers
 docs/
   workflow.md
+  mcp.md
   prompts.md
   benchmark.md
 benchmark/
