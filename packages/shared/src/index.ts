@@ -45,6 +45,12 @@ export type PaperSummary = {
   oaRepository?: string;
   unpaywallStatus?: "found" | "not_found" | "skipped" | "failed";
   unpaywallReason?: string;
+  relevanceScore?: number;
+  journalFitScore?: number;
+  verificationScore?: number;
+  oaScore?: number;
+  citationScore?: number;
+  recencyScore?: number;
   abstractScore: number;
   finalScore: number;
   includeStatus: "include" | "exclude" | "review";

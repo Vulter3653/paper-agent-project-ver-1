@@ -37,11 +37,12 @@ Current next implementation target:
 
 1. Wait for Cloudflare to deploy the next `main` commit.
 2. Click `Run` on the dashboard and confirm the Pipeline Progress panel advances through persisted Worker steps.
-3. Select a result and confirm Score Breakdown displays relevance, journal fit, Crossref, Open Access, citation, and recency scores.
-4. Confirm search output contains only journals in `packages/shared/src/businessSchoolJournals.ts`.
-5. Confirm non-allowlisted journals are absent from API, dashboard, CSV, and D1 `papers` rows.
-6. Verify deployed CSV download still includes Crossref and Unpaywall columns.
-7. Start the next major implementation phase: persisting score component columns in `evaluations` or report generation.
+3. Select a result and confirm Score Breakdown displays persisted relevance, journal fit, Crossref, Open Access, citation, and recency scores.
+4. Confirm D1 `evaluations` rows include `relevance_score`, `journal_fit_score`, `verification_score`, `oa_score`, `citation_score`, and `recency_score`.
+5. Confirm search output contains only journals in `packages/shared/src/businessSchoolJournals.ts`.
+6. Confirm non-allowlisted journals are absent from API, dashboard, CSV, and D1 `papers` rows.
+7. Verify deployed CSV download includes Crossref, Unpaywall, and evaluation score columns.
+8. Start the next major implementation phase: ranking formula improvements or report generation.
 
 ## Current Status
 
@@ -153,6 +154,15 @@ Additional paper metadata now tracked/backfilled:
 - `unpaywall_status`
 - `unpaywall_reason`
 
+Additional evaluation score metadata now tracked/backfilled:
+
+- `relevance_score`
+- `journal_fit_score`
+- `verification_score`
+- `oa_score`
+- `citation_score`
+- `recency_score`
+
 Indexes:
 
 - `idx_papers_job_id`
@@ -183,6 +193,7 @@ The deployed D1 database already had some existing schema constraints, including
 - Pipeline Progress was added to the dashboard so users can see where a run is in the paper discovery flow.
 - Worker job execution was changed to return a job immediately and continue OpenAlex, journal filtering, Crossref, Unpaywall, and ranking in the background with D1 progress updates.
 - Score Breakdown was added to the dashboard detail view; the Worker now returns `citedByCount` in paper summaries for citation scoring.
+- Score component values are now persisted in `evaluations` and returned through API/CSV so the dashboard can prefer stored scores over frontend estimates.
 
 ## Verification Completed
 
@@ -205,6 +216,8 @@ Business school journal allowlist filtering was locally verified with `wrangler 
 Asynchronous Worker progress was locally verified with `wrangler dev`, `POST /api/search-jobs`, `GET /api/search-jobs/:id`, and `GET /api/search-jobs/:id/papers.csv`. The POST response returned immediately with `status: searching`, `currentStep: openalex_search`, `totalSteps: 6`, and an empty `papers` array; a later GET returned `status: completed`, `currentStep: completed`, and persisted paper results.
 
 Dashboard Score Breakdown was locally verified through typecheck/build and Worker API polling. The Worker response now includes `citedByCount` in paper summaries; a local completed job returned `citedByCount: 378`, enabling the dashboard Citation score bar.
+
+Persisted evaluation score components were locally verified with `wrangler dev`, `POST /api/search-jobs`, `GET /api/search-jobs/:id`, and `GET /api/search-jobs/:id/papers.csv`. The API response and CSV included `relevanceScore`, `journalFitScore`, `verificationScore`, `oaScore`, `citationScore`, and `recencyScore`; example verified values included `journalFitScore: 1`, `verificationScore: 1`, `oaScore: 1`, `citationScore: 1`, and `recencyScore: 0.6`.
 
 ## Manual Cloudflare Settings Required
 
@@ -244,14 +257,15 @@ After clicking `Run`, these queries returned stored data.
 
 ## Remaining Work
 
-OpenAlex search, D1 persistence, CSV export, Crossref enrichment, Unpaywall metadata lookup, business school journal allowlist filtering, dashboard pipeline visualization, asynchronous job progress updates, and dashboard score breakdown are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
+OpenAlex search, D1 persistence, CSV export, Crossref enrichment, Unpaywall metadata lookup, business school journal allowlist filtering, dashboard pipeline visualization, asynchronous job progress updates, dashboard score breakdown, and persisted evaluation score components are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
 
 1. Confirm deployed pipeline progress visualization after clicking `Run`.
 2. Confirm deployed score breakdown in the Paper Detail panel.
-3. Confirm deployed allowlist filtering from the dashboard, CSV endpoint, and D1 Console.
-4. Persist score component columns in `evaluations` instead of computing all breakdown scores in the frontend.
-5. Add report generation.
-6. Add tests around Worker API persistence, OpenAlex mapping, journal allowlist filtering, Crossref enrichment, Unpaywall enrichment, CSV generation, D1 row mapping, asynchronous progress updates, and score breakdown mapping.
+3. Confirm deployed persisted evaluation score columns in D1 and CSV.
+4. Confirm deployed allowlist filtering from the dashboard, CSV endpoint, and D1 Console.
+5. Improve ranking formula using the persisted component scores.
+6. Add report generation.
+7. Add tests around Worker API persistence, OpenAlex mapping, journal allowlist filtering, Crossref enrichment, Unpaywall enrichment, CSV generation, D1 row mapping, asynchronous progress updates, and score breakdown mapping.
 
 ## Useful D1 Checks
 
@@ -331,6 +345,27 @@ ORDER BY journal_name ASC;
 ```
 
 Every returned `journal_name` should correspond to `packages/shared/src/businessSchoolJournals.ts`.
+
+Evaluation score component check:
+
+```sql
+SELECT relevance_score, journal_fit_score, verification_score, oa_score, citation_score, recency_score, final_score
+FROM evaluations
+ORDER BY created_at DESC
+LIMIT 10;
+```
+
+If this query returns `no such column: relevance_score`, first run:
+
+```sql
+PRAGMA table_info(evaluations);
+```
+
+Then add only the missing evaluation score columns from:
+
+```text
+apps/worker/migrations/0004_add_evaluation_score_columns.sql
+```
 
 CSV check:
 

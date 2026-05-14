@@ -2,6 +2,82 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Persisted Evaluation Score Components
+
+### Context
+
+The dashboard Score Breakdown initially calculated most component scores in the frontend. The next step was to persist those components in D1 so the evaluation record is auditable and CSV/API output can carry the same score breakdown.
+
+### Code Changes Under Test
+
+- Added score component columns to `apps/worker/schema.sql`.
+- Added D1 backfill checks in `apps/worker/src/index.ts`.
+- Added score component INSERT values for `evaluations`.
+- Added score component SELECT/API mapping and CSV columns.
+- Added `apps/worker/migrations/0004_add_evaluation_score_columns.sql` for manual D1 repair.
+- Updated dashboard score breakdown to prefer persisted score values and fallback to local estimates for older rows.
+
+### Expected Behavior
+
+- New `evaluations` rows store:
+  - `relevance_score`
+  - `journal_fit_score`
+  - `verification_score`
+  - `oa_score`
+  - `citation_score`
+  - `recency_score`
+- API paper summaries include these fields.
+- CSV includes these fields.
+- Dashboard score bars use the persisted values when present.
+
+### Verification Commands
+
+Static checks:
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run
+```
+
+All three passed.
+
+Runtime check:
+
+```bash
+npx wrangler dev --port 8787 --ip 127.0.0.1 \
+  --var UNPAYWALL_EMAIL:<contact email> \
+  --var CROSSREF_EMAIL:<contact email> \
+  --var OPENALEX_EMAIL:<contact email>
+```
+
+Create and poll a local search job:
+
+```bash
+curl -s -X POST http://127.0.0.1:8787/api/search-jobs \
+  -H 'Content-Type: application/json' \
+  -d '{"keyword":"AI interview employer branding","maxResults":3}'
+
+curl -s http://127.0.0.1:8787/api/search-jobs/job-b7747e29-3d5d-476f-a446-d833bcca2c2a
+```
+
+Observed:
+
+- Job completed normally.
+- API response included persisted component fields: `relevanceScore`, `journalFitScore`, `verificationScore`, `oaScore`, `citationScore`, and `recencyScore`.
+- Example verified values: `journalFitScore: 1`, `verificationScore: 1`, `oaScore: 1`, `citationScore: 1`, `recencyScore: 0.6`.
+
+CSV check:
+
+```bash
+curl -s -D - http://127.0.0.1:8787/api/search-jobs/job-b7747e29-3d5d-476f-a446-d833bcca2c2a/papers.csv
+```
+
+Observed:
+
+- HTTP 200.
+- CSV header included all six persisted score component columns.
+
 ## 2026-05-14 - Dashboard Score Breakdown
 
 ### Context

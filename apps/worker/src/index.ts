@@ -40,6 +40,15 @@ type PaperRecord = PaperSummary & {
   unpaywallReason: string;
 };
 
+type EvaluationScores = {
+  relevanceScore: number;
+  journalFitScore: number;
+  verificationScore: number;
+  oaScore: number;
+  citationScore: number;
+  recencyScore: number;
+};
+
 type OpenAlexResponse = {
   results?: OpenAlexWork[];
 };
@@ -123,6 +132,12 @@ type PaperSummaryRow = {
   oa_status: PaperSummary["oaStatus"];
   cited_by_count: number | null;
   abstract_score: number | null;
+  relevance_score: number | null;
+  journal_fit_score: number | null;
+  verification_score: number | null;
+  oa_score: number | null;
+  citation_score: number | null;
+  recency_score: number | null;
   final_score: number | null;
   include_status: PaperSummary["includeStatus"] | null;
   relevance_reason: string | null;
@@ -302,6 +317,12 @@ async function ensureSchema(db: D1Database): Promise<void> {
         id TEXT PRIMARY KEY,
         paper_id TEXT NOT NULL,
         abstract_score REAL NOT NULL,
+        relevance_score REAL DEFAULT 0,
+        journal_fit_score REAL DEFAULT 0,
+        verification_score REAL DEFAULT 0,
+        oa_score REAL DEFAULT 0,
+        citation_score REAL DEFAULT 0,
+        recency_score REAL DEFAULT 0,
         final_score REAL NOT NULL,
         include_status TEXT NOT NULL,
         relevance_reason TEXT NOT NULL,
@@ -350,6 +371,12 @@ async function ensureSchema(db: D1Database): Promise<void> {
   await ensureColumn(db, "evaluations", "id", "TEXT");
   await ensureColumn(db, "evaluations", "paper_id", "TEXT");
   await ensureColumn(db, "evaluations", "abstract_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "relevance_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "journal_fit_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "verification_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "oa_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "citation_score", "REAL DEFAULT 0");
+  await ensureColumn(db, "evaluations", "recency_score", "REAL DEFAULT 0");
   await ensureColumn(db, "evaluations", "final_score", "REAL DEFAULT 0");
   await ensureColumn(db, "evaluations", "include_status", "TEXT DEFAULT 'review'");
   await ensureColumn(db, "evaluations", "relevance_reason", "TEXT DEFAULT ''");
@@ -419,6 +446,7 @@ async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRec
 
   for (const paper of papers) {
     const paperId = `${job.id}-paper-${paper.rank}`;
+    const evaluationScores = calculateEvaluationScores(paper);
     statements.push(
       db
         .prepare(
@@ -464,13 +492,22 @@ async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRec
     statements.push(
       db
         .prepare(
-          `INSERT INTO evaluations (id, paper_id, abstract_score, final_score, include_status, relevance_reason, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO evaluations (
+            id, paper_id, abstract_score, relevance_score, journal_fit_score, verification_score,
+            oa_score, citation_score, recency_score, final_score, include_status, relevance_reason, created_at
+           )
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
         .bind(
           `${job.id}-evaluation-${paper.rank}`,
           paperId,
           paper.abstractScore,
+          evaluationScores.relevanceScore,
+          evaluationScores.journalFitScore,
+          evaluationScores.verificationScore,
+          evaluationScores.oaScore,
+          evaluationScores.citationScore,
+          evaluationScores.recencyScore,
           paper.finalScore,
           paper.includeStatus,
           paper.relevanceReason,
@@ -900,6 +937,17 @@ function scoreRecency(year: number): number {
   return Math.max(0, Math.min(1, 1 - (currentYear - year) / 10));
 }
 
+function calculateEvaluationScores(paper: PaperSummary): EvaluationScores {
+  return {
+    relevanceScore: roundScore(paper.abstractScore),
+    journalFitScore: 1,
+    verificationScore: roundScore(paper.verificationStatus === "verified" ? 1 : paper.verificationStatus === "partial" ? 0.5 : 0),
+    oaScore: roundScore(paper.oaPdfUrl ? 1 : paper.oaLandingPageUrl || paper.oaStatus === "oa" ? 0.75 : paper.unpaywallStatus === "not_found" ? 0 : 0.25),
+    citationScore: roundScore(Math.min((paper.citedByCount ?? 0) / 100, 1)),
+    recencyScore: roundScore(scoreRecency(paper.year))
+  };
+}
+
 function roundScore(score: number): number {
   return Math.round(score * 1000) / 1000;
 }
@@ -934,6 +982,12 @@ async function getSearchResult(db: D1Database, jobId: string): Promise<{ job: Se
         p.unpaywall_status,
         p.unpaywall_reason,
         e.abstract_score,
+        e.relevance_score,
+        e.journal_fit_score,
+        e.verification_score,
+        e.oa_score,
+        e.citation_score,
+        e.recency_score,
         e.final_score,
         e.include_status,
         e.relevance_reason
@@ -975,6 +1029,12 @@ function mapPaperSummary(row: PaperSummaryRow): PaperSummary {
     doi: row.doi,
     oaStatus: row.oa_status,
     citedByCount: row.cited_by_count ?? 0,
+    relevanceScore: row.relevance_score ?? undefined,
+    journalFitScore: row.journal_fit_score ?? undefined,
+    verificationScore: row.verification_score ?? undefined,
+    oaScore: row.oa_score ?? undefined,
+    citationScore: row.citation_score ?? undefined,
+    recencyScore: row.recency_score ?? undefined,
     abstractScore: row.abstract_score ?? 0,
     finalScore: row.final_score ?? 0,
     includeStatus: row.include_status ?? "review",
@@ -1030,6 +1090,12 @@ function csv(result: { job: SearchJob; papers: PaperSummary[] }): Response {
     "unpaywall_status",
     "unpaywall_reason",
     "abstract_score",
+    "relevance_score",
+    "journal_fit_score",
+    "verification_score",
+    "oa_score",
+    "citation_score",
+    "recency_score",
     "final_score",
     "include_status",
     "relevance_reason"
@@ -1058,6 +1124,12 @@ function csv(result: { job: SearchJob; papers: PaperSummary[] }): Response {
     paper.unpaywallStatus ?? "",
     paper.unpaywallReason ?? "",
     paper.abstractScore,
+    paper.relevanceScore ?? "",
+    paper.journalFitScore ?? "",
+    paper.verificationScore ?? "",
+    paper.oaScore ?? "",
+    paper.citationScore ?? "",
+    paper.recencyScore ?? "",
     paper.finalScore,
     paper.includeStatus,
     paper.relevanceReason

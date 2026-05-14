@@ -291,12 +291,12 @@ function ScoreBreakdown({ paper }: { paper: PaperSummary }) {
 }
 
 function getScoreBreakdown(paper: PaperSummary): ScoreBreakdownItem[] {
-  const relevance = paper.abstractScore;
-  const journalFit = 1;
-  const verification = paper.verificationStatus === "verified" ? 1 : paper.verificationStatus === "partial" ? 0.5 : 0;
-  const openAccess = paper.oaPdfUrl ? 1 : paper.oaLandingPageUrl || paper.oaStatus === "oa" ? 0.75 : paper.unpaywallStatus === "not_found" ? 0 : 0.25;
-  const citation = Math.min((paper.citedByCount ?? 0) / 100, 1);
-  const recency = getRecencyScore(paper.year);
+  const relevance = paper.relevanceScore ?? paper.abstractScore;
+  const journalFit = paper.journalFitScore ?? 1;
+  const verification = paper.verificationScore ?? (paper.verificationStatus === "verified" ? 1 : paper.verificationStatus === "partial" ? 0.5 : 0);
+  const openAccess = paper.oaScore ?? (paper.oaPdfUrl ? 1 : paper.oaLandingPageUrl || paper.oaStatus === "oa" ? 0.75 : paper.unpaywallStatus === "not_found" ? 0 : 0.25);
+  const citation = paper.citationScore ?? Math.min((paper.citedByCount ?? 0) / 100, 1);
+  const recency = paper.recencyScore ?? getRecencyScore(paper.year);
 
   return [
     { label: "Relevance", value: relevance, detail: paper.relevanceReason },

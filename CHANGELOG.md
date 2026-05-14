@@ -15,6 +15,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Added`: Persisted score breakdown columns in `evaluations` via `apps/worker/schema.sql`, `apps/worker/src/index.ts`, and `apps/worker/migrations/0004_add_evaluation_score_columns.sql`.
+- `Changed`: Updated dashboard score breakdown in `apps/web/src/main.tsx` to prefer persisted evaluation scores and fallback to client-side estimates for older rows.
 - `Added`: Added score breakdown visualization in `apps/web/src/main.tsx` and `apps/web/src/styles.css` for relevance, journal fit, Crossref verification, OA, citations, and recency.
 - `Changed`: Included `citedByCount` in `PaperSummary` API mapping through `packages/shared/src/index.ts` and `apps/worker/src/index.ts`.
 - `Changed`: Updated `apps/worker/src/index.ts` to create search jobs immediately and process OpenAlex, journal filtering, Crossref, Unpaywall, and ranking in the background with persisted step updates.
