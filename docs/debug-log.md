@@ -2,6 +2,55 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - D1 Missing Publisher Column
+
+### Context
+
+D1 Console returned:
+
+```text
+no such column: publisher at offset 19: SQLITE_ERROR
+```
+
+This means the deployed D1 `papers` table predates the Crossref enrichment columns. The Worker has automatic schema backfill, but D1 Console queries fail until either the deployed Worker runs once after the latest code is live or the missing columns are added manually.
+
+### Verification Attempt
+
+Tried to inspect the remote D1 table from the terminal:
+
+```bash
+npx wrangler d1 execute paper_agent_db --remote --command "PRAGMA table_info(papers);"
+```
+
+Result:
+
+- Failed because this non-interactive terminal does not have `CLOUDFLARE_API_TOKEN` set.
+- No remote D1 mutation was applied from the terminal.
+
+### Resolution Path
+
+Added a tracked manual migration file:
+
+```text
+apps/worker/migrations/0002_add_crossref_columns.sql
+```
+
+Use Cloudflare D1 Console to run `PRAGMA table_info(papers);`, then run only the missing `ALTER TABLE` statements from that migration file.
+
+If `publisher` is missing, the other Crossref columns are likely missing too:
+
+```text
+crossref_id
+publisher
+issn
+publication_type
+published_date
+verification_status
+verification_reason
+```
+
+After the columns exist, run the dashboard again so new rows are populated with Crossref metadata.
+
 ## 2026-05-14 - Crossref Enrichment And Verifier Foundation
 
 ### Context

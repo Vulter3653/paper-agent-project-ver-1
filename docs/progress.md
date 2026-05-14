@@ -35,12 +35,13 @@ Worker health: https://paper-agent-project.shch3653.workers.dev/api/health
 
 Current next implementation target:
 
-1. Add `CROSSREF_EMAIL` to the Cloudflare Worker variables/secrets for `paper-agent-project`.
-2. Wait for Cloudflare to deploy the next `main` commit.
-3. Click `Run` on the dashboard and confirm each returned paper can show Crossref metadata where DOI matching succeeds.
-4. Confirm new D1 columns `crossref_id`, `publisher`, `issn`, `publication_type`, `published_date`, `verification_status`, and `verification_reason` are present and populated for new rows.
-5. Verify the deployed CSV download includes Crossref and verification columns.
-6. Start the next major implementation phase: Unpaywall open access checks.
+1. Repair the deployed D1 `papers` table if `publisher` or other Crossref columns are missing.
+2. Add `CROSSREF_EMAIL` to the Cloudflare Worker variables/secrets for `paper-agent-project`.
+3. Wait for Cloudflare to deploy the next `main` commit.
+4. Click `Run` on the dashboard and confirm each returned paper can show Crossref metadata where DOI matching succeeds.
+5. Confirm new D1 columns `crossref_id`, `publisher`, `issn`, `publication_type`, `published_date`, `verification_status`, and `verification_reason` are present and populated for new rows.
+6. Verify the deployed CSV download includes Crossref and verification columns.
+7. Start the next major implementation phase: Unpaywall open access checks.
 
 ## Current Status
 
@@ -260,6 +261,18 @@ SELECT title, doi, publisher, issn, publication_type, published_date, verificati
 FROM papers
 ORDER BY created_at DESC
 LIMIT 10;
+```
+
+If this query returns `no such column: publisher`, first run:
+
+```sql
+PRAGMA table_info(papers);
+```
+
+Then add only the missing Crossref columns from:
+
+```text
+apps/worker/migrations/0002_add_crossref_columns.sql
 ```
 
 CSV check:
