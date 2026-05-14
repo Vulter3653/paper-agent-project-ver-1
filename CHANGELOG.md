@@ -15,6 +15,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Changed`: Updated `apps/worker/src/index.ts` to create search jobs immediately and process OpenAlex, journal filtering, Crossref, Unpaywall, and ranking in the background with persisted step updates.
+- `Changed`: Updated dashboard polling in `apps/web/src/main.tsx` so selected papers update when asynchronous results arrive.
 - `Added`: Added pipeline progress visualization to `apps/web/src/main.tsx` and `apps/web/src/styles.css` for search run status.
 - `Added`: Added `packages/shared/src/businessSchoolJournals.ts` allowlist extracted from `경영대학 학술지 목록.docx`.
 - `Changed`: Updated `apps/worker/src/index.ts` so only allowed business school journals are saved and returned from search results.

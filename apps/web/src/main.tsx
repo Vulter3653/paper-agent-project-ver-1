@@ -83,6 +83,7 @@ function App() {
       const data = (await response.json()) as JobResponse;
       setJob(data.job);
       setPapers(data.papers);
+      setSelectedId((current) => (data.papers.some((paper) => paper.id === current) ? current : data.papers[0]?.id ?? ""));
     }, 2500);
     return () => window.clearInterval(timer);
   }, [job]);

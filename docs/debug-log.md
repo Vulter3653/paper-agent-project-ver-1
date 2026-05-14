@@ -2,6 +2,90 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-14 - Asynchronous Worker Progress Updates
+
+### Context
+
+The dashboard pipeline panel needed real progress data instead of only showing completion after the POST request finished. The Worker now creates a job immediately, returns it to the dashboard, and continues processing in the background.
+
+### Code Changes Under Test
+
+- Changed `POST /api/search-jobs` to return the initial job immediately.
+- Added `ctx.waitUntil()` background processing.
+- Added persisted step updates for:
+  - `openalex_search`
+  - `journal_filter`
+  - `crossref_enrichment`
+  - `unpaywall_check`
+  - `ranking`
+  - `completed`
+- Added failed job persistence if a background step throws.
+- Updated dashboard polling so the selected paper updates when results arrive asynchronously.
+
+### Expected Behavior
+
+- `Run` returns quickly with `status: searching` and an empty `papers` array.
+- The dashboard polls `GET /api/search-jobs/:id`.
+- `currentStep` changes as each Worker step completes.
+- When processing finishes, `status` becomes `completed`, `currentStep` becomes `completed`, and papers are available.
+
+### Verification Commands
+
+Static checks:
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run
+```
+
+All three passed.
+
+Runtime check:
+
+```bash
+npx wrangler dev --port 8787 --ip 127.0.0.1 \
+  --var UNPAYWALL_EMAIL:<contact email> \
+  --var CROSSREF_EMAIL:<contact email> \
+  --var OPENALEX_EMAIL:<contact email>
+```
+
+Create a local search job:
+
+```bash
+curl -s -X POST http://127.0.0.1:8787/api/search-jobs \
+  -H 'Content-Type: application/json' \
+  -d '{"keyword":"AI interview employer branding","maxResults":5}'
+```
+
+Observed:
+
+- POST returned immediately.
+- Initial response had `status: searching`, `currentStep: openalex_search`, `totalSteps: 6`, and an empty `papers` array.
+
+Polling check:
+
+```bash
+curl -s http://127.0.0.1:8787/api/search-jobs/job-e44935b6-74e4-4277-9219-e285c795a1da
+```
+
+Observed:
+
+- Job reached `status: completed`.
+- `currentStep` reached `completed`.
+- Papers were persisted and returned.
+
+CSV check:
+
+```bash
+curl -s -D - http://127.0.0.1:8787/api/search-jobs/job-e44935b6-74e4-4277-9219-e285c795a1da/papers.csv
+```
+
+Observed:
+
+- HTTP 200.
+- CSV contained the asynchronously generated job results.
+
 ## 2026-05-14 - Dashboard Pipeline Progress Visualization
 
 ### Context

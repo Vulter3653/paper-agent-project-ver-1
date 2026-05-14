@@ -141,7 +141,7 @@ type PaperSummaryRow = {
 };
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
@@ -161,18 +161,18 @@ export default {
         const maxResults = normalizeMaxResults(body.maxResults);
         const job = createSearchJob(keyword, "searching");
         await saveSearchJob(env.DB, job);
-        const papers = await searchOpenAlex(keyword, {
-          email: env.OPENALEX_EMAIL,
-          apiKey: env.OPENALEX_API_KEY,
-          crossrefEmail: env.CROSSREF_EMAIL ?? env.OPENALEX_EMAIL,
-          unpaywallEmail: env.UNPAYWALL_EMAIL,
-          maxResults,
-          yearStart: body.yearStart,
-          yearEnd: body.yearEnd
-        });
-        const completedJob = completeSearchJob(job);
-        await saveSearchResult(env.DB, completedJob, papers);
-        return json((await getSearchResult(env.DB, completedJob.id)) ?? { job: completedJob, papers });
+        ctx.waitUntil(
+          processSearchJob(env.DB, job, keyword, {
+            email: env.OPENALEX_EMAIL,
+            apiKey: env.OPENALEX_API_KEY,
+            crossrefEmail: env.CROSSREF_EMAIL ?? env.OPENALEX_EMAIL,
+            unpaywallEmail: env.UNPAYWALL_EMAIL,
+            maxResults,
+            yearStart: body.yearStart,
+            yearEnd: body.yearEnd
+          })
+        );
+        return json({ job, papers: [] });
       } catch (error) {
         return json({ error: getErrorMessage(error) }, 500);
       }
@@ -233,7 +233,7 @@ function createSearchJob(keyword: string, status: SearchJob["status"], id = `job
     keyword,
     status,
     currentStep: status === "searching" ? "openalex_search" : "ranking",
-    totalSteps: 12,
+    totalSteps: 6,
     createdAt: now
   };
 }
@@ -242,7 +242,7 @@ function completeSearchJob(job: SearchJob): SearchJob {
   return {
     ...job,
     status: "completed",
-    currentStep: "ranking",
+    currentStep: "completed",
     completedAt: new Date().toISOString()
   };
 }
@@ -376,6 +376,34 @@ async function saveSearchJob(db: D1Database, job: SearchJob): Promise<void> {
     .run();
 }
 
+async function updateSearchJobProgress(db: D1Database, job: SearchJob, status: SearchJob["status"], currentStep: string): Promise<SearchJob> {
+  const updated = {
+    ...job,
+    status,
+    currentStep
+  };
+  await db
+    .prepare(
+      `UPDATE search_jobs
+       SET status = ?, current_step = ?, error_message = ?
+       WHERE id = ?`
+    )
+    .bind(updated.status, updated.currentStep, updated.errorMessage ?? null, updated.id)
+    .run();
+  return updated;
+}
+
+async function saveSearchFailure(db: D1Database, job: SearchJob, error: unknown): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE search_jobs
+       SET status = ?, current_step = ?, completed_at = ?, error_message = ?
+       WHERE id = ?`
+    )
+    .bind("failed", job.currentStep, new Date().toISOString(), getErrorMessage(error), job.id)
+    .run();
+}
+
 async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRecord[]): Promise<void> {
   const now = new Date().toISOString();
   const statements: D1PreparedStatement[] = [
@@ -453,13 +481,46 @@ async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRec
   await db.batch(statements);
 }
 
-async function searchOpenAlex(
+async function processSearchJob(
+  db: D1Database,
+  initialJob: SearchJob,
   keyword: string,
   options: {
     email?: string;
     apiKey?: string;
     crossrefEmail?: string;
     unpaywallEmail?: string;
+    maxResults: number;
+    yearStart?: number;
+    yearEnd?: number;
+  }
+): Promise<void> {
+  let job = initialJob;
+  try {
+    job = await updateSearchJobProgress(db, job, "searching", "openalex_search");
+    const candidates = await searchOpenAlex(keyword, options);
+
+    job = await updateSearchJobProgress(db, job, "scoring", "journal_filter");
+    const allowedPapers = filterAllowedBusinessSchoolJournals(candidates).slice(0, options.maxResults);
+
+    job = await updateSearchJobProgress(db, job, "enriching_metadata", "crossref_enrichment");
+    const crossrefEnriched = await enrichPapersWithCrossref(allowedPapers, options.crossrefEmail);
+
+    job = await updateSearchJobProgress(db, job, "checking_oa", "unpaywall_check");
+    const unpaywallEnriched = await enrichPapersWithUnpaywall(crossrefEnriched, options.unpaywallEmail);
+
+    job = await updateSearchJobProgress(db, job, "ranking", "ranking");
+    await saveSearchResult(db, completeSearchJob(job), unpaywallEnriched);
+  } catch (error) {
+    await saveSearchFailure(db, job, error);
+  }
+}
+
+async function searchOpenAlex(
+  keyword: string,
+  options: {
+    email?: string;
+    apiKey?: string;
     maxResults: number;
     yearStart?: number;
     yearEnd?: number;
@@ -496,10 +557,7 @@ async function searchOpenAlex(
   const response = await fetchOpenAlexWithRetry(url, options.email);
 
   const data = (await response.json()) as OpenAlexResponse;
-  const papers = (data.results ?? []).slice(0, candidateLimit).map((work, index) => mapOpenAlexWork(work, keyword, index + 1));
-  const allowedPapers = filterAllowedBusinessSchoolJournals(papers).slice(0, options.maxResults);
-  const crossrefEnriched = await enrichPapersWithCrossref(allowedPapers, options.crossrefEmail);
-  return enrichPapersWithUnpaywall(crossrefEnriched, options.unpaywallEmail);
+  return (data.results ?? []).slice(0, candidateLimit).map((work, index) => mapOpenAlexWork(work, keyword, index + 1));
 }
 
 async function fetchOpenAlexWithRetry(url: URL, email: string | undefined): Promise<Response> {

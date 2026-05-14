@@ -36,11 +36,11 @@ Worker health: https://paper-agent-project.shch3653.workers.dev/api/health
 Current next implementation target:
 
 1. Wait for Cloudflare to deploy the next `main` commit.
-2. Click `Run` on the dashboard and confirm the Pipeline Progress panel shows the run lifecycle.
+2. Click `Run` on the dashboard and confirm the Pipeline Progress panel advances through persisted Worker steps.
 3. Confirm search output contains only journals in `packages/shared/src/businessSchoolJournals.ts`.
 4. Confirm non-allowlisted journals are absent from API, dashboard, CSV, and D1 `papers` rows.
 5. Verify deployed CSV download still includes Crossref and Unpaywall columns.
-6. Start the next major implementation phase: asynchronous job progress updates, scoring/evaluation improvements, or report generation.
+6. Start the next major implementation phase: scoring/evaluation improvements or report generation.
 
 ## Current Status
 
@@ -104,6 +104,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - CORS headers for dashboard access.
 - D1 binding validation.
 - D1 schema creation/backfill checks.
+- Asynchronous search job processing with persisted `current_step` updates.
 - OpenAlex Works API search using the dashboard keyword.
 - OpenAlex API key support through `OPENALEX_API_KEY`.
 - OpenAlex retry/backoff handling for 429 and 5xx responses.
@@ -178,6 +179,7 @@ The deployed D1 database already had some existing schema constraints, including
 - Unpaywall enrichment was added after Crossref mapping so DOI-backed results carry OA PDF/page metadata without requiring R2 storage.
 - Journal allowlist filtering was added so only journals from `packages/shared/src/businessSchoolJournals.ts` appear in search results.
 - Pipeline Progress was added to the dashboard so users can see where a run is in the paper discovery flow.
+- Worker job execution was changed to return a job immediately and continue OpenAlex, journal filtering, Crossref, Unpaywall, and ranking in the background with D1 progress updates.
 
 ## Verification Completed
 
@@ -196,6 +198,8 @@ Crossref enrichment was locally verified with `wrangler dev`, `POST /api/search-
 Unpaywall enrichment was locally verified with `wrangler dev --var UNPAYWALL_EMAIL:...`, `POST /api/search-jobs`, and `GET /api/search-jobs/:id/papers.csv`. The local JSON and CSV responses included `oa_pdf_url`, `oa_landing_page_url`, `oa_license`, `oa_host_type`, `oa_repository`, `unpaywall_status`, and `unpaywall_reason`.
 
 Business school journal allowlist filtering was locally verified with `wrangler dev`, `POST /api/search-jobs`, and `GET /api/search-jobs/:id/papers.csv`. The local JSON and CSV responses contained only allowlisted journals, including `Journal of the Academy of Marketing Science` and `Journal of Business Ethics`, and excluded the previously observed non-allowlisted `International Journal of Information Management` result.
+
+Asynchronous Worker progress was locally verified with `wrangler dev`, `POST /api/search-jobs`, `GET /api/search-jobs/:id`, and `GET /api/search-jobs/:id/papers.csv`. The POST response returned immediately with `status: searching`, `currentStep: openalex_search`, `totalSteps: 6`, and an empty `papers` array; a later GET returned `status: completed`, `currentStep: completed`, and persisted paper results.
 
 ## Manual Cloudflare Settings Required
 
@@ -235,14 +239,13 @@ After clicking `Run`, these queries returned stored data.
 
 ## Remaining Work
 
-OpenAlex search, D1 persistence, CSV export, Crossref enrichment, Unpaywall metadata lookup, business school journal allowlist filtering, and dashboard pipeline visualization are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
+OpenAlex search, D1 persistence, CSV export, Crossref enrichment, Unpaywall metadata lookup, business school journal allowlist filtering, dashboard pipeline visualization, and asynchronous job progress updates are implemented locally. After Cloudflare deploys the next commit, verify the deployed dashboard and D1 rows. The next major implementation phase is hardening and extending real paper discovery:
 
 1. Confirm deployed pipeline progress visualization after clicking `Run`.
 2. Confirm deployed allowlist filtering from the dashboard, CSV endpoint, and D1 Console.
 3. Improve scoring and evaluation rows beyond basic lexical scoring.
 4. Add report generation.
-5. Add asynchronous job progress states instead of waiting for the POST request to finish before showing results.
-6. Add tests around Worker API persistence, OpenAlex mapping, journal allowlist filtering, Crossref enrichment, Unpaywall enrichment, CSV generation, and D1 row mapping.
+5. Add tests around Worker API persistence, OpenAlex mapping, journal allowlist filtering, Crossref enrichment, Unpaywall enrichment, CSV generation, D1 row mapping, and asynchronous progress updates.
 
 ## Useful D1 Checks
 
