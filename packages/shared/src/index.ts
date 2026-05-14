@@ -29,6 +29,12 @@ export type PaperSummary = {
   journalName: string;
   doi: string;
   oaStatus: "oa" | "closed" | "unknown";
+  publisher?: string;
+  issn?: string;
+  publicationType?: string;
+  publishedDate?: string;
+  verificationStatus?: "verified" | "partial" | "unverified";
+  verificationReason?: string;
   abstractScore: number;
   finalScore: number;
   includeStatus: "include" | "exclude" | "review";

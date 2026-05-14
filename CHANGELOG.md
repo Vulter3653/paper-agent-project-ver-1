@@ -15,6 +15,10 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Docs`: Updated `docs/progress.md` and `docs/debug-log.md` with Crossref enrichment verification, deployment requirements, and next-session handoff details.
+- `Added`: Added Crossref DOI metadata enrichment and DOI/title/year/journal verification fields in `apps/worker/src/index.ts`, `apps/worker/schema.sql`, and CSV output.
+- `Fixed`: Corrected Crossref verification match counting in `apps/worker/src/index.ts` so `mismatch` is not counted as a successful match.
+- `Docs`: Added `CROSSREF_EMAIL` to `.env.example` and `README.md` required secrets.
 - `Docs`: Added `docs/debug-log.md` with CSV endpoint verification and troubleshooting details.
 - `Added`: Added `GET /api/search-jobs/:id/papers.csv` in `apps/worker/src/index.ts` and a dashboard CSV download button in `apps/web/src/main.tsx`.
 - `Fixed`: Added OpenAlex `api_key` support, selected response fields, and retry/backoff handling for 429 responses in `apps/worker/src/index.ts`.

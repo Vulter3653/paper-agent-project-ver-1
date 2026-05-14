@@ -78,6 +78,7 @@ Never commit real credentials. Use `.env.example` as a template and set producti
 ```text
 OPENALEX_EMAIL
 OPENALEX_API_KEY
+CROSSREF_EMAIL
 UNPAYWALL_EMAIL
 GOOGLE_CLIENT_EMAIL
 GOOGLE_PRIVATE_KEY

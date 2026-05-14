@@ -22,6 +22,13 @@ CREATE TABLE IF NOT EXISTS papers (
   openalex_id TEXT,
   abstract TEXT,
   cited_by_count INTEGER DEFAULT 0,
+  crossref_id TEXT,
+  publisher TEXT,
+  issn TEXT,
+  publication_type TEXT,
+  published_date TEXT,
+  verification_status TEXT,
+  verification_reason TEXT,
   created_at TEXT NOT NULL,
   FOREIGN KEY (job_id) REFERENCES search_jobs(id) ON DELETE CASCADE
 );

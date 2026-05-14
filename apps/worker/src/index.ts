@@ -5,6 +5,7 @@ export interface Env {
   REPORTS?: R2Bucket;
   OPENALEX_EMAIL?: string;
   OPENALEX_API_KEY?: string;
+  CROSSREF_EMAIL?: string;
   UNPAYWALL_EMAIL?: string;
   GOOGLE_CLIENT_EMAIL?: string;
   GOOGLE_PRIVATE_KEY?: string;
@@ -22,6 +23,13 @@ type PaperRecord = PaperSummary & {
   openalexId: string;
   abstract: string;
   citedByCount: number;
+  crossrefId: string;
+  publisher: string;
+  issn: string;
+  publicationType: string;
+  publishedDate: string;
+  verificationStatus: "verified" | "partial" | "unverified";
+  verificationReason: string;
 };
 
 type OpenAlexResponse = {
@@ -55,6 +63,22 @@ type OpenAlexWork = {
   } | null;
 };
 
+type CrossrefResponse = {
+  message?: CrossrefWork;
+};
+
+type CrossrefWork = {
+  DOI?: string;
+  title?: string[];
+  publisher?: string;
+  ISSN?: string[];
+  type?: string;
+  "container-title"?: string[];
+  published?: { "date-parts"?: number[][] };
+  "published-print"?: { "date-parts"?: number[][] };
+  "published-online"?: { "date-parts"?: number[][] };
+};
+
 type SearchJobRow = {
   id: string;
   keyword: string;
@@ -79,6 +103,12 @@ type PaperSummaryRow = {
   final_score: number | null;
   include_status: PaperSummary["includeStatus"] | null;
   relevance_reason: string | null;
+  publisher: string | null;
+  issn: string | null;
+  publication_type: string | null;
+  published_date: string | null;
+  verification_status: PaperRecord["verificationStatus"] | null;
+  verification_reason: string | null;
 };
 
 export default {
@@ -105,6 +135,7 @@ export default {
         const papers = await searchOpenAlex(keyword, {
           email: env.OPENALEX_EMAIL,
           apiKey: env.OPENALEX_API_KEY,
+          crossrefEmail: env.CROSSREF_EMAIL ?? env.OPENALEX_EMAIL,
           maxResults,
           yearStart: body.yearStart,
           yearEnd: body.yearEnd
@@ -216,6 +247,13 @@ async function ensureSchema(db: D1Database): Promise<void> {
         openalex_id TEXT,
         abstract TEXT,
         cited_by_count INTEGER DEFAULT 0,
+        crossref_id TEXT,
+        publisher TEXT,
+        issn TEXT,
+        publication_type TEXT,
+        published_date TEXT,
+        verification_status TEXT,
+        verification_reason TEXT,
         FOREIGN KEY (job_id) REFERENCES search_jobs(id) ON DELETE CASCADE
       )`
     )
@@ -255,6 +293,13 @@ async function ensureSchema(db: D1Database): Promise<void> {
   await ensureColumn(db, "papers", "openalex_id", "TEXT");
   await ensureColumn(db, "papers", "abstract", "TEXT");
   await ensureColumn(db, "papers", "cited_by_count", "INTEGER DEFAULT 0");
+  await ensureColumn(db, "papers", "crossref_id", "TEXT");
+  await ensureColumn(db, "papers", "publisher", "TEXT");
+  await ensureColumn(db, "papers", "issn", "TEXT");
+  await ensureColumn(db, "papers", "publication_type", "TEXT");
+  await ensureColumn(db, "papers", "published_date", "TEXT");
+  await ensureColumn(db, "papers", "verification_status", "TEXT");
+  await ensureColumn(db, "papers", "verification_reason", "TEXT");
   await ensureColumn(db, "papers", "created_at", "TEXT");
 
   await ensureColumn(db, "evaluations", "id", "TEXT");
@@ -306,9 +351,10 @@ async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRec
         .prepare(
           `INSERT INTO papers (
             id, job_id, rank, title, authors, year, journal_name, doi, oa_status,
-            openalex_id, abstract, cited_by_count, created_at
+            openalex_id, abstract, cited_by_count, crossref_id, publisher, issn,
+            publication_type, published_date, verification_status, verification_reason, created_at
            )
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
         .bind(
           paperId,
@@ -323,6 +369,13 @@ async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRec
           paper.openalexId,
           paper.abstract,
           paper.citedByCount,
+          paper.crossrefId,
+          paper.publisher,
+          paper.issn,
+          paper.publicationType,
+          paper.publishedDate,
+          paper.verificationStatus,
+          paper.verificationReason,
           now
         )
     );
@@ -349,7 +402,7 @@ async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRec
 
 async function searchOpenAlex(
   keyword: string,
-  options: { email?: string; apiKey?: string; maxResults: number; yearStart?: number; yearEnd?: number }
+  options: { email?: string; apiKey?: string; crossrefEmail?: string; maxResults: number; yearStart?: number; yearEnd?: number }
 ): Promise<PaperRecord[]> {
   const url = new URL("https://api.openalex.org/works");
   url.searchParams.set("search", keyword);
@@ -381,7 +434,8 @@ async function searchOpenAlex(
   const response = await fetchOpenAlexWithRetry(url, options.email);
 
   const data = (await response.json()) as OpenAlexResponse;
-  return (data.results ?? []).slice(0, options.maxResults).map((work, index) => mapOpenAlexWork(work, keyword, index + 1));
+  const papers = (data.results ?? []).slice(0, options.maxResults).map((work, index) => mapOpenAlexWork(work, keyword, index + 1));
+  return enrichPapersWithCrossref(papers, options.crossrefEmail);
 }
 
 async function fetchOpenAlexWithRetry(url: URL, email: string | undefined): Promise<Response> {
@@ -442,8 +496,110 @@ function mapOpenAlexWork(work: OpenAlexWork, keyword: string, rank: number): Pap
     relevanceReason: scores.reason,
     openalexId: work.id ?? "",
     abstract,
-    citedByCount
+    citedByCount,
+    crossrefId: "",
+    publisher: "",
+    issn: "",
+    publicationType: "",
+    publishedDate: "",
+    verificationStatus: normalizeDoi(work.doi) ? "unverified" : "partial",
+    verificationReason: normalizeDoi(work.doi) ? "Crossref verification pending." : "No DOI available for Crossref verification."
   };
+}
+
+async function enrichPapersWithCrossref(papers: PaperRecord[], email: string | undefined): Promise<PaperRecord[]> {
+  const enriched: PaperRecord[] = [];
+  for (const paper of papers) {
+    if (!paper.doi) {
+      enriched.push(paper);
+      continue;
+    }
+
+    try {
+      const crossref = await fetchCrossrefWork(paper.doi, email);
+      enriched.push(applyCrossrefMetadata(paper, crossref));
+    } catch (error) {
+      enriched.push({
+        ...paper,
+        verificationStatus: "partial",
+        verificationReason: `Crossref lookup failed: ${getErrorMessage(error)}`
+      });
+    }
+  }
+  return enriched;
+}
+
+async function fetchCrossrefWork(doi: string, email: string | undefined): Promise<CrossrefWork> {
+  const url = new URL(`https://api.crossref.org/works/${encodeURIComponent(doi)}`);
+  if (email) url.searchParams.set("mailto", email);
+  const response = await fetchCrossrefWithRetry(url, email);
+  const data = (await response.json()) as CrossrefResponse;
+  if (!data.message) throw new Error("Crossref response did not include message metadata");
+  return data.message;
+}
+
+async function fetchCrossrefWithRetry(url: URL, email: string | undefined): Promise<Response> {
+  const maxAttempts = 3;
+  let lastResponse: Response | null = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const response = await fetch(url.toString(), {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": email ? `paper-agent-project (${email})` : "paper-agent-project"
+      }
+    });
+    if (response.ok) return response;
+    lastResponse = response;
+    if (response.status !== 429 && response.status < 500) break;
+    await sleep(2 ** attempt * 1000);
+  }
+
+  throw new Error(`Crossref request failed with ${lastResponse?.status ?? "unknown status"}`);
+}
+
+function applyCrossrefMetadata(paper: PaperRecord, crossref: CrossrefWork): PaperRecord {
+  const crossrefTitle = crossref.title?.[0] ?? "";
+  const crossrefJournal = crossref["container-title"]?.[0] ?? "";
+  const crossrefYear = getCrossrefYear(crossref);
+  const titleMatches = crossrefTitle ? isSimilarText(paper.title, crossrefTitle) : null;
+  const yearMatches = crossrefYear ? paper.year === crossrefYear : null;
+  const journalMatches = crossrefJournal ? isSimilarText(paper.journalName, crossrefJournal) : null;
+  const checks = [
+    titleMatches === null ? "title missing" : `title ${titleMatches ? "match" : "mismatch"}`,
+    yearMatches === null ? "year missing" : `year ${yearMatches ? "match" : "mismatch"}`,
+    journalMatches === null ? "journal missing" : `journal ${journalMatches ? "match" : "mismatch"}`
+  ];
+  const matchCount = [titleMatches, yearMatches, journalMatches].filter(Boolean).length;
+  return {
+    ...paper,
+    crossrefId: normalizeDoi(crossref.DOI),
+    publisher: crossref.publisher ?? "",
+    issn: (crossref.ISSN ?? []).join("; "),
+    publicationType: crossref.type ?? "",
+    publishedDate: getCrossrefDate(crossref),
+    verificationStatus: matchCount >= 2 ? "verified" : matchCount >= 1 ? "partial" : "unverified",
+    verificationReason: checks.join("; ")
+  };
+}
+
+function getCrossrefYear(work: CrossrefWork): number | null {
+  return work.published?.["date-parts"]?.[0]?.[0] ?? work["published-online"]?.["date-parts"]?.[0]?.[0] ?? work["published-print"]?.["date-parts"]?.[0]?.[0] ?? null;
+}
+
+function getCrossrefDate(work: CrossrefWork): string {
+  const parts = work.published?.["date-parts"]?.[0] ?? work["published-online"]?.["date-parts"]?.[0] ?? work["published-print"]?.["date-parts"]?.[0];
+  if (!parts?.length) return "";
+  const [year, month = 1, day = 1] = parts;
+  return [year, String(month).padStart(2, "0"), String(day).padStart(2, "0")].join("-");
+}
+
+function isSimilarText(left: string, right: string): boolean {
+  const leftTokens = tokenize(left);
+  const rightTokens = new Set(tokenize(right));
+  if (!leftTokens.length || !rightTokens.size) return false;
+  const overlap = leftTokens.filter((token) => rightTokens.has(token)).length / leftTokens.length;
+  return overlap >= 0.6;
 }
 
 function reconstructAbstract(index: OpenAlexWork["abstract_inverted_index"]): string {
@@ -537,6 +693,12 @@ async function getSearchResult(db: D1Database, jobId: string): Promise<{ job: Se
         p.journal_name,
         p.doi,
         p.oa_status,
+        p.publisher,
+        p.issn,
+        p.publication_type,
+        p.published_date,
+        p.verification_status,
+        p.verification_reason,
         e.abstract_score,
         e.final_score,
         e.include_status,
@@ -581,7 +743,13 @@ function mapPaperSummary(row: PaperSummaryRow): PaperSummary {
     abstractScore: row.abstract_score ?? 0,
     finalScore: row.final_score ?? 0,
     includeStatus: row.include_status ?? "review",
-    relevanceReason: row.relevance_reason ?? "No evaluation recorded."
+    relevanceReason: row.relevance_reason ?? "No evaluation recorded.",
+    publisher: row.publisher ?? "",
+    issn: row.issn ?? "",
+    publicationType: row.publication_type ?? "",
+    publishedDate: row.published_date ?? "",
+    verificationStatus: row.verification_status ?? "unverified",
+    verificationReason: row.verification_reason ?? "No verification recorded."
   };
 }
 
@@ -606,6 +774,12 @@ function csv(result: { job: SearchJob; papers: PaperSummary[] }): Response {
     "journal_name",
     "doi",
     "oa_status",
+    "publisher",
+    "issn",
+    "publication_type",
+    "published_date",
+    "verification_status",
+    "verification_reason",
     "abstract_score",
     "final_score",
     "include_status",
@@ -621,6 +795,12 @@ function csv(result: { job: SearchJob; papers: PaperSummary[] }): Response {
     paper.journalName,
     paper.doi,
     paper.oaStatus,
+    paper.publisher ?? "",
+    paper.issn ?? "",
+    paper.publicationType ?? "",
+    paper.publishedDate ?? "",
+    paper.verificationStatus ?? "",
+    paper.verificationReason ?? "",
     paper.abstractScore,
     paper.finalScore,
     paper.includeStatus,
