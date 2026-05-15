@@ -65,7 +65,7 @@ Current next implementation target:
     - After XLSX is stable, add `reports/<job_id>/report.pdf`.
 18. Use `docs/workflow.md` as the current source of truth for the integrated multi-agent target workflow.
 19. After Cloudflare Pages deploys the dashboard UI/UX refresh, verify the production page at `https://paper-agent-project.pages.dev/` across desktop and mobile widths.
-20. Deploy the WoS Starter API limit fix and verify dashboard `Run` no longer fails with `Web of Science request failed with 400`.
+20. Dashboard `Run` no longer fails with `Web of Science request failed with 400`; next improve low-result queries by tuning keyword/date defaults or adding source-title-aware retrieval.
 
 ## Current Status
 
@@ -94,6 +94,7 @@ The latest confirmed behavior is normal:
 - Unpaywall DOI/email request values are normalized before lookup; this requires one more deployed runtime check because the last confirmed job returned Unpaywall 422 responses.
 - Dashboard UI/UX has been refreshed locally with an improved command header, operational status layout, ranked-paper table, detail panel, and responsive CSS. Static checks passed and the local Vite server returned HTTP 200.
 - Latest dashboard `Run` failure was traced to WoS `limit=100` from dashboard `maxResults=20`; Worker code now caps WoS candidate requests at the Starter API maximum of 50.
+- Runtime confirmation job `job-6639c061-9c43-43bf-bbc7-063de355f974` completed with `sourceResultCount=2` and `allowedResultCount=0`, confirming the WoS 400 failure is resolved.
 
 ## Repository And Deployment Targets
 

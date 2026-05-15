@@ -66,6 +66,20 @@ curl -s -X POST https://paper-agent-project.shch3653.workers.dev/api/search-jobs
 
 Expected result: the job should leave `wos_search` and complete or proceed to journal filtering without a WoS 400 error.
 
+### Runtime Confirmation
+
+After Cloudflare automatic deployment caught up, the same dashboard-style payload completed:
+
+```text
+job-6639c061-9c43-43bf-bbc7-063de355f974
+status=completed
+currentStep=completed
+sourceResultCount=2
+allowedResultCount=0
+```
+
+This confirms the `status=failed` issue was the WoS request limit. The remaining zero-paper state is not a runtime failure; it means the returned WoS candidates did not pass the approved journal allowlist.
+
 ## 2026-05-15 - Dashboard UI/UX Refresh
 
 ### Context
