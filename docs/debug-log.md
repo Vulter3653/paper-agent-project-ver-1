@@ -94,6 +94,24 @@ instead of:
 PY=(2020-2026)
 ```
 
+### Current Runtime Confirmation
+
+After direct Worker deployment, the default dashboard-style payload:
+
+```json
+{"keyword":"marketing","yearStart":2020,"maxResults":10}
+```
+
+completed with:
+
+```text
+job-b83c7239-03a0-4376-98bc-cee2ed8a5b6e
+sourceResultCount=50
+allowedResultCount=8
+```
+
+This confirms WoS authentication, `hits` parsing, year filtering, approved journal filtering, Crossref enrichment, D1 persistence, and dashboard-readable job metrics are working. Unpaywall still returned 422 for the runtime job, while a direct public API call for the same DOI returned 200. DOI and email values are now trimmed before Unpaywall requests; run a new job after this change to confirm whether the 422 was caused by whitespace in runtime values.
+
 ## 2026-05-15 - WoS API Key Runtime Diagnostics
 
 ### Context

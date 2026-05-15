@@ -1226,9 +1226,11 @@ async function enrichPapersWithUnpaywall(papers: PaperRecord[], email: string | 
 }
 
 async function fetchUnpaywallWork(doi: string, email: string): Promise<UnpaywallResponse> {
-  const url = new URL(`https://api.unpaywall.org/v2/${encodeURIComponent(doi)}`);
-  url.searchParams.set("email", email);
-  const response = await fetchUnpaywallWithRetry(url, email);
+  const normalizedDoi = normalizeDoi(doi).trim();
+  const normalizedEmail = email.trim();
+  const url = new URL(`https://api.unpaywall.org/v2/${encodeURIComponent(normalizedDoi)}`);
+  url.searchParams.set("email", normalizedEmail);
+  const response = await fetchUnpaywallWithRetry(url, normalizedEmail);
   return (await response.json()) as UnpaywallResponse;
 }
 
