@@ -15,6 +15,9 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Added`: Added `source_result_count` and `allowed_result_count` search job diagnostics in `apps/worker/src/index.ts`, `apps/worker/schema.sql`, and `apps/worker/migrations/0005_add_search_job_result_counts.sql`.
+- `Changed`: Added a dashboard `Source / Allowed` metric in `apps/web/src/main.tsx` and `apps/web/src/styles.css` to explain zero-result WoS jobs after journal allowlist filtering.
+- `Docs`: Recorded WoS runtime verification, zero-result troubleshooting, and search result count diagnostics in `docs/debug-log.md` and `docs/progress.md`.
 - `Changed`: Added WoS API key alias detection and diagnostics source reporting in `apps/worker/src/index.ts` and `apps/web/src/main.tsx` to debug Cloudflare secret naming issues without exposing secret values.
 - `Docs`: Recorded WoS secret diagnostics debugging in `docs/debug-log.md` and `docs/progress.md`.
 - `Docs`: Updated `docs/progress.md` and `docs/debug-log.md` with the confirmed dashboard report preview status and the next XLSX/PDF output implementation plan.

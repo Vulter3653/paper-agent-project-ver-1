@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS search_jobs (
   total_steps INTEGER NOT NULL,
   created_at TEXT NOT NULL,
   completed_at TEXT,
-  error_message TEXT
+  error_message TEXT,
+  source_result_count INTEGER DEFAULT 0,
+  allowed_result_count INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS papers (

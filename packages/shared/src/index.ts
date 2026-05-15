@@ -20,6 +20,8 @@ export type SearchJob = {
   createdAt: string;
   completedAt?: string;
   errorMessage?: string;
+  sourceResultCount?: number;
+  allowedResultCount?: number;
 };
 
 export type PaperSummary = {

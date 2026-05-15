@@ -268,6 +268,7 @@ function App() {
       <section className="statusBand">
         <Metric label="Status" value={job?.status ?? "demo"} />
         <Metric label="Step" value={job?.currentStep ?? "ranking preview"} />
+        <Metric label="Source / Allowed" value={job ? `${job.sourceResultCount ?? "-"} / ${job.allowedResultCount ?? "-"}` : "-"} />
         <Metric label="Papers" value={String(papers.length)} />
         <Metric label="Top Score" value={papers[0] ? papers[0].finalScore.toFixed(2) : "-"} />
       </section>

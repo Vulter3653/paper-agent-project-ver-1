@@ -191,6 +191,8 @@ type SearchJobRow = {
   created_at: string;
   completed_at: string | null;
   error_message: string | null;
+  source_result_count: number | null;
+  allowed_result_count: number | null;
 };
 
 type PaperSummaryRow = {
@@ -415,7 +417,9 @@ async function ensureSchema(db: D1Database): Promise<void> {
         total_steps INTEGER NOT NULL,
         created_at TEXT NOT NULL,
         completed_at TEXT,
-        error_message TEXT
+        error_message TEXT,
+        source_result_count INTEGER DEFAULT 0,
+        allowed_result_count INTEGER DEFAULT 0
       )`
     )
     .run();
@@ -480,6 +484,8 @@ async function ensureSchema(db: D1Database): Promise<void> {
   await ensureColumn(db, "search_jobs", "created_at", "TEXT");
   await ensureColumn(db, "search_jobs", "completed_at", "TEXT");
   await ensureColumn(db, "search_jobs", "error_message", "TEXT");
+  await ensureColumn(db, "search_jobs", "source_result_count", "INTEGER DEFAULT 0");
+  await ensureColumn(db, "search_jobs", "allowed_result_count", "INTEGER DEFAULT 0");
 
   await ensureColumn(db, "papers", "id", "TEXT");
   await ensureColumn(db, "papers", "job_id", "TEXT");
@@ -566,7 +572,18 @@ async function getMissingColumns(db: D1Database): Promise<DiagnosticsColumnCheck
   const requiredColumns: Array<{ table: string; columns: string[] }> = [
     {
       table: "search_jobs",
-      columns: ["id", "keyword", "status", "current_step", "total_steps", "created_at", "completed_at", "error_message"]
+      columns: [
+        "id",
+        "keyword",
+        "status",
+        "current_step",
+        "total_steps",
+        "created_at",
+        "completed_at",
+        "error_message",
+        "source_result_count",
+        "allowed_result_count"
+      ]
     },
     {
       table: "papers",
@@ -670,16 +687,29 @@ async function saveSearchFailure(db: D1Database, job: SearchJob, error: unknown)
     .run();
 }
 
-async function saveSearchResult(db: D1Database, job: SearchJob, papers: PaperRecord[]): Promise<void> {
+async function saveSearchResult(
+  db: D1Database,
+  job: SearchJob,
+  papers: PaperRecord[],
+  metrics: { sourceResultCount: number; allowedResultCount: number }
+): Promise<void> {
   const now = new Date().toISOString();
   const statements: D1PreparedStatement[] = [
     db
       .prepare(
         `UPDATE search_jobs
-         SET status = ?, current_step = ?, completed_at = ?, error_message = ?
+         SET status = ?, current_step = ?, completed_at = ?, error_message = ?, source_result_count = ?, allowed_result_count = ?
          WHERE id = ?`
       )
-      .bind(job.status, job.currentStep, job.completedAt ?? null, job.errorMessage ?? null, job.id)
+      .bind(
+        job.status,
+        job.currentStep,
+        job.completedAt ?? null,
+        job.errorMessage ?? null,
+        metrics.sourceResultCount,
+        metrics.allowedResultCount,
+        job.id
+      )
   ];
 
   for (const paper of papers) {
@@ -794,7 +824,10 @@ async function processSearchJob(
     job = await updateSearchJobProgress(db, job, "ranking", "ranking");
     const rankedPapers = rankPapers(unpaywallEnriched);
     const completedJob = completeSearchJob(job);
-    await saveSearchResult(db, completedJob, rankedPapers);
+    await saveSearchResult(db, completedJob, rankedPapers, {
+      sourceResultCount: candidates.length,
+      allowedResultCount: allowedPapers.length
+    });
     await persistSearchOutputs(options.reports, { job: completedJob, papers: rankedPapers });
   } catch (error) {
     await saveSearchFailure(db, job, error);
@@ -1450,7 +1483,7 @@ async function getSearchResult(db: D1Database, jobId: string): Promise<{ job: Se
 async function listSearchJobs(db: D1Database, limit: number): Promise<SearchJob[]> {
   const rows = await db
     .prepare(
-      `SELECT id, keyword, status, current_step, total_steps, created_at, completed_at, error_message
+      `SELECT id, keyword, status, current_step, total_steps, created_at, completed_at, error_message, source_result_count, allowed_result_count
        FROM search_jobs
        ORDER BY created_at DESC
        LIMIT ?`
@@ -1469,7 +1502,9 @@ function mapSearchJob(row: SearchJobRow): SearchJob {
     totalSteps: row.total_steps,
     createdAt: row.created_at,
     completedAt: row.completed_at ?? undefined,
-    errorMessage: row.error_message ?? undefined
+    errorMessage: row.error_message ?? undefined,
+    sourceResultCount: row.source_result_count ?? undefined,
+    allowedResultCount: row.allowed_result_count ?? undefined
   };
 }
 

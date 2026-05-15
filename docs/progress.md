@@ -1,6 +1,6 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-14
+Updated: 2026-05-15
 
 ## Mandatory Session Handoff Rules
 
@@ -35,29 +35,32 @@ Worker health: https://paper-agent-project.shch3653.workers.dev/api/health
 
 Current next implementation target:
 
-0. Wait for Clarivate to approve the `wos-starter` subscription for `MON AI Team Paper Agent Project`.
-1. Until `WOS_API_KEY` is issued, set Worker variables `SEARCH_PROVIDER=openalex` and `OPENALEX_EMAIL=<contact email>` for integration testing.
-2. After WoS approval, change `SEARCH_PROVIDER=wos` and copy the issued API key into the Cloudflare Worker variables/secrets as `WOS_API_KEY`.
-3. Wait for Cloudflare to deploy the next `main` commit.
-4. Open `/api/diagnostics` and confirm `searchProvider`, provider readiness, D1 schema, Crossref, Unpaywall, and R2 report binding status.
-   - For WoS, confirm `env.wosApiKey: true` and `env.wosApiKeySource` is not `null`.
-5. Open the dashboard and confirm the System Checks panel reports the active provider and provider readiness.
-6. Click `Run` and confirm the Pipeline Progress panel advances through source search, journal filtering, Crossref, Unpaywall, ranking, and completion.
-7. Confirm D1 `papers.openalex_id` stores the external source identifier. The column name is retained for schema compatibility.
-8. Verify deployed CSV and Markdown report downloads include Crossref, Unpaywall, and evaluation score data.
-9. In R2 bucket `paper-agent-outputs`, confirm `reports/<job_id>/papers.csv` and `reports/<job_id>/report.md` are created for completed jobs.
-10. Confirm the Markdown report includes executive summary metrics, Report Agent synthesis sections, top-ranked table, paper details, OA landing page, and license details.
-11. Confirm the dashboard Recent Jobs panel lists saved jobs and can reload prior job results.
-12. Confirm new jobs use persisted component-score final ranking: relevance 35%, journal fit 20%, Crossref verification 15%, OA 10%, citation 10%, recency 10%.
-13. Use `docs/mcp.md` as the current source of truth for MCP attachment and the implemented read-only MCP Worker.
-14. Deployed MCP is verified at `https://paper-agent-mcp.shch3653.workers.dev/health`.
-15. MCP protocol connectivity and read-only tool calls are verified with `npm run smoke:mcp`.
-16. Start the next major implementation phase with XLSX output first, then PDF output.
+0. WoS API key registration is complete. Deployed diagnostics must remain:
+   - `searchProvider: "wos"`
+   - `env.wosApiKey: true`
+   - `env.wosApiKeySource: "WOS_API_KEY"`
+   - `readiness.activeProviderReady: true`
+1. Deploy the search job result count diagnostics added in this session.
+2. Run a new WoS dashboard search and confirm the `Source / Allowed` metric.
+   - If `Source > 0` and `Allowed = 0`, the WoS query returned candidates but the approved journal allowlist removed them.
+   - If `Source = 0`, tune the WoS keyword/date query.
+3. Confirm D1 `search_jobs.source_result_count` and `search_jobs.allowed_result_count` are populated for new jobs.
+4. If allowed results remain zero for broad business keywords, improve WoS retrieval by adding source-title-aware query expansion or multi-page candidate collection before the allowlist filter.
+5. Confirm D1 `papers.openalex_id` stores the external source identifier. The column name is retained for schema compatibility.
+6. Verify deployed CSV and Markdown report downloads include Crossref, Unpaywall, and evaluation score data.
+7. In R2 bucket `paper-agent-outputs`, confirm `reports/<job_id>/papers.csv` and `reports/<job_id>/report.md` are created for completed jobs with allowed papers.
+8. Confirm the Markdown report includes executive summary metrics, Report Agent synthesis sections, top-ranked table, paper details, OA landing page, and license details.
+9. Confirm the dashboard Recent Jobs panel lists saved jobs and can reload prior job results.
+10. Confirm new jobs use persisted component-score final ranking: relevance 35%, journal fit 20%, Crossref verification 15%, OA 10%, citation 10%, recency 10%.
+11. Use `docs/mcp.md` as the current source of truth for MCP attachment and the implemented read-only MCP Worker.
+12. Deployed MCP is verified at `https://paper-agent-mcp.shch3653.workers.dev/health`.
+13. MCP protocol connectivity and read-only tool calls are verified with `npm run smoke:mcp`.
+14. Start the next major implementation phase with XLSX output first, then PDF output.
     - Add `reports/<job_id>/papers.xlsx` generation and R2 persistence.
     - Add dashboard XLSX download button.
     - Extend `npm run e2e:reports` to verify XLSX endpoint and R2 object.
     - After XLSX is stable, add `reports/<job_id>/report.pdf`.
-17. Use `docs/workflow.md` as the current source of truth for the integrated multi-agent target workflow.
+15. Use `docs/workflow.md` as the current source of truth for the integrated multi-agent target workflow.
 
 ## Current Status
 
@@ -75,9 +78,10 @@ The latest confirmed behavior is normal:
 - `POST /api/search-jobs` calls the configured source provider, maps returned documents, scores them, and stores the result in D1.
 - `search_jobs`, `papers`, and `evaluations` receive rows in D1.
 - D1 Console no longer returns empty results after a successful run.
-- Deployed `/api/diagnostics` confirms provider readiness, Crossref, Unpaywall, and R2 status; `wosApiKey` remains `false` until Clarivate approval is complete.
+- Deployed `/api/diagnostics` confirms provider readiness, Crossref, Unpaywall, and R2 status; `wosApiKey` is now `true` and `wosApiKeySource` is `WOS_API_KEY`.
 - Dashboard Report Preview is visible and displays the Markdown report for completed jobs.
-- WoS API key debugging has been added: diagnostics now reports `env.wosApiKeySource` so the next runtime check can tell whether `WOS_API_KEY` or a supported alias is actually attached to the Worker.
+- WoS runtime searches now complete, but the first tested keywords returned zero saved papers after the approved journal allowlist.
+- Search job count diagnostics have been added so new jobs expose provider candidate count and allowlist pass count.
 
 ## Repository And Deployment Targets
 
@@ -122,6 +126,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - API error messages are shown in the page when search creation or refresh fails.
 - Dashboard API base URL supports `VITE_API_BASE_URL`, with a deployed Worker default.
 - Pipeline Progress panel visualizes Web of Science search, journal filtering, Crossref enrichment, Unpaywall check, ranking, and completion status.
+- Status metrics include `Source / Allowed` for new jobs after deployment.
 - Paper Detail panel shows Score Breakdown for relevance, journal fit, Crossref verification, open access, citations, and recency.
 - System Checks panel calls `GET /api/diagnostics` to display D1 schema readiness and Worker environment variable presence.
 - Report Preview panel fetches `GET /api/search-jobs/:id/report.md` for completed jobs and displays the Markdown report in the dashboard before download.
@@ -150,6 +155,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - Basic relevance scoring based on title keyword overlap, abstract keyword overlap, citation count, and recency.
 - Final ranking based on persisted component scores: relevance, journal fit, verification, OA, citation, and recency.
 - Search job persistence into D1.
+- Search jobs track provider candidate count and approved journal allowlist pass count.
 - D1 readback for job, paper, and evaluation data.
 - Recent search job listing from D1.
 - CSV generation from persisted D1 results, with R2 storage under `reports/<job_id>/papers.csv` when available.
@@ -190,6 +196,11 @@ Tables:
 - `search_jobs`
 - `papers`
 - `evaluations`
+
+Additional search job diagnostics now tracked/backfilled:
+
+- `source_result_count`
+- `allowed_result_count`
 
 Additional paper metadata now tracked/backfilled:
 

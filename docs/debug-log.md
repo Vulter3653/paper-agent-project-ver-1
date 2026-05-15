@@ -2,6 +2,68 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-15 - WoS Search Runtime Result Counts
+
+### Context
+
+The WoS API key is now visible to the deployed Worker:
+
+```json
+{
+  "searchProvider": "wos",
+  "env": {
+    "wosApiKey": true,
+    "wosApiKeySource": "WOS_API_KEY"
+  },
+  "readiness": {
+    "activeProviderReady": true
+  }
+}
+```
+
+### Runtime Verification
+
+Created three deployed WoS jobs:
+
+```text
+job-2f7faddb-3e4e-4a16-8daf-fc287b136b57 keyword=marketing analytics
+job-56122b46-7545-4257-a454-1f3e3c358373 keyword=strategic management
+job-64132c0c-6ad3-47e3-943f-c113b302081d keyword=marketing
+```
+
+All three jobs completed successfully, which confirms the Worker can authenticate against WoS and run the pipeline. Each returned zero saved papers after the journal allowlist stage.
+
+### Code Changes Under Test
+
+Added search job result count diagnostics:
+
+```text
+search_jobs.source_result_count
+search_jobs.allowed_result_count
+```
+
+The Worker now records how many provider candidates were received and how many passed the approved business school journal allowlist. The dashboard now displays this as `Source / Allowed`, making zero-result jobs diagnosable without inspecting logs.
+
+### Verification Commands
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run --config apps/worker/wrangler.toml
+```
+
+All passed.
+
+### Next Runtime Check
+
+After deployment, run another WoS job and confirm:
+
+```text
+Source / Allowed shows a numeric pair.
+If Source > 0 and Allowed = 0, the API returned results but the approved journal filter removed them.
+If Source = 0, the WoS query itself returned no candidates for the keyword/date range.
+```
+
 ## 2026-05-15 - WoS API Key Runtime Diagnostics
 
 ### Context
