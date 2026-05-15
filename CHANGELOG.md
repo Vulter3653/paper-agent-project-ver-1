@@ -15,6 +15,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Docs`: Recorded latest direct Worker deployment version and WoS smoke verification results in `docs/progress.md` and `docs/debug-log.md`.
 - `Fixed`: Normalized DOI and email values before Unpaywall requests in `apps/worker/src/index.ts` to avoid malformed lookup URLs from secret/input whitespace.
 - `Fixed`: Changed WoS year filtering in `apps/worker/src/index.ts` to emit explicit `PY=(YYYY OR YYYY...)` clauses for short ranges because `PY=(start-end)` returned zero Starter API candidates.
 - `Fixed`: Corrected WoS Starter API response parsing in `apps/worker/src/index.ts` to read the official `hits` array, with `documents` retained as a compatibility fallback.

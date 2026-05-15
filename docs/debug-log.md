@@ -112,6 +112,26 @@ allowedResultCount=8
 
 This confirms WoS authentication, `hits` parsing, year filtering, approved journal filtering, Crossref enrichment, D1 persistence, and dashboard-readable job metrics are working. Unpaywall still returned 422 for the runtime job, while a direct public API call for the same DOI returned 200. DOI and email values are now trimmed before Unpaywall requests; run a new job after this change to confirm whether the 422 was caused by whitespace in runtime values.
 
+### Latest Deployment Check
+
+Direct Worker deployments completed:
+
+```text
+3af40580-0c46-4b60-9031-430d0b3824cf - search result diagnostics
+37121eff-c477-431a-a05b-0d631f2ec721 - WoS hits parser and year filter
+c827fe7b-37cc-40db-8755-fb8031031fdb - Unpaywall DOI/email normalization
+```
+
+After the final deployment, a short `maxResults=2` smoke job completed:
+
+```text
+job-3939c7f5-d674-4069-bacd-e18d5ebff919
+sourceResultCount=10
+allowedResultCount=0
+```
+
+This confirms the latest deployed code still records source/allowed counts. The short candidate window did not include allowlisted journals; use `maxResults=10` or the dashboard default for a fuller WoS validation.
+
 ## 2026-05-15 - WoS API Key Runtime Diagnostics
 
 ### Context

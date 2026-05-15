@@ -88,6 +88,7 @@ The latest confirmed behavior is normal:
 - WoS Starter API parsing has been corrected to read the official `hits` response array.
 - WoS short year ranges now use explicit OR clauses because `PY=(start-end)` returned zero candidates in runtime testing.
 - Latest confirmed WoS runtime job `job-b83c7239-03a0-4376-98bc-cee2ed8a5b6e` returned `sourceResultCount=50`, `allowedResultCount=8`, and 8 stored papers.
+- Latest smoke job after Unpaywall normalization `job-3939c7f5-d674-4069-bacd-e18d5ebff919` returned `sourceResultCount=10`, `allowedResultCount=0`; use a larger candidate window for full allowlist validation.
 - Unpaywall DOI/email request values are normalized before lookup; this requires one more deployed runtime check because the last confirmed job returned Unpaywall 422 responses.
 
 ## Repository And Deployment Targets
@@ -105,6 +106,7 @@ The latest confirmed behavior is normal:
 - MCP endpoint: `https://paper-agent-mcp.shch3653.workers.dev/mcp`
 - Default Worker API URL: `https://paper-agent-project.shch3653.workers.dev`
 - Dashboard URL: `https://paper-agent-project.pages.dev/`
+- Latest direct Worker version ID: `c827fe7b-37cc-40db-8755-fb8031031fdb`
 
 Local manual Cloudflare deployment is not used. Deployment should happen in Cloudflare from GitHub commits.
 
