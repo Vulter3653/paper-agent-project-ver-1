@@ -146,6 +146,15 @@ export type BusinessSchoolJournalCategory = {
   domesticA: readonly string[];
 };
 
+export type BusinessSchoolJournalRank = "international_s" | "international_a1" | "domestic_a";
+
+export type BusinessSchoolJournalMatch = {
+  categoryId: string;
+  categoryLabel: string;
+  rank: BusinessSchoolJournalRank;
+  rankLabel: string;
+};
+
 export const BUSINESS_SCHOOL_JOURNAL_CATEGORIES = [
   {
     id: "common",
@@ -328,6 +337,34 @@ export function isBusinessSchoolJournal(value: string): boolean {
   return BUSINESS_SCHOOL_JOURNAL_SET.has(normalizeJournalName(value));
 }
 
+export function getBusinessSchoolJournalMatch(value: string, preferredCategoryId?: string): BusinessSchoolJournalMatch | undefined {
+  const normalized = normalizeJournalName(value);
+  const normalizedSingular = normalized.endsWith("s") ? normalized.slice(0, -1) : normalized;
+  const categories = preferredCategoryId
+    ? [
+        ...BUSINESS_SCHOOL_JOURNAL_CATEGORIES.filter((category) => category.id === preferredCategoryId),
+        ...BUSINESS_SCHOOL_JOURNAL_CATEGORIES.filter((category) => category.id !== preferredCategoryId)
+      ]
+    : BUSINESS_SCHOOL_JOURNAL_CATEGORIES;
+
+  for (const category of categories) {
+    const rankMatch =
+      getRankMatch(category.internationalS, normalized, normalizedSingular, "international_s", "국제 S급") ??
+      getRankMatch(category.internationalA1, normalized, normalizedSingular, "international_a1", "국제 A1급") ??
+      getRankMatch(category.domesticA, normalized, normalizedSingular, "domestic_a", "국내 A급");
+
+    if (rankMatch) {
+      return {
+        categoryId: category.id,
+        categoryLabel: category.label,
+        ...rankMatch
+      };
+    }
+  }
+
+  return undefined;
+}
+
 export function getBusinessSchoolJournalCategory(categoryId: string | undefined): BusinessSchoolJournalCategory | undefined {
   if (!categoryId) return undefined;
   return BUSINESS_SCHOOL_JOURNAL_CATEGORIES.find((category) => category.id === categoryId);
@@ -337,4 +374,18 @@ export function getPriorityInternationalJournals(categoryId: string | undefined)
   const category = getBusinessSchoolJournalCategory(categoryId);
   if (!category) return [];
   return [...category.internationalS, ...category.internationalA1];
+}
+
+function getRankMatch(
+  journals: readonly string[],
+  normalized: string,
+  normalizedSingular: string,
+  rank: BusinessSchoolJournalRank,
+  rankLabel: string
+): Pick<BusinessSchoolJournalMatch, "rank" | "rankLabel"> | undefined {
+  const matches = journals.some((journal) => {
+    const normalizedJournal = normalizeJournalName(journal);
+    return normalizedJournal === normalized || normalizedJournal === normalizedSingular;
+  });
+  return matches ? { rank, rankLabel } : undefined;
 }

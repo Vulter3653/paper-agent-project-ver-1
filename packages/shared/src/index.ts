@@ -3,10 +3,13 @@ export {
   BUSINESS_SCHOOL_JOURNAL_CATEGORIES,
   BUSINESS_SCHOOL_JOURNAL_CATEGORY_OPTIONS,
   getBusinessSchoolJournalCategory,
+  getBusinessSchoolJournalMatch,
   getPriorityInternationalJournals,
   isBusinessSchoolJournal,
   normalizeJournalName,
-  type BusinessSchoolJournalCategory
+  type BusinessSchoolJournalCategory,
+  type BusinessSchoolJournalMatch,
+  type BusinessSchoolJournalRank
 } from "./businessSchoolJournals";
 
 export type SearchJobStatus =
@@ -40,6 +43,8 @@ export type PaperSummary = {
   authors: string;
   year: number;
   journalName: string;
+  journalField?: string;
+  journalRank?: string;
   doi: string;
   oaStatus: "oa" | "closed" | "unknown";
   citedByCount?: number;

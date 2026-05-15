@@ -2,6 +2,7 @@ import {
   BUSINESS_SCHOOL_JOURNALS,
   calculateFinalScore,
   getBusinessSchoolJournalCategory,
+  getBusinessSchoolJournalMatch,
   isBusinessSchoolJournal,
   normalizeJournalName,
   type PaperSummary,
@@ -1672,6 +1673,7 @@ function mapSearchJob(row: SearchJobRow): SearchJob {
 }
 
 function mapPaperSummary(row: PaperSummaryRow): PaperSummary {
+  const journalMatch = getBusinessSchoolJournalMatch(row.journal_name);
   return {
     id: row.id,
     rank: row.rank,
@@ -1679,6 +1681,8 @@ function mapPaperSummary(row: PaperSummaryRow): PaperSummary {
     authors: row.authors,
     year: row.year,
     journalName: row.journal_name,
+    journalField: journalMatch?.categoryLabel,
+    journalRank: journalMatch?.rankLabel,
     doi: row.doi,
     oaStatus: row.oa_status,
     citedByCount: row.cited_by_count ?? 0,
@@ -1790,6 +1794,8 @@ function getCsvBody(result: SearchResult): string {
     "authors",
     "year",
     "journal_name",
+    "journal_field",
+    "journal_rank",
     "doi",
     "oa_status",
     "publisher",
@@ -1824,6 +1830,8 @@ function getCsvBody(result: SearchResult): string {
     paper.authors,
     paper.year,
     paper.journalName,
+    paper.journalField ?? "",
+    paper.journalRank ?? "",
     paper.doi,
     paper.oaStatus,
     paper.publisher ?? "",
@@ -1921,14 +1929,16 @@ function getMarkdownReportBody(result: SearchResult): string {
     "",
     "## Top Ranked Table",
     "",
-    "| Rank | Title | Year | Journal | Final | Include | DOI | OA PDF |",
-    "| --- | --- | --- | --- | ---: | --- | --- | --- |",
+    "| Rank | Title | Year | Journal | Field | Rank Class | Final | Include | DOI | OA PDF |",
+    "| --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- |",
     ...result.papers.map((paper) =>
       [
         paper.rank,
         escapeMarkdownTableCell(paper.title),
         paper.year || "Unknown",
         escapeMarkdownTableCell(paper.journalName),
+        escapeMarkdownTableCell(paper.journalField ?? "Unmatched"),
+        escapeMarkdownTableCell(paper.journalRank ?? "Unmatched"),
         formatReportScore(paper.finalScore),
         paper.includeStatus,
         paper.doi ? escapeMarkdownTableCell(paper.doi) : "Not available",
@@ -1951,6 +1961,7 @@ function getMarkdownReportBody(result: SearchResult): string {
       `- Authors: ${paper.authors}`,
       `- Year: ${paper.year || "Unknown"}`,
       `- Journal: ${paper.journalName}`,
+      `- Field / rank: ${[paper.journalField, paper.journalRank].filter(Boolean).join(" / ") || "Unmatched"}`,
       `- DOI: ${paper.doi || "Not available"}`,
       `- Open access: ${paper.oaStatus}`,
       `- Final score: ${paper.finalScore.toFixed(3)}`,

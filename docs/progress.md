@@ -70,7 +70,8 @@ Current next implementation target:
 22. Keyword decomposition and source-title-aware WoS retrieval are implemented locally; after Cloudflare deploy, verify `sourceResultCount` and `allowedResultCount` improve for low-result queries.
 23. `CHANGELOG.md` is now organized by modification date. Continue moving completed entries from `Unreleased` into the current `YYYY-MM-DD` section before each commit.
 24. Journal category selection from `경영대학 학술지 목록.docx` is deployed and user-confirmed as working. Use this as the baseline for the next UI/reporting step.
-25. Next recommended implementation: display each result's matched field/rank on the dashboard and in report output, for example `2. 조직인사 / 국제 S급` or `2. 조직인사 / 국제 A1급`.
+25. Result `Field / Rank` visibility is implemented locally. After Cloudflare deploy, verify dashboard rows/details plus CSV and Markdown report downloads show values such as `2. 조직인사 / 국제 S급`.
+26. Next recommended implementation: add a search settings summary bar that records keyword, selected field, priority order, year range, and max count for each active job.
 
 ## Current Status
 
@@ -108,6 +109,7 @@ The latest confirmed behavior is normal:
 - The `경영대학 학술지 목록.docx` numbered field groups are now represented as shared category metadata with `국제 S급`, `국제 A1급`, and `국내 A급` lists.
 - Dashboard search options now include a `Field` selector. When selected, the Worker prioritizes that field's `국제 S급` WoS source-title query first, then `국제 A1급`, and filters saved papers to that selected field.
 - Deployed journal category selection was user-confirmed as normally working after the `eb2dbe3` push.
+- Result `Field / Rank` metadata is now derived from stored journal names and displayed in dashboard rows, paper details, CSV exports, and Markdown reports without a D1 schema migration.
 
 ## Repository And Deployment Targets
 
@@ -157,6 +159,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - Dashboard layout uses a command header, compact status band, operations grid, main ranked-paper workspace, side detail panel, and recent job list.
 - Dashboard command header includes search option controls for result count and optional year range.
 - Dashboard command header includes a journal field selector sourced from the shared business school journal category list.
+- Ranked paper rows and paper detail show matched journal `Field / Rank` values.
 - Paper Detail panel shows Score Breakdown for relevance, journal fit, Crossref verification, open access, citations, and recency.
 - System Checks panel calls `GET /api/diagnostics` to display D1 schema readiness and Worker environment variable presence.
 - Report Preview panel fetches `GET /api/search-jobs/:id/report.md` for completed jobs and displays the Markdown report in the dashboard before download.
@@ -195,6 +198,7 @@ Local manual Cloudflare deployment is not used. Deployment should happen in Clou
 - Recent search job listing from D1.
 - CSV generation from persisted D1 results, with R2 storage under `reports/<job_id>/papers.csv` when available.
 - Markdown report generation from persisted D1 results, with R2 storage under `reports/<job_id>/report.md` when available.
+- CSV and Markdown report output include matched journal field/rank values derived from the shared business school journal metadata.
 - Report Agent Markdown sections for key findings, common themes, method/context differences, research gaps, suggested reading order, screening notes, and limitations.
 - CSV and Markdown download endpoints serve the R2 object first and fall back to direct generation if no object exists.
 - Crossref DOI lookup after Web of Science search.

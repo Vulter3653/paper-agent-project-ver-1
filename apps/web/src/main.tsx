@@ -68,6 +68,8 @@ const demoPapers: PaperSummary[] = [
     authors: "Kim, Lee, Park",
     year: 2025,
     journalName: "Information Systems Research",
+    journalField: "6. 경영정보",
+    journalRank: "국제 S급",
     doi: "10.0000/demo.1",
     oaStatus: "unknown",
     citedByCount: 42,
@@ -83,6 +85,8 @@ const demoPapers: PaperSummary[] = [
     authors: "Choi, Han",
     year: 2024,
     journalName: "Information Systems Review",
+    journalField: "6. 경영정보",
+    journalRank: "국내 A급",
     doi: "10.0000/demo.2",
     oaStatus: "oa",
     citedByCount: 128,
@@ -374,6 +378,7 @@ function App() {
                     <th>Rank</th>
                     <th>Title</th>
                     <th>Journal</th>
+                    <th>Field / Rank</th>
                     <th>Year</th>
                     <th>Status</th>
                     <th>OA</th>
@@ -392,6 +397,9 @@ function App() {
                           <small>{paper.authors}</small>
                         </td>
                         <td>{paper.journalName}</td>
+                        <td>
+                          <JournalRankBadge paper={paper} />
+                        </td>
                         <td>{paper.year || "-"}</td>
                         <td>
                           <StatusBadge value={paper.includeStatus} tone={getIncludeTone(paper.includeStatus)} />
@@ -404,7 +412,7 @@ function App() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="emptyCell">
+                      <td colSpan={8} className="emptyCell">
                         No allowed journal results.
                       </td>
                     </tr>
@@ -456,6 +464,10 @@ function PaperDetailPanel({ selected }: { selected?: PaperSummary }) {
             <dd>{selected.authors}</dd>
             <dt>DOI</dt>
             <dd>{selected.doi || "Not available"}</dd>
+            <dt>Field / Rank</dt>
+            <dd>
+              <JournalRankBadge paper={selected} />
+            </dd>
             <dt>Verification</dt>
             <dd>{selected.verificationStatus ?? "unverified"} · {selected.verificationReason ?? "No verification recorded."}</dd>
             <dt>Open Access</dt>
@@ -482,6 +494,15 @@ function PaperDetailPanel({ selected }: { selected?: PaperSummary }) {
         <p className="emptyState">No allowed journal result selected.</p>
       )}
     </section>
+  );
+}
+
+function JournalRankBadge({ paper }: { paper: PaperSummary }) {
+  return (
+    <span className="journalRankBadge">
+      <strong>{paper.journalField ?? "Unmatched"}</strong>
+      <small>{paper.journalRank ?? "No rank"}</small>
+    </span>
   );
 }
 

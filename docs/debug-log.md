@@ -2,6 +2,38 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-15 - Result Field And Rank Visibility
+
+### Context
+
+After the selected-field search workflow was confirmed, the next dashboard UX priority was result transparency. Reviewers need to see why an allowlisted result is accepted, specifically which `경영대학 학술지 목록.docx` field and rank class matched the journal.
+
+### Code Changes Under Test
+
+- Added shared journal matching helpers that map a journal name to:
+  - category label, for example `2. 조직인사`
+  - rank label, for example `국제 S급` or `국제 A1급`
+- Extended `PaperSummary` with optional `journalField` and `journalRank`.
+- Worker API row mapping now derives `journalField` and `journalRank` from persisted `journal_name`, so older D1 rows can display the new metadata without a schema migration.
+- Dashboard ranked-paper table now includes a `Field / Rank` column.
+- Paper detail now includes `Field / Rank`.
+- CSV export now includes `journal_field` and `journal_rank`.
+- Markdown report top table and ranked-paper detail sections now include Field/Rank.
+
+### Verification Commands
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run --config apps/worker/wrangler.toml
+```
+
+All passed locally.
+
+### Runtime Check
+
+After Cloudflare deploys the commit, open a completed job in the dashboard and confirm each paper row shows `Field / Rank`. Then download CSV and Markdown report for the same job and confirm the field/rank values are present.
+
 ## 2026-05-15 - Journal Category Selector And Ranked Source Priority
 
 ### Context

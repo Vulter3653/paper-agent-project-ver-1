@@ -598,7 +598,7 @@ h2 {
 
 table {
   border-collapse: collapse;
-  min-width: 860px;
+  min-width: 980px;
   width: 100%;
 }
 
@@ -643,6 +643,27 @@ tbody tr.selected {
 .scorePill {
   background: #eaf4ff;
   color: #1d5fd1;
+}
+
+.journalRankBadge {
+  align-items: flex-start;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  line-height: 1.2;
+  min-width: 92px;
+}
+
+.journalRankBadge strong {
+  color: #1d2b3a;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.journalRankBadge small {
+  color: #607080;
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .paperTitleCell {
