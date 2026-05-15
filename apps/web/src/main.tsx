@@ -33,6 +33,7 @@ type DiagnosticsResponse = {
   };
   env: {
     wosApiKey: boolean;
+    wosApiKeySource: string | null;
     openAlexEmail: boolean;
     openAlexApiKey: boolean;
     crossrefEmail: boolean;
@@ -397,7 +398,7 @@ function DiagnosticsPanel({
   const envItems = diagnostics
     ? [
         ["Active provider", diagnostics.readiness.activeProviderReady],
-        ["WoS API key", diagnostics.env.wosApiKey],
+        [`WoS API key${diagnostics.env.wosApiKeySource ? ` (${diagnostics.env.wosApiKeySource})` : ""}`, diagnostics.env.wosApiKey],
         ["OpenAlex email", diagnostics.env.openAlexEmail],
         ["OpenAlex API key", diagnostics.env.openAlexApiKey],
         ["Crossref email", diagnostics.env.crossrefEmail],

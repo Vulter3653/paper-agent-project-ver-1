@@ -40,6 +40,7 @@ Current next implementation target:
 2. After WoS approval, change `SEARCH_PROVIDER=wos` and copy the issued API key into the Cloudflare Worker variables/secrets as `WOS_API_KEY`.
 3. Wait for Cloudflare to deploy the next `main` commit.
 4. Open `/api/diagnostics` and confirm `searchProvider`, provider readiness, D1 schema, Crossref, Unpaywall, and R2 report binding status.
+   - For WoS, confirm `env.wosApiKey: true` and `env.wosApiKeySource` is not `null`.
 5. Open the dashboard and confirm the System Checks panel reports the active provider and provider readiness.
 6. Click `Run` and confirm the Pipeline Progress panel advances through source search, journal filtering, Crossref, Unpaywall, ranking, and completion.
 7. Confirm D1 `papers.openalex_id` stores the external source identifier. The column name is retained for schema compatibility.
@@ -76,6 +77,7 @@ The latest confirmed behavior is normal:
 - D1 Console no longer returns empty results after a successful run.
 - Deployed `/api/diagnostics` confirms provider readiness, Crossref, Unpaywall, and R2 status; `wosApiKey` remains `false` until Clarivate approval is complete.
 - Dashboard Report Preview is visible and displays the Markdown report for completed jobs.
+- WoS API key debugging has been added: diagnostics now reports `env.wosApiKeySource` so the next runtime check can tell whether `WOS_API_KEY` or a supported alias is actually attached to the Worker.
 
 ## Repository And Deployment Targets
 

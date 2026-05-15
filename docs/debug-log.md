@@ -2,6 +2,89 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-15 - WoS API Key Runtime Diagnostics
+
+### Context
+
+The user reported that the WoS API key was registered in Cloudflare, but deployed diagnostics still returned:
+
+```json
+{
+  "searchProvider": "wos",
+  "env": {
+    "wosApiKey": false
+  },
+  "readiness": {
+    "activeProviderReady": false
+  }
+}
+```
+
+### Investigation
+
+- Confirmed deployed Worker sees `SEARCH_PROVIDER=wos`.
+- Confirmed deployed Worker still does not see `WOS_API_KEY`.
+- Confirmed code was reading exactly `env.WOS_API_KEY`.
+- Attempted `wrangler secret list`, but this local shell does not have `CLOUDFLARE_API_TOKEN`, so remote secret names could not be listed from the terminal.
+
+### Code Changes Under Test
+
+Added safe WoS API key source detection without exposing secret values.
+
+Accepted runtime aliases:
+
+```text
+WOS_API_KEY
+WOS_APIKEY
+WOS_STARTER_API_KEY
+CLARIVATE_API_KEY
+WEB_OF_SCIENCE_API_KEY
+```
+
+Diagnostics now returns:
+
+```text
+env.wosApiKey
+env.wosApiKeySource
+```
+
+The dashboard System Checks panel also shows the detected source name when present.
+
+### Verification Commands
+
+```bash
+npm run typecheck
+npm run build
+npx wrangler deploy --dry-run --config apps/worker/wrangler.toml
+```
+
+All passed.
+
+### Next Runtime Check
+
+After Cloudflare deploys this commit, open:
+
+```text
+https://paper-agent-project.shch3653.workers.dev/api/diagnostics
+```
+
+Expected if any supported key name is present:
+
+```json
+{
+  "searchProvider": "wos",
+  "env": {
+    "wosApiKey": true,
+    "wosApiKeySource": "WOS_API_KEY"
+  },
+  "readiness": {
+    "activeProviderReady": true
+  }
+}
+```
+
+If `wosApiKeySource` remains `null`, the key is not attached to the production `paper-agent-project` Worker runtime, even if it appears elsewhere in Cloudflare.
+
 ## 2026-05-14 - Dashboard Report Preview
 
 ### Context

@@ -5,6 +5,10 @@ export interface Env {
   REPORTS?: R2Bucket;
   SEARCH_PROVIDER?: string;
   WOS_API_KEY?: string;
+  WOS_APIKEY?: string;
+  WOS_STARTER_API_KEY?: string;
+  CLARIVATE_API_KEY?: string;
+  WEB_OF_SCIENCE_API_KEY?: string;
   OPENALEX_EMAIL?: string;
   OPENALEX_API_KEY?: string;
   CROSSREF_EMAIL?: string;
@@ -36,6 +40,7 @@ type DiagnosticsResponse = {
   };
   env: {
     wosApiKey: boolean;
+    wosApiKeySource: string | null;
     openAlexEmail: boolean;
     openAlexApiKey: boolean;
     crossrefEmail: boolean;
@@ -267,7 +272,7 @@ export default {
         ctx.waitUntil(
           processSearchJob(env.DB, job, keyword, {
             searchProvider,
-            wosApiKey: env.WOS_API_KEY,
+            wosApiKey: getWosApiKey(env).value,
             openAlexEmail: env.OPENALEX_EMAIL,
             openAlexApiKey: env.OPENALEX_API_KEY,
             crossrefEmail: env.CROSSREF_EMAIL ?? env.UNPAYWALL_EMAIL,
@@ -357,6 +362,21 @@ function normalizeListLimit(limit: string | null): number {
 
 function normalizeSearchProvider(value: string | undefined): SearchProvider {
   return value?.toLowerCase() === "openalex" ? "openalex" : "wos";
+}
+
+function getWosApiKey(env: Env): { value: string | undefined; source: string | null } {
+  const candidates: Array<[string, string | undefined]> = [
+    ["WOS_API_KEY", env.WOS_API_KEY],
+    ["WOS_APIKEY", env.WOS_APIKEY],
+    ["WOS_STARTER_API_KEY", env.WOS_STARTER_API_KEY],
+    ["CLARIVATE_API_KEY", env.CLARIVATE_API_KEY],
+    ["WEB_OF_SCIENCE_API_KEY", env.WEB_OF_SCIENCE_API_KEY]
+  ];
+  const match = candidates.find(([, value]) => Boolean(value?.trim()));
+  return {
+    value: match?.[1],
+    source: match?.[0] ?? null
+  };
 }
 
 function getSearchStepId(searchProvider: SearchProvider): string {
@@ -518,7 +538,8 @@ async function ensureColumn(db: D1Database, tableName: string, columnName: strin
 async function getDiagnostics(env: Env): Promise<DiagnosticsResponse> {
   const missingColumns = env.DB ? await getMissingColumns(env.DB) : [];
   const searchProvider = normalizeSearchProvider(env.SEARCH_PROVIDER);
-  const activeProviderReady = searchProvider === "openalex" ? Boolean(env.OPENALEX_EMAIL) : Boolean(env.WOS_API_KEY);
+  const wosApiKey = getWosApiKey(env);
+  const activeProviderReady = searchProvider === "openalex" ? Boolean(env.OPENALEX_EMAIL) : Boolean(wosApiKey.value);
   return {
     ok: Boolean(env.DB) && missingColumns.length === 0 && activeProviderReady,
     searchProvider,
@@ -527,7 +548,8 @@ async function getDiagnostics(env: Env): Promise<DiagnosticsResponse> {
       missingColumns
     },
     env: {
-      wosApiKey: Boolean(env.WOS_API_KEY),
+      wosApiKey: Boolean(wosApiKey.value),
+      wosApiKeySource: wosApiKey.source,
       openAlexEmail: Boolean(env.OPENALEX_EMAIL),
       openAlexApiKey: Boolean(env.OPENALEX_API_KEY),
       crossrefEmail: Boolean(env.CROSSREF_EMAIL),

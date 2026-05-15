@@ -15,6 +15,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Changed`: Added WoS API key alias detection and diagnostics source reporting in `apps/worker/src/index.ts` and `apps/web/src/main.tsx` to debug Cloudflare secret naming issues without exposing secret values.
+- `Docs`: Recorded WoS secret diagnostics debugging in `docs/debug-log.md` and `docs/progress.md`.
 - `Docs`: Updated `docs/progress.md` and `docs/debug-log.md` with the confirmed dashboard report preview status and the next XLSX/PDF output implementation plan.
 - `Added`: Added dashboard Markdown report preview in `apps/web/src/main.tsx` and `apps/web/src/styles.css` so completed job reports can be inspected before download.
 - `Docs`: Recorded dashboard report preview work in `docs/debug-log.md` and `docs/progress.md`.
