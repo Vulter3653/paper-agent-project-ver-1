@@ -15,6 +15,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
+- `Changed`: Updated the dashboard `Max` search option in `apps/web/src/main.tsx` and `apps/web/src/styles.css` to allow numeric typing while enforcing the 1-50 limit on blur and request payload creation.
 - `Added`: Added dashboard search option controls for max results, start year, and end year in `apps/web/src/main.tsx` and `apps/web/src/styles.css`, wiring them into `POST /api/search-jobs`.
 - `Docs`: Recorded search option UI work and verification in `docs/debug-log.md` and `docs/progress.md`.
 - `Docs`: Added deployed runtime confirmation for the dashboard Run failure fix in `docs/debug-log.md` and `docs/progress.md`.

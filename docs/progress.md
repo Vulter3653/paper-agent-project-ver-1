@@ -98,6 +98,7 @@ The latest confirmed behavior is normal:
 - Latest dashboard `Run` failure was traced to WoS `limit=100` from dashboard `maxResults=20`; Worker code now caps WoS candidate requests at the Starter API maximum of 50.
 - Runtime confirmation job `job-6639c061-9c43-43bf-bbc7-063de355f974` completed with `sourceResultCount=2` and `allowedResultCount=0`, confirming the WoS 400 failure is resolved.
 - Dashboard search options now expose `Max`, `From`, and `To` fields and send them to the existing Worker search API.
+- Dashboard `Max` accepts typed numeric input and enforces the 1-50 limit before the search request is sent.
 
 ## Repository And Deployment Targets
 

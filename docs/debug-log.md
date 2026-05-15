@@ -17,7 +17,7 @@ This made it hard to test broader WoS queries or adjust candidate volume from th
 ### Code Changes Under Test
 
 - Added `Max`, `From`, and `To` controls to the dashboard command area.
-- `Max` is clamped to the Worker-supported range of 1-50.
+- `Max` accepts numeric typing and is clamped to the Worker-supported range of 1-50 on blur and when creating the request payload.
 - `From` and `To` are optional year fields.
 - Empty year fields are omitted from the request payload.
 - `Run` now sends `keyword`, `maxResults`, and optional `yearStart`/`yearEnd` from UI state instead of hard-coded values.
@@ -30,6 +30,10 @@ npm run build
 ```
 
 Both passed.
+
+### Follow-Up Adjustment
+
+The `Max` input now keeps its local value as a string so users can type naturally. Invalid, empty, or out-of-range values are normalized to the 1-50 range before `POST /api/search-jobs`.
 
 ## 2026-05-15 - Dashboard Run Failed At WoS Search
 

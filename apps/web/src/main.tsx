@@ -100,7 +100,7 @@ const demoPapers: PaperSummary[] = [
 
 function App() {
   const [keyword, setKeyword] = useState("AI interview employer branding");
-  const [maxResults, setMaxResults] = useState(20);
+  const [maxResults, setMaxResults] = useState("20");
   const [yearStart, setYearStart] = useState("2020");
   const [yearEnd, setYearEnd] = useState("");
   const [job, setJob] = useState<SearchJob | null>(null);
@@ -272,14 +272,17 @@ function App() {
           </div>
           <div className="searchOptions" aria-label="Search options">
             <label>
-              <span>Max</span>
+              <span>Max 1-50</span>
               <input
                 type="number"
                 min={1}
                 max={50}
                 step={1}
+                inputMode="numeric"
                 value={maxResults}
-                onChange={(event) => setMaxResults(clampNumber(event.target.valueAsNumber, 1, 50, 20))}
+                onChange={(event) => setMaxResults(event.target.value)}
+                onBlur={() => setMaxResults(String(parseLimitedMaxResults(maxResults)))}
+                placeholder="20"
                 aria-label="Maximum results"
               />
             </label>
@@ -760,16 +763,21 @@ function formatDateTime(value: string): string {
   return date.toLocaleString();
 }
 
-function buildSearchPayload(keyword: string, maxResults: number, yearStart: string, yearEnd: string) {
+function buildSearchPayload(keyword: string, maxResults: string, yearStart: string, yearEnd: string) {
   const payload: { keyword: string; maxResults: number; yearStart?: number; yearEnd?: number } = {
     keyword: keyword.trim(),
-    maxResults: clampNumber(maxResults, 1, 50, 20)
+    maxResults: parseLimitedMaxResults(maxResults)
   };
   const start = parseOptionalYear(yearStart);
   const end = parseOptionalYear(yearEnd);
   if (start) payload.yearStart = start;
   if (end) payload.yearEnd = end;
   return payload;
+}
+
+function parseLimitedMaxResults(value: string): number {
+  const parsed = Number.parseInt(value.trim(), 10);
+  return clampNumber(parsed, 1, 50, 20);
 }
 
 function parseOptionalYear(value: string): number | undefined {

@@ -154,6 +154,7 @@ h1 {
   flex: 0 0 auto;
   font-size: 12px;
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .searchOptions input {
