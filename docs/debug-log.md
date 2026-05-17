@@ -2,6 +2,45 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-17 - Benchmark Gold Crossref Verification Pass
+
+### Context
+
+After initializing 20 benchmark tasks and 60 seed gold relevance rows, the next required benchmark step was to stop relying on title-level labels and begin DOI verification through Crossref.
+
+### Code Changes Under Test
+
+- Added `benchmark/scripts/verify-gold-crossref.mjs`.
+- Added root npm script `benchmark:verify-gold`.
+- Generated `benchmark/gold_relevant_papers.verified.csv`.
+
+The script:
+
+- reads `benchmark/gold_relevant_papers.csv`
+- queries Crossref by title
+- chooses a candidate by title similarity and year proximity
+- writes `verified`, `ambiguous`, `no_match`, or `lookup_failed`
+- preserves rows without inventing DOI values
+
+### Verification Commands
+
+```bash
+npm run benchmark:verify-gold -- --limit 0 --output /tmp/gold_verified_limit0.csv
+npm run benchmark:verify-gold -- --limit 5 --output /tmp/gold_verified_sample.csv --delay-ms 250
+npm run benchmark:verify-gold -- --output benchmark/gold_relevant_papers.verified.csv
+node -e "const fs=require('fs'); const rows=fs.readFileSync('benchmark/gold_relevant_papers.verified.csv','utf8').trim().split(/\n/).slice(1); const counts={}; for(const row of rows){ const cols=[]; let cur='',q=false; for(let i=0;i<row.length;i++){const ch=row[i]; if(ch==='\"'&&row[i+1]==='\"'){cur+='\"';i++;} else if(ch==='\"') q=!q; else if(ch===','&&!q){cols.push(cur);cur='';} else cur+=ch;} cols.push(cur); const status=cols[9]; counts[status]=(counts[status]||0)+1;} console.log(JSON.stringify(counts));"
+```
+
+Results:
+
+```json
+{"ambiguous":17,"verified":6,"no_match":37}
+```
+
+### Finding
+
+Crossref access and CSV generation are working. The low verified count means the first seed gold titles are too broad for final DOI-accuracy scoring. The next benchmark step should refine ambiguous/no-match rows with exact paper titles from WoS or Crossref before running baseline comparisons.
+
 ## 2026-05-17 - Benchmark Fixture Expansion
 
 ### Context

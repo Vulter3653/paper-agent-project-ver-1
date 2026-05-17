@@ -79,10 +79,15 @@ Current next implementation target:
     - `benchmark/gold_relevant_papers.csv` contains 60 seed gold relevance rows.
     - `benchmark/evaluation_rubric.md` defines human scoring and agent-level checks.
     - `benchmark/benchmark_summary.md` records the current benchmark status.
-28. Next benchmark step: verify seed gold rows through Crossref and create `benchmark/gold_relevant_papers.verified.csv` before computing DOI Accuracy.
-29. After DOI verification, compare rule-based, single-LLM, and proposed-agent outputs.
-30. After benchmark scaffolding, implement Critic Agent and `agent_traces`, then XLSX output, then PDF output.
-31. Next dashboard integration target: replace static mock data in `apps/web/src/dashboard/mockData.ts` with real API responses while preserving the current route/component contracts.
+28. First Crossref title-query verification pass is complete.
+    - Script: `benchmark/scripts/verify-gold-crossref.mjs`
+    - Command: `npm run benchmark:verify-gold`
+    - Output: `benchmark/gold_relevant_papers.verified.csv`
+    - Result distribution: `verified=6`, `ambiguous=17`, `no_match=37`
+29. Next benchmark step: refine ambiguous/no-match gold rows with exact paper titles and approved-journal targets, then rerun `npm run benchmark:verify-gold`.
+30. After enough DOI labels are verified, compare rule-based, single-LLM, and proposed-agent outputs.
+31. After benchmark scaffolding, implement Critic Agent and `agent_traces`, then XLSX output, then PDF output.
+32. Next dashboard integration target: replace static mock data in `apps/web/src/dashboard/mockData.ts` with real API responses while preserving the current route/component contracts.
 
 ## Current Status
 
@@ -137,6 +142,7 @@ The latest confirmed behavior is normal:
   - Human and agent-level scoring rules in `benchmark/evaluation_rubric.md`.
   - Current status and next steps in `benchmark/benchmark_summary.md`.
 - The benchmark gold file intentionally tracks DOI values as `needs_crossref_verification` rather than storing unverified DOI strings. Crossref verification is the next required benchmark task.
+- A first Crossref verification pass has generated `benchmark/gold_relevant_papers.verified.csv`. The result distribution is `verified=6`, `ambiguous=17`, and `no_match=37`, so the gold set needs exact-title refinement before baseline scoring.
 
 ## Agent Work Attribution
 
