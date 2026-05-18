@@ -1,6 +1,16 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-18
+Updated: 2026-05-18 (shonshinemin benchmark QA re-evaluation)
+
+## shonshinemin — Benchmark QA Re-evaluation (2026-05-18)
+
+- Filled: `benchmark/manual_review_proposed.csv` — 15 papers reviewed across T001-T003. (shonshinemin)
+- Promoted: T003 rank-1 paper added as G061 to `benchmark/gold_relevant_papers.verified.csv`. (shonshinemin)
+- Updated: `benchmark/proposed_agent_metrics.csv` and `benchmark/proposed_agent_metrics_summary.json` post gold update. (shonshinemin)
+- Key metric change: `precision_at_k` 0.0000 → 0.0667, `ndcg_at_k` 0.0000 → 0.1601, `gold_doi_hit_rate_at_k` 0.0000 → 0.3333. Stable: doi_accuracy=1.0, paper_validity=1.0, top_journal_precision=1.0. (shonshinemin)
+- Added: `shonshinemin_cmd/metric-change-report.md` — full delta analysis and QA recommendations. (shonshinemin)
+- Added: `shonshinemin_cmd/qa-notes.md` — QA workflow, scope, and re-run instructions. (shonshinemin)
+- See: `docs/debug-log.md` §2026-05-18 Metric QA Re-evaluation for raw numbers and reviewer notes.
 
 ## Mandatory Session Handoff Rules
 
@@ -139,6 +149,16 @@ Current next implementation target:
     - Benchmark: Filled all 15 T001-T003 rows in `benchmark/manual_review_proposed.csv` with `manual_relevance`, `manual_decision`, `failure_type`, `review_note`, and `reviewer`. (juilie)
     - Docs: Reflected `paper_agent_enhanced_report.pdf` section 8 as the Paper-Agent-Bench evaluation basis in `juilie_bot_hub/README.md`. (juilie)
     - Verification: Local PDF text extraction with `pdfjs-dist` confirmed section 8 covers REPRO-Bench-style Agent-level evaluation, human relevance labels, Precision@5/NDCG@5, DOI accuracy, top-journal precision, hallucination checks, and report completeness. (juilie)
+43. Repository secret exposure audit completed before continuing organization-repository work.
+    - Current tracked files, full Git history, and local workspace were checked for GitHub PAT, Cloudflare `cfut_`, the previously shared OpenAlex key, private key, AWS, npm, and Slack token patterns.
+    - No actual token values were found in repository files or history.
+    - Only `.env.example` is tracked as an env-style file.
+    - Secret-related documentation matches are placeholders or variable names.
+    - Any token pasted into external chat should remain revoked/rotated because the repository audit cannot remove external exposure.
+44. Cloudflare organization repository migration settings are documented.
+    - Use `docs/cloudflare-org-repo-migration.md` to reconnect Worker Builds and Pages builds from `Vulter3653/paper-agent-project` to `mon-ai-team-project/team_project_test_public`.
+    - No D1, R2, Worker name, Pages project name, or runtime secret change is required.
+    - Actual Cloudflare dashboard Git connection changes still require Cloudflare account access.
 
 ## Current Status
 
