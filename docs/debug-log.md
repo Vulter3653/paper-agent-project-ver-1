@@ -2,6 +2,49 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-18 - Repository Secret Exposure Audit
+
+### Context
+
+Before switching the team workflow to the organization repository, the user asked whether security issues from the earlier personal repository work could affect the project.
+
+### Scope
+
+Checked:
+
+- Current tracked files.
+- Full Git history from `git rev-list --all`.
+- Local workspace, including untracked reference files, excluding `.git`, `node_modules`, `dist`, and `.wrangler`.
+
+Patterns checked:
+
+- GitHub fine-grained and classic token prefixes.
+- Cloudflare `cfut_` token prefix.
+- Previously shared OpenAlex key value.
+- Private key blocks.
+- AWS access key prefix.
+- npm token prefix.
+- Slack token prefix.
+- Common secret variable assignments, reviewed as redacted output.
+
+### Findings
+
+- No `github_pat_` token was found in tracked files, Git history, or local workspace.
+- No classic GitHub token prefix was found in tracked files, Git history, or local workspace.
+- No Cloudflare `cfut_` token prefix was found in tracked files, Git history, or local workspace.
+- The previously shared OpenAlex key value was not found in tracked files, Git history, or local workspace.
+- No private key, AWS, npm, or Slack token pattern was found in Git history.
+- The only tracked `.env`-style file is `.env.example`.
+- Secret-related matches in `README.md`, `docs/debug-log.md`, and `docs/progress.md` are variable names or placeholders such as `<Clarivate issued key>`, `<optional>`, or redacted example syntax.
+
+### Residual Risk
+
+The repository audit does not cover secrets pasted into external chat history or GitHub/Cloudflare web UIs. Any token pasted into chat should remain revoked/rotated even though it was not found in the repository.
+
+### Resolution
+
+No repository history rewrite is required based on this audit. Continue using organization-repository branches and PRs, and keep real credentials only in GitHub/Cloudflare secret stores.
+
 ## 2026-05-18 - Team Agent Auto-Start Guidance Verification
 
 ### Context

@@ -135,6 +135,12 @@ Current next implementation target:
     - `jin23624_cpu/`, `juilie_bot_hub/`, `seunghyeon_choi/`, `shonshinemin_cmd/`, and `integrated/` each contain a role-specific README.
     - Benchmark collaboration templates are initialized: `benchmark/manual_review_proposed.csv`, `benchmark/baseline_rule_based_results.csv`, and `benchmark/baseline_single_llm_results.csv`.
     - `.github/pull_request_template.md` now asks contributors to confirm `AGENTS.md`, assignment scope, and benchmark verification.
+42. Repository secret exposure audit completed before continuing organization-repository work.
+    - Current tracked files, full Git history, and local workspace were checked for GitHub PAT, Cloudflare `cfut_`, the previously shared OpenAlex key, private key, AWS, npm, and Slack token patterns.
+    - No actual token values were found in repository files or history.
+    - Only `.env.example` is tracked as an env-style file.
+    - Secret-related documentation matches are placeholders or variable names.
+    - Any token pasted into external chat should remain revoked/rotated because the repository audit cannot remove external exposure.
 
 ## Current Status
 
