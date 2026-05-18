@@ -1,6 +1,16 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-18
+Updated: 2026-05-18 (shonshinemin benchmark QA re-evaluation)
+
+## shonshinemin — Benchmark QA Re-evaluation (2026-05-18)
+
+- Filled: `benchmark/manual_review_proposed.csv` — 15 papers reviewed across T001-T003. (shonshinemin)
+- Promoted: T003 rank-1 paper added as G061 to `benchmark/gold_relevant_papers.verified.csv`. (shonshinemin)
+- Updated: `benchmark/proposed_agent_metrics.csv` and `benchmark/proposed_agent_metrics_summary.json` post gold update. (shonshinemin)
+- Key metric change: `precision_at_k` 0.0000 → 0.0667, `ndcg_at_k` 0.0000 → 0.1601, `gold_doi_hit_rate_at_k` 0.0000 → 0.3333. Stable: doi_accuracy=1.0, paper_validity=1.0, top_journal_precision=1.0. (shonshinemin)
+- Added: `shonshinemin_cmd/metric-change-report.md` — full delta analysis and QA recommendations. (shonshinemin)
+- Added: `shonshinemin_cmd/qa-notes.md` — QA workflow, scope, and re-run instructions. (shonshinemin)
+- See: `docs/debug-log.md` §2026-05-18 Metric QA Re-evaluation for raw numbers and reviewer notes.
 
 ## Mandatory Session Handoff Rules
 

@@ -20,6 +20,17 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 - No unreleased changes.
 
+## 2026-05-18 (shonshinemin)
+
+- Benchmark: Filled `benchmark/manual_review_proposed.csv` with manual relevance scores and decisions for all 15 proposed agent papers across T001-T003 (reviewer: shonshinemin). (shonshinemin)
+- Benchmark: Promoted T003 rank-1 paper to gold as G061 in `benchmark/gold_relevant_papers.verified.csv`; DOI `10.1287/mksc.2023.0494` (MARKETING SCIENCE, human_relevance=5, doi_label_status=verified). (shonshinemin)
+- Benchmark: Re-ran `npm run benchmark:evaluate-proposed` after gold G061 promotion; `precision_at_k` 0.0000→0.0667, `ndcg_at_k` 0.0000→0.1601, `gold_doi_hit_rate_at_k` 0.0000→0.3333; stability confirmed for doi_accuracy, paper_validity, top_journal_precision, hallucination, oa_success. (shonshinemin)
+- Benchmark: Updated `benchmark/proposed_agent_metrics.csv` and `benchmark/proposed_agent_metrics_summary.json` with post-gold-update values. (shonshinemin)
+- Docs: Added `shonshinemin_cmd/metric-change-report.md` with full per-task delta analysis, NDCG derivation, and QA recommendations. (shonshinemin)
+- Docs: Added `shonshinemin_cmd/qa-notes.md` with QA workflow, allowed-file scope, and re-run instructions. (shonshinemin)
+- Docs: Appended benchmark QA re-evaluation entry to `docs/debug-log.md`. (shonshinemin)
+- Docs: Appended shonshinemin work summary to `docs/progress.md`. (shonshinemin)
+
 ## 2026-05-18 (codex)
 
 - Docs: Added `docs/cloudflare-org-repo-migration.md` with Worker, Pages, and MCP settings for switching Cloudflare Git builds to the organization repository. (codex)

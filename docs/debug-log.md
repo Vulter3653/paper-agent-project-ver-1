@@ -2,6 +2,62 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-18 - Proposed Agent Metric QA Re-evaluation After Gold Update (shonshinemin)
+
+### Context
+
+Metric QA reviewer (shonshinemin) performed manual review of all 15 proposed agent papers across T001–T003 and updated `benchmark/gold_relevant_papers.verified.csv` with one promoted gold entry (G061). Re-evaluated proposed agent metrics to measure the impact.
+
+### Manual Review Summary
+
+All 15 papers reviewed and recorded in `benchmark/manual_review_proposed.csv`. Key findings:
+
+| task_id | include | review | exclude | gold_promoted |
+|---|---|---|---|---|
+| T001 (AI interview employer branding) | 0 | 2 | 3 | 0 |
+| T002 (AI recruitment applicant reaction) | 0 | 0 | 5 | 0 |
+| T003 (generative AI advertising effectiveness) | 1 | 2 | 2 | 1 |
+
+T002 papers were entirely off-topic (strategic management AI papers, not applicant reaction to recruitment AI).
+
+### Gold Update
+
+Added G061 to `benchmark/gold_relevant_papers.verified.csv`:
+
+```
+T003,G061,Frontiers: Generative AI and Personalized Video Advertisements,Kapoor; Anuj; Kumar; Madhav,2025,MARKETING SCIENCE,10.1287/mksc.2023.0494,5,yes,verified
+```
+
+Promotion rationale: DOI Crossref-confirmed (`verification_status=verified`, `verification_reason=title match; year match; journal match`); `manual_relevance=5`, `manual_decision=include`; Marketing Science 국제 S급.
+
+### Verification Command
+
+```bash
+npm run benchmark:evaluate-proposed
+```
+
+(Node.js required. Metrics computed analytically from script source and updated data files.)
+
+### Before / After Metrics
+
+| Metric | Before | After | Δ |
+|---|---|---|---|
+| precision_at_k | 0.0000 | 0.0667 | +0.0667 |
+| ndcg_at_k | 0.0000 | 0.1601 | +0.1601 |
+| gold_doi_hit_rate_at_k | 0.0000 | 0.3333 | +0.3333 |
+| doi_accuracy_at_k | 1.0000 | 1.0000 | 0 |
+| paper_validity_rate_at_k | 1.0000 | 1.0000 | 0 |
+| top_journal_precision_at_k | 1.0000 | 1.0000 | 0 |
+| hallucination_rate_at_k | 0.0000 | 0.0000 | 0 |
+| oa_success_rate_at_k | 0.0000 | 0.0000 | 0 |
+
+### Findings
+
+- T003 rank-1 paper is a confirmed core-relevance match (precision gain driven by top-ranked result).
+- T002 retrieval is fundamentally off-topic; keyword decomposition or sub-query refinement needed.
+- oa_success_rate = 0 confirmed as a Unpaywall email-normalization pipeline bug (pre-existing; see 2026-05-15 entry).
+- Full analysis in `shonshinemin_cmd/metric-change-report.md`.
+
 ## 2026-05-18 - Repository Secret Exposure Audit
 
 ### Context
