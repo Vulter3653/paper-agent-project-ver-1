@@ -236,11 +236,30 @@ npm run build:web
 npm run smoke:mcp
 ```
 
-After staging deploy:
+Run a no-quota Worker smoke check against production or staging:
+
+```bash
+npm run smoke:worker
+WORKER_URL=https://paper-agent-project-staging.<account-subdomain>.workers.dev npm run smoke:worker
+```
+
+This checks:
 
 ```text
 GET /api/health
 GET /api/diagnostics
+GET /api/search-jobs?limit=3
+```
+
+After staging deploy, run one low-quota search only when needed:
+
+```bash
+WORKER_URL=https://paper-agent-project-staging.<account-subdomain>.workers.dev RUN_SEARCH=true SMOKE_MAX_RESULTS=3 npm run smoke:worker
+```
+
+The search mode additionally checks:
+
+```text
 POST /api/search-jobs
 GET /api/search-jobs/:id
 GET /api/search-jobs/:id/papers.csv

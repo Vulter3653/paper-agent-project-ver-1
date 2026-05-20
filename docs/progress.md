@@ -1,6 +1,6 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-20 (codex staging test bed file)
+Updated: 2026-05-20 (codex Worker smoke test)
 
 ## shonshinemin — Benchmark QA Re-evaluation (2026-05-18)
 
@@ -29,6 +29,14 @@ Updated: 2026-05-20 (codex staging test bed file)
 
 - Docs: Added `docs/staging-testbed.md` as the personal-repo-based staging test bed procedure for Worker, Pages, MCP, D1, R2, smoke tests, promotion checks, and team-file integration. (codex)
 - Docs: Defined that staging must use separate D1 and R2 resources and that team branch project-level history files must be consolidated manually by the maintainer. (codex)
+
+## codex - Worker Smoke Test (2026-05-20)
+
+- Added: `apps/worker/scripts/smoke-test.mjs` for Worker API smoke checks against production or staging URLs. (codex)
+- Added: Root script `npm run smoke:worker`, which defaults to no-quota checks for `/api/health`, `/api/diagnostics`, and `/api/search-jobs?limit=3`. (codex)
+- Verification: Ran `npm run smoke:worker` against `https://paper-agent-project.shch3653.workers.dev`; health and diagnostics returned `ok: true`, active provider readiness was true, D1 had no missing columns, R2 was bound, and 3 recent jobs were listed. (codex)
+- Verification: Ran `npm run typecheck`; all workspaces passed. (codex)
+
 ## Mandatory Session Handoff Rules
 
 This file is the required handoff document for future sessions. Before ending any work session, update this file in the same commit or final repository state.
@@ -86,7 +94,7 @@ Current next implementation target:
 13. Confirm new jobs use persisted component-score final ranking: relevance 35%, journal fit 20%, Crossref verification 15%, OA 10%, citation 10%, recency 10%.
 14. Use `docs/mcp.md`, `docs/mcp-installation.md`, and `docs/mcp-client-config.example.json` as the current source of truth for MCP attachment, selected external MCP servers, and client setup.
 15. Deployed MCP is verified at `https://paper-agent-mcp.shch3653.workers.dev/health`.
-16. MCP protocol connectivity and read-only tool calls are verified with `npm run smoke:mcp`.
+16. MCP protocol connectivity and read-only tool calls are verified with `npm run smoke:mcp`; Worker health/diagnostics/recent-job readiness is verified with `npm run smoke:worker`.
 17. Use `paper_agent_enhanced_report.md` as the current submission-oriented master plan.
 18. Use `docs/workflow.md` as the current source of truth for the integrated multi-agent target workflow.
 19. After Cloudflare Pages deploys the final dashboard route UI/UX refresh, verify these production routes across desktop and mobile widths:
