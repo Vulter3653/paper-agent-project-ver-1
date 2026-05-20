@@ -1,6 +1,6 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-20 (codex MCP installation baseline)
+Updated: 2026-05-20 (codex seunghyeon workspace role)
 
 ## shonshinemin — Benchmark QA Re-evaluation (2026-05-18)
 
@@ -19,6 +19,12 @@ Updated: 2026-05-20 (codex MCP installation baseline)
 - Docs: Updated `docs/mcp.md` to point future agents to the shared MCP installation baseline and to avoid installing the entire MCP server catalog. (codex)
 - Verification: Ran `npm run smoke:mcp`; deployed Paper Agent MCP returned expected read-only tools and diagnostics `ok: true`. (codex)
 - Infra: Registered selected MCP servers in `/home/user/.codex/config.toml` for the next Codex session: Paper Agent MCP, Cloudflare Docs/Builds/Observability/Browser MCP, Playwright MCP, and restricted filesystem MCP. GitHub MCP was not added locally because Docker is unavailable and the current GitHub MCP connector is already active. (codex)
+
+## codex - seunghyeon_choi Workspace Role Clarification (2026-05-20)
+
+- Docs: Clarified `seunghyeon_choi/README.md` as the current active project worker folder and maintainer/integration workspace. (codex)
+- Docs: Recorded that other team agents should not edit `seunghyeon_choi/` unless explicitly assigned by the maintainer. (codex)
+
 ## Mandatory Session Handoff Rules
 
 This file is the required handoff document for future sessions. Before ending any work session, update this file in the same commit or final repository state.
@@ -147,7 +153,7 @@ Current next implementation target:
 41. Team-agent auto-start guidance is now defined for organization repository collaboration.
     - `AGENTS.md` is the root operating guide for any agent entering the repository.
     - `docs/agent-work-queue.md` defines current benchmark assignments and allowed file scopes.
-    - `seunghyeon_choi` is the current maintainer and integration lead.
+    - `seunghyeon_choi` is the current active project worker, maintainer, and integration lead; `seunghyeon_choi/` is that worker workspace.
     - Baseline result collection is now marked as `unassigned_member_c` until a separate team member is assigned.
     - `jin23624_cpu/`, `juilie_bot_hub/`, `seunghyeon_choi/`, `shonshinemin_cmd/`, and `integrated/` each contain a role-specific README.
     - Benchmark collaboration templates are initialized: `benchmark/manual_review_proposed.csv`, `benchmark/baseline_rule_based_results.csv`, and `benchmark/baseline_single_llm_results.csv`.
