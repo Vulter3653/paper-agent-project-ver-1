@@ -1,6 +1,6 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-20 (codex seunghyeon workspace role)
+Updated: 2026-05-20 (codex staging test bed file)
 
 ## shonshinemin — Benchmark QA Re-evaluation (2026-05-18)
 
@@ -25,6 +25,10 @@ Updated: 2026-05-20 (codex seunghyeon workspace role)
 - Docs: Clarified `seunghyeon_choi/README.md` as the current active project worker folder and maintainer/integration workspace. (codex)
 - Docs: Recorded that other team agents should not edit `seunghyeon_choi/` unless explicitly assigned by the maintainer. (codex)
 
+## codex - Staging Test Bed File (2026-05-20)
+
+- Docs: Added `docs/staging-testbed.md` as the personal-repo-based staging test bed procedure for Worker, Pages, MCP, D1, R2, smoke tests, promotion checks, and team-file integration. (codex)
+- Docs: Defined that staging must use separate D1 and R2 resources and that team branch project-level history files must be consolidated manually by the maintainer. (codex)
 ## Mandatory Session Handoff Rules
 
 This file is the required handoff document for future sessions. Before ending any work session, update this file in the same commit or final repository state.
@@ -95,7 +99,7 @@ Current next implementation target:
 23. `CHANGELOG.md` is now organized by modification date. Continue moving completed entries from `Unreleased` into the current `YYYY-MM-DD` section before each commit.
 24. Journal category selection from `경영대학 학술지 목록.docx` is deployed and user-confirmed as working. Use this as the baseline for the next UI/reporting step.
 25. Result `Field / Rank` visibility is implemented locally. After Cloudflare deploy, verify dashboard rows/details plus CSV and Markdown report downloads show values such as `2. 조직인사 / 국제 S급`.
-26. Next recommended implementation for product UX: add a search settings summary bar that records keyword, selected field, priority order, year range, and max count for each active job.
+26. Before the next product UX change, use `docs/staging-testbed.md` to create or verify a staging Worker, Pages project, D1 database, R2 bucket, and MCP service for personal-repo-based development validation.
 27. Benchmark fixture expansion is initialized.
     - `benchmark/tasks.jsonl` contains 20 tasks.
     - `benchmark/keywords.csv` contains 20 runnable benchmark queries.

@@ -22,6 +22,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-20 (codex)
 
+- Docs: Added `docs/staging-testbed.md` with the personal-repo-based staging Worker, Pages, MCP, D1, R2, smoke-test, promotion, and team-integration procedure. (codex)
+
 - Docs: Clarified `seunghyeon_choi/README.md` as the current active worker workspace, maintainer role, integration boundary, and main-protection responsibility. (codex)
 - Docs: Added MCP installation guide and shared client config example for Paper Agent, GitHub, Cloudflare, Playwright, and restricted filesystem MCP servers selected from `awesome-mcp-servers`. (codex)
 - Docs: Recorded MCP smoke-test verification and local Codex MCP registration status in `docs/debug-log.md` and `docs/progress.md`. (codex)
