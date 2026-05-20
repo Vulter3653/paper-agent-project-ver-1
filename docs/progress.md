@@ -1,6 +1,6 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-18 (shonshinemin benchmark QA re-evaluation)
+Updated: 2026-05-20 (codex MCP installation baseline)
 
 ## shonshinemin — Benchmark QA Re-evaluation (2026-05-18)
 
@@ -12,6 +12,13 @@ Updated: 2026-05-18 (shonshinemin benchmark QA re-evaluation)
 - Added: `shonshinemin_cmd/qa-notes.md` — QA workflow, scope, and re-run instructions. (shonshinemin)
 - See: `docs/debug-log.md` §2026-05-18 Metric QA Re-evaluation for raw numbers and reviewer notes.
 
+## codex - MCP Installation Baseline (2026-05-20)
+
+- Docs: Added `docs/mcp-installation.md` with the selected MCP server set from `awesome-mcp-servers`, explicit deferred servers, environment variables, least-privilege rules, and verification steps. (codex)
+- Docs: Added `docs/mcp-client-config.example.json` with JSON `mcpServers` entries for Paper Agent MCP, Cloudflare Docs/Builds/Observability/Browser MCP, Playwright MCP, restricted filesystem MCP, and read-only GitHub MCP. (codex)
+- Docs: Updated `docs/mcp.md` to point future agents to the shared MCP installation baseline and to avoid installing the entire MCP server catalog. (codex)
+- Verification: Ran `npm run smoke:mcp`; deployed Paper Agent MCP returned expected read-only tools and diagnostics `ok: true`. (codex)
+- Infra: Registered selected MCP servers in `/home/user/.codex/config.toml` for the next Codex session: Paper Agent MCP, Cloudflare Docs/Builds/Observability/Browser MCP, Playwright MCP, and restricted filesystem MCP. GitHub MCP was not added locally because Docker is unavailable and the current GitHub MCP connector is already active. (codex)
 ## Mandatory Session Handoff Rules
 
 This file is the required handoff document for future sessions. Before ending any work session, update this file in the same commit or final repository state.
@@ -67,7 +74,7 @@ Current next implementation target:
 11. Confirm the Markdown report includes executive summary metrics, Report Agent synthesis sections, top-ranked table, paper details, OA landing page, and license details.
 12. Confirm the dashboard Recent Jobs panel lists saved jobs and can reload prior job results.
 13. Confirm new jobs use persisted component-score final ranking: relevance 35%, journal fit 20%, Crossref verification 15%, OA 10%, citation 10%, recency 10%.
-14. Use `docs/mcp.md` as the current source of truth for MCP attachment and the implemented read-only MCP Worker.
+14. Use `docs/mcp.md`, `docs/mcp-installation.md`, and `docs/mcp-client-config.example.json` as the current source of truth for MCP attachment, selected external MCP servers, and client setup.
 15. Deployed MCP is verified at `https://paper-agent-mcp.shch3653.workers.dev/health`.
 16. MCP protocol connectivity and read-only tool calls are verified with `npm run smoke:mcp`.
 17. Use `paper_agent_enhanced_report.md` as the current submission-oriented master plan.
@@ -165,6 +172,12 @@ Current next implementation target:
     - `docs/github-main-protection.md` defines the required GitHub ruleset/branch protection settings.
     - `main` should be restricted to maintainer-reviewed integration by `seunghyeon_choi`.
     - Actual branch protection still needs GitHub UI or GitHub API repository administration access because the available GitHub MCP tools do not expose branch protection mutation.
+
+47. External MCP installation baseline is documented.
+    - Selected from `awesome-mcp-servers`: Paper Agent MCP, GitHub MCP, Cloudflare Docs/Builds/Observability/Browser MCP, Playwright MCP, and restricted filesystem MCP.
+    - Deferred: Google Drive/Sheets MCP, generic database MCP, generic web search MCP, and aggregator/meta MCP until credentials and permission boundaries are finalized.
+    - Shared config example: `docs/mcp-client-config.example.json`.
+    - Local Codex config `/home/user/.codex/config.toml` now includes Paper Agent, Cloudflare Docs/Builds/Observability/Browser, Playwright, and restricted filesystem MCP entries. Restart Codex to load them.
 
 ## Current Status
 

@@ -2,6 +2,29 @@
 
 This file records debugging and troubleshooting work that affects implementation, deployment, or verification. Update it whenever a defect is investigated or a verification run changes project confidence.
 
+## 2026-05-20 - MCP Installation Baseline Verification (codex)
+
+### Context
+
+The user requested MCP servers from `awesome-mcp-servers` that are necessary for Paper Agent work. The selected set was limited to Paper Agent MCP, GitHub MCP, Cloudflare Docs/Builds/Observability/Browser MCP, Playwright MCP, and restricted filesystem MCP.
+
+### Verification Command
+
+```bash
+npm run smoke:mcp
+```
+
+### Result
+
+- Passed: Deployed MCP endpoint `https://paper-agent-mcp.shch3653.workers.dev/mcp` returned the expected read-only tool list. (codex)
+- Passed: `get_system_diagnostics` returned `ok: true`, D1 bound, no missing columns, R2 reports enabled, and MCP mode `read_only`. (codex)
+- Passed: Recent jobs, selected job details, paper results, and report link tool calls returned data. (codex)
+
+### Notes
+
+- Local Codex config was updated for next-session loading of Paper Agent, Cloudflare Docs/Builds/Observability/Browser, Playwright, and restricted filesystem MCP servers. (codex)
+- GitHub MCP was not added to local Codex config because Docker is unavailable; the current session already has the GitHub MCP connector. (codex)
+
 ## 2026-05-18 - Proposed Agent Metric QA Re-evaluation After Gold Update (shonshinemin)
 
 ### Context

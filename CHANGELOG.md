@@ -20,6 +20,11 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 - No unreleased changes.
 
+## 2026-05-20 (codex)
+
+- Docs: Added MCP installation guide and shared client config example for Paper Agent, GitHub, Cloudflare, Playwright, and restricted filesystem MCP servers selected from `awesome-mcp-servers`. (codex)
+- Docs: Recorded MCP smoke-test verification and local Codex MCP registration status in `docs/debug-log.md` and `docs/progress.md`. (codex)
+
 ## 2026-05-18 (shonshinemin)
 
 - Benchmark: Filled `benchmark/manual_review_proposed.csv` with manual relevance scores and decisions for all 15 proposed agent papers across T001-T003 (reviewer: shonshinemin). (shonshinemin)
