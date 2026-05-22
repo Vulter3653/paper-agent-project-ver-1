@@ -95,9 +95,11 @@ if (matchedAgent) {
     );
   }
 
-  const changelog = readFileAtHead("CHANGELOG.md");
-  if (!changelog.includes(`(${matchedAgent.id})`)) {
-    failures.push(`CHANGELOG.md must include attribution '(${matchedAgent.id})' for branch '${branchName}'.`);
+  const changelogAddedLines = getAddedLines("CHANGELOG.md");
+  if (!changelogAddedLines.some((line) => line.includes(`(${matchedAgent.id})`))) {
+    failures.push(
+      `CHANGELOG.md must add a line with attribution '(${matchedAgent.id})' for branch '${branchName}'.`
+    );
   }
 } else if (branchName.startsWith("benchmark/")) {
   failures.push(
@@ -132,10 +134,9 @@ function runGit(args) {
   return execFileSync("git", args, { encoding: "utf8" });
 }
 
-function readFileAtHead(path) {
-  try {
-    return runGit(["show", `HEAD:${path}`]);
-  } catch {
-    return "";
-  }
+function getAddedLines(path) {
+  return runGit(["diff", "--unified=0", `${baseRef}...HEAD`, "--", path])
+    .split("\n")
+    .filter((line) => line.startsWith("+") && !line.startsWith("+++"))
+    .map((line) => line.slice(1));
 }

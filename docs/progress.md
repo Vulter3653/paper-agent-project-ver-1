@@ -55,6 +55,7 @@ Updated: 2026-05-22 (codex automatic team rule enforcement)
 ## codex - Automatic Team Rule Enforcement (2026-05-22)
 
 - Added: `scripts/validate-agent-rules.mjs` to enforce team benchmark branch scope, required `CHANGELOG.md` updates, matching attribution, and assigned personal-folder updates. (codex)
+- Fixed: Updated `scripts/validate-agent-rules.mjs` to validate attribution only from newly added `CHANGELOG.md` lines, addressing Codex PR review feedback. (codex)
 - Added: `.github/workflows/agent-rules.yml` so pull requests into `main` run the validator automatically. (codex)
 - Infra: Added `.github/CODEOWNERS` to support maintainer-reviewed integration when GitHub branch protection requires CODEOWNER review. (codex)
 - Docs: Updated `AGENTS.md`, `docs/agent-writing-rules.md`, `docs/agent-work-queue.md`, and `.github/pull_request_template.md` with automatic enforcement and personal-folder/work-log requirements. (codex)
