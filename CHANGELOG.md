@@ -22,6 +22,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-24 (codex)
 
+- Changed: Connected the Ops dashboard route to live Worker search jobs and D1 `agent_traces` for status board, pipeline, and console output. (codex)
 - Fixed: Ensured Worker diagnostics runs schema bootstrap before checking columns, set new search jobs to 12 total steps, and completed trace rows now receive completion timestamps. (codex)
 
 - Added: Persisted Worker multi-agent execution traces in D1 and exposed trace read APIs for dashboard and MCP inspection. (codex)

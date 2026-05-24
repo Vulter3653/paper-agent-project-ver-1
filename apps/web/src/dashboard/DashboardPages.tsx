@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Activity, BarChart3, Cloud, FileText, Play, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Activity, BarChart3, Cloud, FileText, Play, RefreshCw, ShieldCheck } from "lucide-react";
 import {
   agentStatuses,
   criticReviews,
@@ -19,9 +19,19 @@ import {
   type FeatureImplementationItem,
   type FeatureImplementationStatus
 } from "./mockData";
+import type { AgentTrace, SearchJob } from "@paper-agent/shared";
 import "./dashboard.css";
 
 export type DashboardRoute = "research" | "ops" | "evaluation";
+
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "https://paper-agent-project.shch3653.workers.dev").replace(/\/$/, "");
+
+function apiUrl(path: string): string {
+  return `${apiBaseUrl}${path}`;
+}
+
+type TraceResponse = { job: SearchJob; traces: AgentTrace[] };
+type JobsResponse = { jobs: SearchJob[] };
 
 export function resolveDashboardRoute(pathname = window.location.pathname): DashboardRoute {
   if (pathname.includes("/dashboard/ops")) return "ops";
@@ -165,24 +175,80 @@ export function ResearchExperiencePanels({ isRunning }: { isRunning: boolean }) 
 
 export function AgentOpsPage() {
   const [running, setRunning] = useState(false);
-  const [step, setStep] = useState(8);
+  const [keyword, setKeyword] = useState("AI interview employer branding");
+  const [activeJob, setActiveJob] = useState<SearchJob | null>(null);
+  const [traces, setTraces] = useState<AgentTrace[]>([]);
+  const [traceError, setTraceError] = useState("");
   const [logs, setLogs] = useState(toolCallLogs);
-  const progress = Math.round((step / literatureWorkflowStages.length) * 100);
+  const completedTraceCount = traces.filter((trace) => trace.status === "completed" || trace.status === "skipped").length;
+  const progress = traces.length ? Math.round((completedTraceCount / 12) * 100) : 0;
+  const liveStages = traces.length ? mapTracesToWorkflowStages(traces) : literatureWorkflowStages;
+  const liveAgentCards = traces.length ? mapTracesToAgentCards(traces) : agentStatuses;
 
-  function launchJob() {
+  useEffect(() => {
+    void loadLatestJob();
+  }, []);
+
+  useEffect(() => {
+    if (!activeJob || activeJob.status === "completed" || activeJob.status === "failed") return;
+    const timer = window.setInterval(() => {
+      void loadJobTraces(activeJob.id);
+    }, 2500);
+    return () => window.clearInterval(timer);
+  }, [activeJob?.id, activeJob?.status]);
+
+  async function loadLatestJob() {
+    setTraceError("");
+    try {
+      const response = await fetch(apiUrl("/api/search-jobs?limit=1"));
+      if (!response.ok) throw new Error(await readDashboardError(response, "Failed to load recent job"));
+      const data = (await response.json()) as JobsResponse;
+      const latest = data.jobs[0];
+      if (latest) await loadJobTraces(latest.id);
+    } catch (error) {
+      setTraceError(error instanceof Error ? error.message : "Failed to load recent job");
+    }
+  }
+
+  async function loadJobTraces(jobId: string) {
+    setTraceError("");
+    try {
+      const response = await fetch(apiUrl(`/api/search-jobs/${jobId}/traces`));
+      if (!response.ok) throw new Error(await readDashboardError(response, "Failed to load agent traces"));
+      const data = (await response.json()) as TraceResponse;
+      setActiveJob(data.job);
+      setTraces(data.traces);
+      setLogs(data.traces.map((trace) => ({ level: getTraceLogLevel(trace.status), message: `${trace.stepId}: ${trace.summary}` })));
+      if (data.job.status === "completed" || data.job.status === "failed") setRunning(false);
+    } catch (error) {
+      setTraceError(error instanceof Error ? error.message : "Failed to load agent traces");
+      setRunning(false);
+    }
+  }
+
+  async function launchJob() {
     setRunning(true);
-    setStep(12);
-    setLogs([
-      ...toolCallLogs,
-      { level: "ok", message: "Vectorize.upsert abstract_embeddings=128" },
-      { level: "warn", message: "Critic flagged adjacent journal ambiguity=2" },
-      { level: "ok", message: "ReportAgent.export completed PDF / XLSX / Markdown" }
-    ]);
-    window.setTimeout(() => setRunning(false), 700);
+    setTraceError("");
+    setLogs([{ level: "muted", message: `POST /api/search-jobs keyword="${keyword}"` }]);
+    try {
+      const response = await fetch(apiUrl("/api/search-jobs"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, maxResults: 20 })
+      });
+      if (!response.ok) throw new Error(await readDashboardError(response, "Failed to launch agent job"));
+      const data = (await response.json()) as { job: SearchJob };
+      setActiveJob(data.job);
+      await loadJobTraces(data.job.id);
+    } catch (error) {
+      setTraceError(error instanceof Error ? error.message : "Failed to launch agent job");
+      setRunning(false);
+    }
   }
 
   function inspectAgent(name: string) {
-    setLogs((current) => [...current, { level: "muted", message: `${name}.inspect status requested` }]);
+    const trace = traces.find((item) => item.agentName === name);
+    setLogs((current) => [...current, { level: trace ? getTraceLogLevel(trace.status) : "muted", message: trace ? `${trace.agentName}.inspect ${trace.summary}` : `${name}.inspect no live trace loaded` }]);
   }
 
   return (
@@ -192,50 +258,50 @@ export function AgentOpsPage() {
           <div>
             <span className="uxEyebrow cyan">Interactive Agent Ops</span>
             <h1>Multi-Agent 실행 상태와 tool call 흐름을 운영 관점에서 추적합니다.</h1>
-            <p>미완성 Mock: Launch 버튼은 화면 상호작용 preview만 갱신하며 실제 Worker job을 실행하지 않습니다.</p>
+            <p>실제 Worker job과 D1 agent_traces를 기반으로 최신 실행 상태를 표시합니다.</p>
           </div>
           <aside className="uxSearchSummary">
             <h2>Launch Agent Job</h2>
             <label className="uxField">
               <span>Keyword</span>
-              <input defaultValue="AI interview employer branding" />
+              <input value={keyword} onChange={(event) => setKeyword(event.target.value)} />
             </label>
             <div className="uxFieldGrid">
               <label className="uxField">
                 <span>Provider</span>
-                <select defaultValue="wos">
-                  <option value="wos">Web of Science</option>
-                  <option value="openalex">OpenAlex test mode</option>
+                <select defaultValue="wos" disabled>
+                  <option value="wos">Worker configured provider</option>
                 </select>
               </label>
               <label className="uxField">
                 <span>Pipeline</span>
-                <select defaultValue="full">
-                  <option value="full">Full 12-step</option>
-                  <option value="search">Search only</option>
+                <select defaultValue="full" disabled>
+                  <option value="full">Full 12-step trace</option>
                 </select>
               </label>
             </div>
-            <button className="uxButton green" type="button" onClick={launchJob}>
-              <Play size={18} />
+            <button className="uxButton green" type="button" onClick={launchJob} disabled={running || !keyword.trim()}>
+              {running ? <RefreshCw size={18} className="spin" /> : <Play size={18} />}
               Launch Agent Job
             </button>
+            {activeJob ? <p className="uxTinyStatus">job_id: {activeJob.id}</p> : null}
+            {traceError ? <p className="uxTinyError">{traceError}</p> : null}
           </aside>
         </div>
       </section>
 
       <section className="uxMetrics">
-        <MetricTile label="Job" value="미완성 Mock" detail="no real job created" tone="amber" />
-        <MetricTile label="Tool Calls" value="미완성" detail="mock console only" tone="amber" />
-        <MetricTile label="Agents" value="미완성" detail="agent traces pending" tone="purple" />
-        <MetricTile label="Warnings" value="미완성" detail="critic mock" tone="amber" />
-        <MetricTile label="Storage" value="부분 구현" detail="D1/R2 live, Drive pending" tone="amber" />
-        <MetricTile label="Vectorize" value="미완성" detail="embedding index pending" tone="blue" />
+        <MetricTile label="Job" value={activeJob?.status ?? "No job"} detail={activeJob?.currentStep ?? "load or launch"} tone={activeJob?.status === "failed" ? "amber" : "green"} />
+        <MetricTile label="Trace Steps" value={String(traces.length)} detail={`${completedTraceCount} completed/skipped`} tone="blue" />
+        <MetricTile label="Agents" value={String(liveAgentCards.length)} detail="from D1 traces" tone="purple" />
+        <MetricTile label="Warnings" value={String(traces.filter((trace) => trace.status === "skipped" || trace.status === "failed").length)} detail="skipped or failed" tone="amber" />
+        <MetricTile label="Storage" value={traces.some((trace) => trace.stepId === "drive_r2_storage" && trace.status === "completed") ? "R2 Ready" : "Pending"} detail="Drive remains planned" tone="green" />
+        <MetricTile label="Vectorize" value={traces.some((trace) => trace.stepId === "vectorize_relevance" && trace.status === "skipped") ? "Skipped" : "Pending"} detail="embedding index pending" tone="blue" />
       </section>
 
       <ImplementationStatusPanel
         title="Ops Route Implementation Status"
-        description="운영 화면의 Agent board, console, critic 항목은 미완성 Mock입니다. 실제 agent trace/API 연결이 다음 단계입니다."
+        description="운영 화면의 Agent board, pipeline, console은 최신 D1 agent_traces를 우선 사용하고 trace가 없을 때만 mock placeholder를 표시합니다."
         items={opsImplementationStatus}
       />
 
@@ -245,12 +311,12 @@ export function AgentOpsPage() {
             <div className="uxPanelHead">
               <div>
                 <h2>Multi-Agent Status Board</h2>
-                <p>Agent card를 클릭하면 해당 agent의 상태 로그가 console에 추가됩니다.</p>
+                <p>Agent card를 클릭하면 해당 agent의 trace summary가 console에 추가됩니다.</p>
               </div>
-              <span className="uxPill amber">미완성 Mock</span>
+              <span className={`uxPill ${traces.length ? "green" : "amber"}`}>{traces.length ? "Live D1 traces" : "No live trace"}</span>
             </div>
             <div className="uxAgentGrid">
-              {agentStatuses.map((agent) => (
+              {liveAgentCards.map((agent) => (
                 <button key={agent.name} className="uxMiniCard uxAgentCard" type="button" onClick={() => inspectAgent(agent.name)}>
                   <h3>{agent.name}</h3>
                   <p>{agent.role}</p>
@@ -266,14 +332,14 @@ export function AgentOpsPage() {
                 <h2>Pipeline Execution</h2>
                 <p>12단계 문헌검토 workflow의 운영 상태입니다.</p>
               </div>
-              <span className="uxPill amber">미완성 Mock</span>
+              <span className={`uxPill ${traces.length ? "green" : "amber"}`}>{traces.length ? `${progress}%` : "No live trace"}</span>
             </div>
             <div className="uxProgressTrack">
               <span style={{ width: `${progress}%` }} />
             </div>
             <div className="uxSteps12">
-              {literatureWorkflowStages.map((stage, index) => (
-                <article key={stage.id} className={`uxStep ${index + 1 < step ? "done" : index + 1 === step && running ? "running" : index === 9 ? "review" : "idle"}`}>
+              {liveStages.map((stage) => (
+                <article key={stage.id} className={`uxStep ${stage.status === "done" ? "done" : stage.status === "running" ? "running" : stage.status === "review" ? "review" : "idle"}`}>
                   <span>{stage.order}</span>
                   <strong>{stage.title}</strong>
                   <small>{stage.detail}</small>
@@ -288,7 +354,7 @@ export function AgentOpsPage() {
             <div className="uxPanelHead">
               <div>
                 <h2>Tool Call Console</h2>
-                <p>미완성 Mock: 실제 tool call 저장소 연결 전의 console preview입니다.</p>
+                <p>{traces.length ? "D1 agent_traces에서 생성한 실행 로그입니다." : "Live trace가 없으면 placeholder log를 표시합니다."}</p>
               </div>
               <button className="uxSoftButton" type="button" onClick={() => setLogs([])}>Clear</button>
             </div>
@@ -325,6 +391,46 @@ export function AgentOpsPage() {
       </section>
     </main>
   );
+}
+
+function mapTracesToWorkflowStages(traces: AgentTrace[]) {
+  return traces.map((trace) => ({
+    id: trace.stepId,
+    order: trace.stepOrder,
+    title: titleFromTraceStep(trace.stepId),
+    owner: trace.agentName,
+    status: trace.status === "completed" ? "done" as const : trace.status === "running" ? "running" as const : trace.status === "failed" || trace.status === "skipped" ? "review" as const : "idle" as const,
+    progress: trace.status === "completed" || trace.status === "skipped" ? 100 : trace.status === "running" ? 50 : 0,
+    detail: trace.summary
+  }));
+}
+
+function mapTracesToAgentCards(traces: AgentTrace[]) {
+  return traces.map((trace) => ({
+    name: trace.agentName,
+    role: trace.summary,
+    state: trace.status === "completed" ? "done" as const : trace.status === "running" ? "running" as const : trace.status === "failed" || trace.status === "skipped" ? "review" as const : "idle" as const,
+    tool: trace.stepId
+  }));
+}
+
+function titleFromTraceStep(stepId: string): string {
+  return stepId.split("_").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
+}
+
+function getTraceLogLevel(status: AgentTrace["status"]): "ok" | "warn" | "muted" {
+  if (status === "completed") return "ok";
+  if (status === "failed" || status === "skipped") return "warn";
+  return "muted";
+}
+
+async function readDashboardError(response: Response, fallback: string): Promise<string> {
+  try {
+    const body = (await response.json()) as { error?: string };
+    return body.error ?? fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export function EvaluationDashboardPage() {

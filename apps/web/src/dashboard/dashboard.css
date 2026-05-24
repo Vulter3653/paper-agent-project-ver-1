@@ -820,3 +820,19 @@
     flex-direction: column;
   }
 }
+
+.uxTinyStatus,
+.uxTinyError {
+  margin: 10px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.uxTinyStatus {
+  color: var(--muted);
+}
+
+.uxTinyError {
+  color: #b42318;
+}

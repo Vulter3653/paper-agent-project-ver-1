@@ -75,6 +75,12 @@ Updated: 2026-05-24 (codex dashboard mock clarity)
 - Changed: Ranking now uses persisted `paper.relevanceScore` when available instead of falling back only to `abstractScore`. (codex)
 - Verification: `npm run typecheck` and `npm run build:web` passed in this session. (codex)
 
+## codex - Ops Trace Dashboard Binding (2026-05-24)
+
+- Changed: `/dashboard/ops` now loads the latest search job, reads `GET /api/search-jobs/:id/traces`, and maps D1 traces into the Multi-Agent Status Board, Pipeline Execution, metrics, and Tool Call Console. (codex)
+- Changed: The Ops Launch button now creates a real Worker search job instead of only mutating mock console state. (codex)
+- Verification: `npm run typecheck` and `npm run build:web` passed in this session. (codex)
+
 ## codex - Agent Trace Persistence (2026-05-24)
 - Fixed: Diagnostics now runs `ensureSchema` before column checks, so `agent_traces` bootstrap is reflected in `/api/diagnostics`. New jobs now report `totalSteps: 12`, and completed traces receive `completedAt`. (codex)
 

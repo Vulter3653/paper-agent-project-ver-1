@@ -1,5 +1,12 @@
 # Debug Log
 
+## 2026-05-24 - Ops Trace Dashboard Binding
+
+- Context: After `agent_traces` was verified in production, `/dashboard/ops` still showed mock-only agent board, pipeline, and console state. (codex)
+- Change: Connected Ops to recent Worker jobs and `GET /api/search-jobs/:id/traces`; Launch now posts a real search job and refreshes trace state. (codex)
+- Expected effect: Ops should visually distinguish live D1 trace-backed execution from remaining planned items such as Vectorize and Google Drive. (codex)
+- Verification: `npm run typecheck` and `npm run build:web` passed in this session. (codex)
+
 ## 2026-05-24 - Agent Trace Persistence
 - Follow-up fix: `/api/diagnostics` initially reported 14 missing `agent_traces` columns because it checked schema before running bootstrap. Diagnostics now calls `ensureSchema`, new jobs use 12 total steps, and completed traces get completion timestamps. (codex)
 

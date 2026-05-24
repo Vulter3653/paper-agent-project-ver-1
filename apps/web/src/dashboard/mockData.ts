@@ -97,8 +97,8 @@ export const researchImplementationStatus: FeatureImplementationItem[] = [
 export const opsImplementationStatus: FeatureImplementationItem[] = [
   { feature: "MCP Worker", status: "live", evidence: "paper-agent-mcp /mcp read-only tools 배포 완료", next: "agent trace 조회 tool 추가" },
   { feature: "D1 / R2 Runtime", status: "live", evidence: "search_jobs, papers, evaluations, R2 reports 저장", next: "화면 상태를 diagnostics/API로 연결" },
-  { feature: "Agent Status Board", status: "mock", evidence: "미완성 Mock: 실제 agent_traces 테이블 연결 전", next: "agent_traces table과 연결" },
-  { feature: "Tool Call Console", status: "mock", evidence: "미완성 Mock: 실제 Worker tool log 저장 전", next: "실제 Worker step/tool log 저장" },
+  { feature: "Agent Status Board", status: "live", evidence: "GET /api/search-jobs/:id/traces 기반 D1 trace 표시", next: "Critic 세부 flag 저장 후 확장" },
+  { feature: "Tool Call Console", status: "partial", evidence: "agent_traces summary를 console log로 표시", next: "개별 외부 API request/response log 저장" },
   { feature: "Vectorize Status", status: "planned", evidence: "UI 위치만 확보", next: "Vectorize index와 embedding relevance 구현" },
   { feature: "Google Drive PDF Archive", status: "planned", evidence: "UI 위치만 확보", next: "OA PDF만 Drive 저장 및 drive_file_id 저장" },
   { feature: "Critic Review", status: "mock", evidence: "미완성 Mock: Critic Agent 결과 저장 전", next: "Critic Agent flags/risk_level 저장" }
