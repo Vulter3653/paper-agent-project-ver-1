@@ -1,5 +1,12 @@
 # Debug Log
 
+## 2026-05-24 - Google Drive OA PDF Archive
+
+- Context: Google Drive was listed as planned while Unpaywall already captured OA PDF URLs. The user prioritized Drive connection before remaining benchmark work. (codex)
+- Change: Added Worker service-account Drive upload for OA PDF URLs only, persisted Drive metadata in `papers`, and exposed it through diagnostics, CSV, Markdown, dashboard detail, and MCP paper result paths. (codex)
+- Expected effect: Jobs with direct OA PDF URLs upload those files to the configured Drive folder when Google credentials and folder sharing are correct; failures are recorded per paper without failing the whole search job. (codex)
+- Verification: `npm run typecheck`, paper insert placeholder count check, and `npm run build:web` passed in this session. (codex)
+
 ## 2026-05-24 - Ops Trace Dashboard Binding
 
 - Context: After `agent_traces` was verified in production, `/dashboard/ops` still showed mock-only agent board, pipeline, and console state. (codex)

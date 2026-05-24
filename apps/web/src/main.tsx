@@ -45,6 +45,7 @@ type DiagnosticsResponse = {
     crossrefEmail: boolean;
     unpaywallEmail: boolean;
     r2Reports: boolean;
+    googleDrive: boolean;
   };
   readiness: {
     activeProviderReady: boolean;
@@ -531,6 +532,16 @@ function PaperDetailPanel({ selected }: { selected?: PaperSummary }) {
                 "No OA URL found"
               )}
             </dd>
+            <dt>Google Drive</dt>
+            <dd>
+              {selected.driveWebUrl ? (
+                <a href={selected.driveWebUrl} target="_blank" rel="noreferrer">
+                  Open Drive file
+                </a>
+              ) : (
+                `${selected.driveStatus ?? "skipped"} · ${selected.driveReason ?? "No Google Drive upload recorded."}`
+              )}
+            </dd>
             <dt>License</dt>
             <dd>{[selected.oaLicense, selected.oaHostType, selected.oaRepository].filter(Boolean).join(" · ") || "Unknown"}</dd>
           </dl>
@@ -598,7 +609,8 @@ function DiagnosticsPanel({
         ["OpenAlex API key", diagnostics.env.openAlexApiKey],
         ["Crossref email", diagnostics.env.crossrefEmail],
         ["Unpaywall email", diagnostics.env.unpaywallEmail],
-        ["R2 reports", diagnostics.env.r2Reports]
+        ["R2 reports", diagnostics.env.r2Reports],
+        ["Google Drive", diagnostics.env.googleDrive]
       ]
     : [];
 

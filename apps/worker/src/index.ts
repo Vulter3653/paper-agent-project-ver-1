@@ -58,6 +58,7 @@ type DiagnosticsResponse = {
     crossrefEmail: boolean;
     unpaywallEmail: boolean;
     r2Reports: boolean;
+    googleDrive: boolean;
   };
   readiness: {
     activeProviderReady: boolean;
@@ -104,6 +105,10 @@ type PaperRecord = PaperSummary & {
   oaRepository: string;
   unpaywallStatus: "found" | "not_found" | "skipped" | "failed";
   unpaywallReason: string;
+  driveFileId: string;
+  driveWebUrl: string;
+  driveStatus: "uploaded" | "skipped" | "failed";
+  driveReason: string;
 };
 
 type EvaluationScores = {
@@ -290,6 +295,10 @@ type PaperSummaryRow = {
   oa_repository: string | null;
   unpaywall_status: PaperRecord["unpaywallStatus"] | null;
   unpaywall_reason: string | null;
+  drive_file_id: string | null;
+  drive_web_url: string | null;
+  drive_status: PaperRecord["driveStatus"] | null;
+  drive_reason: string | null;
 };
 
 export default {
@@ -342,6 +351,9 @@ export default {
             crossrefEmail: env.CROSSREF_EMAIL ?? env.UNPAYWALL_EMAIL,
             unpaywallEmail: env.UNPAYWALL_EMAIL,
             reports: env.REPORTS,
+            googleClientEmail: env.GOOGLE_CLIENT_EMAIL,
+            googlePrivateKey: env.GOOGLE_PRIVATE_KEY,
+            googleDriveFolderId: env.GOOGLE_DRIVE_FOLDER_ID,
             maxResults,
             yearStart: body.yearStart,
             yearEnd: body.yearEnd,
@@ -615,6 +627,10 @@ async function ensureSchema(db: D1Database): Promise<void> {
   await ensureColumn(db, "papers", "oa_repository", "TEXT");
   await ensureColumn(db, "papers", "unpaywall_status", "TEXT");
   await ensureColumn(db, "papers", "unpaywall_reason", "TEXT");
+  await ensureColumn(db, "papers", "drive_file_id", "TEXT");
+  await ensureColumn(db, "papers", "drive_web_url", "TEXT");
+  await ensureColumn(db, "papers", "drive_status", "TEXT");
+  await ensureColumn(db, "papers", "drive_reason", "TEXT");
   await ensureColumn(db, "papers", "created_at", "TEXT");
 
   await ensureColumn(db, "evaluations", "id", "TEXT");
@@ -680,7 +696,8 @@ async function getDiagnostics(env: Env): Promise<DiagnosticsResponse> {
       openAlexApiKey: Boolean(env.OPENALEX_API_KEY),
       crossrefEmail: Boolean(env.CROSSREF_EMAIL),
       unpaywallEmail: Boolean(env.UNPAYWALL_EMAIL),
-      r2Reports: Boolean(env.REPORTS)
+      r2Reports: Boolean(env.REPORTS),
+      googleDrive: Boolean(env.GOOGLE_CLIENT_EMAIL && env.GOOGLE_PRIVATE_KEY && env.GOOGLE_DRIVE_FOLDER_ID)
     },
     readiness: {
       activeProviderReady
@@ -734,6 +751,10 @@ async function getMissingColumns(db: D1Database): Promise<DiagnosticsColumnCheck
         "oa_repository",
         "unpaywall_status",
         "unpaywall_reason",
+        "drive_file_id",
+        "drive_web_url",
+        "drive_status",
+        "drive_reason",
         "created_at"
       ]
     },
@@ -895,9 +916,9 @@ async function saveSearchResult(
             openalex_id, abstract, cited_by_count, crossref_id, publisher, issn,
             publication_type, published_date, verification_status, verification_reason,
             oa_pdf_url, oa_landing_page_url, oa_license, oa_host_type, oa_repository,
-            unpaywall_status, unpaywall_reason, created_at
+            unpaywall_status, unpaywall_reason, drive_file_id, drive_web_url, drive_status, drive_reason, created_at
            )
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
         .bind(
           paperId,
@@ -926,6 +947,10 @@ async function saveSearchResult(
           paper.oaRepository,
           paper.unpaywallStatus,
           paper.unpaywallReason,
+          paper.driveFileId,
+          paper.driveWebUrl,
+          paper.driveStatus,
+          paper.driveReason,
           now
         )
     );
@@ -971,6 +996,9 @@ async function processSearchJob(
     crossrefEmail?: string;
     unpaywallEmail?: string;
     reports?: R2Bucket;
+    googleClientEmail?: string;
+    googlePrivateKey?: string;
+    googleDriveFolderId?: string;
     maxResults: number;
     yearStart?: number;
     yearEnd?: number;
@@ -1007,10 +1035,24 @@ async function processSearchJob(
     const unpaywallEnriched = await enrichPapersWithUnpaywall(crossrefEnriched, options.unpaywallEmail);
     await recordAgentTrace(db, job, { stepOrder: 5, stepId: "unpaywall_check", agentName: "Open Access Agent", summary: "Unpaywall lookup completed; " + unpaywallEnriched.filter((paper) => paper.oaPdfUrl).length + " OA PDF URLs found.", detail: JSON.stringify({ pdfUrls: unpaywallEnriched.filter((paper) => paper.oaPdfUrl).length, landingPages: unpaywallEnriched.filter((paper) => paper.oaLandingPageUrl).length }), inputCount: crossrefEnriched.length, outputCount: unpaywallEnriched.length });
 
-    await recordAgentTrace(db, job, { stepOrder: 6, stepId: "drive_r2_storage", agentName: "Storage Worker", status: options.reports ? "completed" : "skipped", summary: options.reports ? "R2 output bucket is available for report persistence." : "R2 output bucket is not bound for this run.", detail: "Google Drive upload remains planned and is not executed by this Worker yet." });
+    const driveEnriched = await uploadOpenAccessPdfsToDrive(unpaywallEnriched, {
+      clientEmail: options.googleClientEmail,
+      privateKey: options.googlePrivateKey,
+      folderId: options.googleDriveFolderId
+    });
+    await recordAgentTrace(db, job, {
+      stepOrder: 6,
+      stepId: "drive_r2_storage",
+      agentName: "Storage Worker",
+      status: options.reports || driveEnriched.some((paper) => paper.driveStatus === "uploaded") ? "completed" : "skipped",
+      summary: "R2 " + (options.reports ? "available" : "not bound") + "; Google Drive uploaded " + driveEnriched.filter((paper) => paper.driveStatus === "uploaded").length + " OA PDFs.",
+      detail: JSON.stringify({ driveUploaded: driveEnriched.filter((paper) => paper.driveStatus === "uploaded").length, driveFailed: driveEnriched.filter((paper) => paper.driveStatus === "failed").length, driveSkipped: driveEnriched.filter((paper) => paper.driveStatus === "skipped").length }),
+      inputCount: unpaywallEnriched.length,
+      outputCount: driveEnriched.filter((paper) => paper.driveStatus === "uploaded").length
+    });
 
     job = await updateSearchJobProgress(db, job, "ranking", "ranking");
-    const rankedPapers = rankPapers(unpaywallEnriched);
+    const rankedPapers = rankPapers(driveEnriched);
     await recordAgentTrace(db, job, { stepOrder: 7, stepId: "journal_evaluation", agentName: "Evaluation Agent", summary: "Calculated journal fit, verification, OA, citation, recency, and relevance scores.", inputCount: unpaywallEnriched.length, outputCount: rankedPapers.length });
     await recordAgentTrace(db, job, { stepOrder: 8, stepId: "vectorize_relevance", agentName: "Relevance Agent", status: "skipped", summary: "Vectorize embedding relevance is not connected yet; keyword and metadata scoring were used.", inputCount: rankedPapers.length, outputCount: rankedPapers.length });
     await recordAgentTrace(db, job, { stepOrder: 9, stepId: "ranking", agentName: "Ranking Agent", summary: "Ranked " + rankedPapers.length + " papers by final score.", inputCount: unpaywallEnriched.length, outputCount: rankedPapers.length });
@@ -1325,7 +1367,11 @@ function mapWosDocument(document: WosDocument, keyword: string, rank: number): P
     oaHostType: "",
     oaRepository: "",
     unpaywallStatus: doi ? "skipped" : "not_found",
-    unpaywallReason: doi ? "Unpaywall lookup pending." : "No DOI available for Unpaywall lookup."
+    unpaywallReason: doi ? "Unpaywall lookup pending." : "No DOI available for Unpaywall lookup.",
+    driveFileId: "",
+    driveWebUrl: "",
+    driveStatus: "skipped",
+    driveReason: "Google Drive upload pending."
   };
 }
 
@@ -1369,7 +1415,11 @@ function mapOpenAlexWork(work: OpenAlexWork, keyword: string, rank: number): Pap
     oaHostType: "",
     oaRepository: "",
     unpaywallStatus: doi ? "skipped" : "not_found",
-    unpaywallReason: doi ? "Unpaywall lookup pending." : "No DOI available for Unpaywall lookup."
+    unpaywallReason: doi ? "Unpaywall lookup pending." : "No DOI available for Unpaywall lookup.",
+    driveFileId: "",
+    driveWebUrl: "",
+    driveStatus: "skipped",
+    driveReason: "Google Drive upload pending."
   };
 }
 
@@ -1790,6 +1840,128 @@ function scoreRecency(year: number): number {
   return Math.max(0, Math.min(1, 1 - (currentYear - year) / 10));
 }
 
+type GoogleDriveConfig = {
+  clientEmail?: string;
+  privateKey?: string;
+  folderId?: string;
+};
+
+type GoogleDriveUploadResponse = {
+  id?: string;
+  webViewLink?: string;
+};
+
+async function uploadOpenAccessPdfsToDrive(papers: PaperRecord[], config: GoogleDriveConfig): Promise<PaperRecord[]> {
+  const configured = Boolean(config.clientEmail?.trim() && config.privateKey?.trim() && config.folderId?.trim());
+  if (!configured) {
+    return papers.map((paper) => ({
+      ...paper,
+      driveStatus: paper.oaPdfUrl ? "skipped" : paper.driveStatus,
+      driveReason: paper.oaPdfUrl ? "Google Drive service account variables are not fully configured." : paper.driveReason
+    }));
+  }
+
+  let accessToken = "";
+  const enriched: PaperRecord[] = [];
+  for (const paper of papers) {
+    if (!paper.oaPdfUrl) {
+      enriched.push({ ...paper, driveStatus: "skipped", driveReason: "No OA PDF URL available for Drive upload." });
+      continue;
+    }
+    try {
+      accessToken ||= await getGoogleDriveAccessToken(config.clientEmail ?? "", config.privateKey ?? "");
+      const uploaded = await uploadPdfUrlToGoogleDrive(paper, accessToken, config.folderId ?? "");
+      enriched.push({
+        ...paper,
+        driveFileId: uploaded.id ?? "",
+        driveWebUrl: uploaded.webViewLink ?? (uploaded.id ? `https://drive.google.com/file/d/${uploaded.id}/view` : ""),
+        driveStatus: "uploaded",
+        driveReason: "Uploaded OA PDF to configured Google Drive folder."
+      });
+    } catch (error) {
+      enriched.push({
+        ...paper,
+        driveStatus: "failed",
+        driveReason: `Google Drive upload failed: ${getErrorMessage(error)}`
+      });
+    }
+  }
+  return enriched;
+}
+
+async function uploadPdfUrlToGoogleDrive(paper: PaperRecord, accessToken: string, folderId: string): Promise<GoogleDriveUploadResponse> {
+  const pdfResponse = await fetch(paper.oaPdfUrl, { headers: { Accept: "application/pdf,*/*" } });
+  if (!pdfResponse.ok) throw new Error(`PDF download failed with ${pdfResponse.status}`);
+  const pdfBuffer = await pdfResponse.arrayBuffer();
+  const boundary = `paper-agent-${crypto.randomUUID()}`;
+  const metadata = {
+    name: `${sanitizeFileName(paper.title || paper.doi || paper.id)}.pdf`,
+    parents: [folderId],
+    description: `Paper Agent OA PDF archive for DOI ${paper.doi || "unknown"}`
+  };
+  const body = new Blob([
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`,
+    `--${boundary}\r\nContent-Type: application/pdf\r\n\r\n`,
+    pdfBuffer,
+    `\r\n--${boundary}--\r\n`
+  ]);
+  const uploadResponse = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": `multipart/related; boundary=${boundary}`
+    },
+    body
+  });
+  if (!uploadResponse.ok) throw new Error(`Drive upload failed with ${uploadResponse.status}: ${await uploadResponse.text()}`);
+  return (await uploadResponse.json()) as GoogleDriveUploadResponse;
+}
+
+async function getGoogleDriveAccessToken(clientEmail: string, privateKey: string): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: "RS256", typ: "JWT" };
+  const claim = {
+    iss: clientEmail.trim(),
+    scope: "https://www.googleapis.com/auth/drive.file",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  };
+  const unsignedJwt = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(JSON.stringify(claim))}`;
+  const key = await importGooglePrivateKey(privateKey);
+  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsignedJwt));
+  const jwt = `${unsignedJwt}.${base64UrlEncode(signature)}`;
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: jwt })
+  });
+  if (!tokenResponse.ok) throw new Error(`Google token request failed with ${tokenResponse.status}: ${await tokenResponse.text()}`);
+  const data = (await tokenResponse.json()) as { access_token?: string };
+  if (!data.access_token) throw new Error("Google token response did not include access_token.");
+  return data.access_token;
+}
+
+async function importGooglePrivateKey(privateKey: string): Promise<CryptoKey> {
+  const normalized = privateKey.trim().replace(/\\n/g, "\n");
+  const pem = normalized.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "").replace(/\s+/g, "");
+  const binary = Uint8Array.from(atob(pem), (char) => char.charCodeAt(0));
+  return crypto.subtle.importKey(
+    "pkcs8",
+    binary,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+}
+
+function base64UrlEncode(input: string | ArrayBuffer): string {
+  const bytes = typeof input === "string" ? new TextEncoder().encode(input) : new Uint8Array(input);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+
 function calculateEvaluationScores(paper: PaperSummary): EvaluationScores {
   return {
     relevanceScore: roundScore(paper.relevanceScore ?? paper.abstractScore),
@@ -1864,6 +2036,10 @@ async function getSearchResult(db: D1Database, jobId: string): Promise<{ job: Se
         p.oa_repository,
         p.unpaywall_status,
         p.unpaywall_reason,
+        p.drive_file_id,
+        p.drive_web_url,
+        p.drive_status,
+        p.drive_reason,
         e.abstract_score,
         e.relevance_score,
         e.journal_fit_score,
@@ -1982,9 +2158,13 @@ function mapPaperSummary(row: PaperSummaryRow): PaperSummary {
     oaLandingPageUrl: row.oa_landing_page_url ?? "",
     oaLicense: row.oa_license ?? "",
     oaHostType: row.oa_host_type ?? "",
-    oaRepository: row.oa_repository ?? "",
+      oaRepository: row.oa_repository ?? "",
     unpaywallStatus: row.unpaywall_status ?? "skipped",
-    unpaywallReason: row.unpaywall_reason ?? "No Unpaywall lookup recorded."
+    unpaywallReason: row.unpaywall_reason ?? "No Unpaywall lookup recorded.",
+    driveFileId: row.drive_file_id ?? "",
+    driveWebUrl: row.drive_web_url ?? "",
+    driveStatus: row.drive_status ?? "skipped",
+    driveReason: row.drive_reason ?? "No Google Drive upload recorded."
   };
 }
 
@@ -2087,6 +2267,10 @@ function getCsvBody(result: SearchResult): string {
     "oa_repository",
     "unpaywall_status",
     "unpaywall_reason",
+    "drive_file_id",
+    "drive_web_url",
+    "drive_status",
+    "drive_reason",
     "abstract_score",
     "relevance_score",
     "journal_fit_score",
@@ -2123,6 +2307,10 @@ function getCsvBody(result: SearchResult): string {
     paper.oaRepository ?? "",
     paper.unpaywallStatus ?? "",
     paper.unpaywallReason ?? "",
+    paper.driveFileId ?? "",
+    paper.driveWebUrl ?? "",
+    paper.driveStatus ?? "",
+    paper.driveReason ?? "",
     paper.abstractScore,
     paper.relevanceScore ?? "",
     paper.journalFitScore ?? "",
@@ -2248,6 +2436,7 @@ function getMarkdownReportBody(result: SearchResult): string {
       `- Unpaywall: ${paper.unpaywallStatus ?? "skipped"} - ${paper.unpaywallReason ?? "No Unpaywall lookup recorded."}`,
       `- OA PDF: ${paper.oaPdfUrl || "Not available"}`,
       `- OA landing page: ${paper.oaLandingPageUrl || "Not available"}`,
+      `- Google Drive: ${paper.driveStatus ?? "skipped"} - ${paper.driveWebUrl || paper.driveReason || "No Google Drive upload recorded."}`,
       `- License: ${[paper.oaLicense, paper.oaHostType, paper.oaRepository].filter(Boolean).join(" / ") || "Not available"}`,
       "",
       "Score breakdown:",

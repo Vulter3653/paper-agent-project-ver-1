@@ -75,6 +75,13 @@ Updated: 2026-05-24 (codex dashboard mock clarity)
 - Changed: Ranking now uses persisted `paper.relevanceScore` when available instead of falling back only to `abstractScore`. (codex)
 - Verification: `npm run typecheck` and `npm run build:web` passed in this session. (codex)
 
+## codex - Google Drive OA PDF Archive (2026-05-24)
+
+- Added: Worker Google Drive service-account JWT authentication using `GOOGLE_CLIENT_EMAIL`, `GOOGLE_PRIVATE_KEY`, and `GOOGLE_DRIVE_FOLDER_ID`. (codex)
+- Added: OA PDF upload path for papers with Unpaywall `oaPdfUrl`, with `drive_file_id`, `drive_web_url`, `drive_status`, and `drive_reason` persisted in D1. (codex)
+- Changed: CSV, Markdown report, Paper Detail, diagnostics, MCP paper results, and dashboard implementation labels now surface Google Drive archive status. (codex)
+- Verification: `npm run typecheck`, paper insert placeholder count check, and `npm run build:web` passed in this session. (codex)
+
 ## codex - Ops Trace Dashboard Binding (2026-05-24)
 
 - Changed: `/dashboard/ops` now loads the latest search job, reads `GET /api/search-jobs/:id/traces`, and maps D1 traces into the Multi-Agent Status Board, Pipeline Execution, metrics, and Tool Call Console. (codex)

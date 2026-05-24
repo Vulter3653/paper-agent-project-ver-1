@@ -100,7 +100,7 @@ export const opsImplementationStatus: FeatureImplementationItem[] = [
   { feature: "Agent Status Board", status: "live", evidence: "GET /api/search-jobs/:id/traces 기반 D1 trace 표시", next: "Critic 세부 flag 저장 후 확장" },
   { feature: "Tool Call Console", status: "partial", evidence: "agent_traces summary를 console log로 표시", next: "개별 외부 API request/response log 저장" },
   { feature: "Vectorize Status", status: "planned", evidence: "UI 위치만 확보", next: "Vectorize index와 embedding relevance 구현" },
-  { feature: "Google Drive PDF Archive", status: "planned", evidence: "UI 위치만 확보", next: "OA PDF만 Drive 저장 및 drive_file_id 저장" },
+  { feature: "Google Drive PDF Archive", status: "partial", evidence: "OA PDF URL이 있는 결과를 Google Drive service account로 업로드", next: "Drive 공유 정책과 실패 재시도 UI 추가" },
   { feature: "Critic Review", status: "mock", evidence: "미완성 Mock: Critic Agent 결과 저장 전", next: "Critic Agent flags/risk_level 저장" }
 ];
 
@@ -189,7 +189,7 @@ export const toolCallLogs: ToolLog[] = [
 export const systemStatuses: SystemStatus[] = [
   { name: "Cloudflare D1", status: "Connected", detail: "search_jobs / papers / evaluations", tone: "green" },
   { name: "Cloudflare R2", status: "Ready", detail: "paper-agent-outputs bucket", tone: "green" },
-  { name: "Google Drive", status: "미완성", detail: "OA PDF archive target, API 연결 전", tone: "amber" },
+  { name: "Google Drive", status: "부분 구현", detail: "OA PDF service-account upload path connected", tone: "amber" },
   { name: "Vectorize", status: "미완성", detail: "abstract embedding index 연결 전", tone: "blue" },
   { name: "Remote MCP", status: "Online", detail: "paper-agent-mcp /mcp", tone: "purple" },
   { name: "Pages UI", status: "부분 구현", detail: "route shell 배포, 일부 패널은 미완성 Mock", tone: "amber" }

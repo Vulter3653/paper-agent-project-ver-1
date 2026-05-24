@@ -79,6 +79,10 @@ export type PaperSummary = {
   oaRepository?: string;
   unpaywallStatus?: "found" | "not_found" | "skipped" | "failed";
   unpaywallReason?: string;
+  driveFileId?: string;
+  driveWebUrl?: string;
+  driveStatus?: "uploaded" | "skipped" | "failed";
+  driveReason?: string;
   relevanceScore?: number;
   journalFitScore?: number;
   verificationScore?: number;

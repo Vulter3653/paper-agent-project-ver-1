@@ -38,6 +38,10 @@ CREATE TABLE IF NOT EXISTS papers (
   oa_repository TEXT,
   unpaywall_status TEXT,
   unpaywall_reason TEXT,
+  drive_file_id TEXT,
+  drive_web_url TEXT,
+  drive_status TEXT,
+  drive_reason TEXT,
   created_at TEXT NOT NULL,
   FOREIGN KEY (job_id) REFERENCES search_jobs(id) ON DELETE CASCADE
 );

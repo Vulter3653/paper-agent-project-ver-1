@@ -50,6 +50,10 @@ type PaperRow = {
   oa_pdf_url: string | null;
   oa_landing_page_url: string | null;
   unpaywall_status: string | null;
+  drive_file_id: string | null;
+  drive_web_url: string | null;
+  drive_status: string | null;
+  drive_reason: string | null;
   abstract_score: number | null;
   relevance_score: number | null;
   journal_fit_score: number | null;
@@ -102,6 +106,10 @@ const REQUIRED_COLUMNS = [
       "oa_repository",
       "unpaywall_status",
       "unpaywall_reason",
+      "drive_file_id",
+      "drive_web_url",
+      "drive_status",
+      "drive_reason",
       "created_at"
     ]
   },
@@ -360,6 +368,10 @@ async function listPapers(db: D1Database, jobId: string, limit: number) {
         p.oa_pdf_url,
         p.oa_landing_page_url,
         p.unpaywall_status,
+        p.drive_file_id,
+        p.drive_web_url,
+        p.drive_status,
+        p.drive_reason,
         e.abstract_score,
         e.relevance_score,
         e.journal_fit_score,
@@ -410,6 +422,10 @@ function mapPaper(row: PaperRow) {
     oaPdfUrl: row.oa_pdf_url ?? "",
     oaLandingPageUrl: row.oa_landing_page_url ?? "",
     unpaywallStatus: row.unpaywall_status ?? "skipped",
+    driveFileId: row.drive_file_id ?? "",
+    driveWebUrl: row.drive_web_url ?? "",
+    driveStatus: row.drive_status ?? "skipped",
+    driveReason: row.drive_reason ?? "",
     scores: {
       abstract: row.abstract_score ?? 0,
       relevance: row.relevance_score ?? 0,
