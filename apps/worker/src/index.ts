@@ -473,7 +473,7 @@ function createSearchJob(keyword: string, status: SearchJob["status"], searchPro
     keyword,
     status,
     currentStep: status === "searching" ? getSearchStepId(searchProvider) : "ranking",
-    totalSteps: 6,
+    totalSteps: 12,
     createdAt: now
   };
 }
@@ -661,6 +661,7 @@ async function ensureColumn(db: D1Database, tableName: string, columnName: strin
 }
 
 async function getDiagnostics(env: Env): Promise<DiagnosticsResponse> {
+  if (env.DB) await ensureSchema(env.DB);
   const missingColumns = env.DB ? await getMissingColumns(env.DB) : [];
   const searchProvider = normalizeSearchProvider(env.SEARCH_PROVIDER);
   const wosApiKey = getWosApiKey(env);
@@ -827,8 +828,9 @@ async function saveSearchFailure(db: D1Database, job: SearchJob, error: unknown)
 
 async function recordAgentTrace(db: D1Database, job: SearchJob, trace: AgentTraceInput): Promise<void> {
   const now = new Date().toISOString();
+  const status = trace.status ?? "completed";
   const startedAt = trace.startedAt ?? now;
-  const completedAt = trace.completedAt ?? (trace.status === "completed" || trace.status === "failed" || trace.status === "skipped" ? now : undefined);
+  const completedAt = trace.completedAt ?? (status === "running" || status === "pending" ? undefined : now);
   const id = job.id + "-trace-" + String(trace.stepOrder).padStart(2, "0") + "-" + trace.stepId;
   await db
     .prepare(
@@ -844,7 +846,7 @@ async function recordAgentTrace(db: D1Database, job: SearchJob, trace: AgentTrac
       trace.stepOrder,
       trace.stepId,
       trace.agentName,
-      trace.status ?? "completed",
+      status,
       trace.summary,
       trace.detail ?? null,
       trace.inputCount ?? 0,

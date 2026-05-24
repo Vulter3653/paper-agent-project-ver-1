@@ -22,6 +22,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-24 (codex)
 
+- Fixed: Ensured Worker diagnostics runs schema bootstrap before checking columns, set new search jobs to 12 total steps, and completed trace rows now receive completion timestamps. (codex)
+
 - Added: Persisted Worker multi-agent execution traces in D1 and exposed trace read APIs for dashboard and MCP inspection. (codex)
 - Changed: Replaced misleading dashboard mock metric/status values with explicit incomplete mock placeholders in final dashboard routes. (codex)
 

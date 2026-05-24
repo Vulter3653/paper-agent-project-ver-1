@@ -1,6 +1,7 @@
 # Debug Log
 
 ## 2026-05-24 - Agent Trace Persistence
+- Follow-up fix: `/api/diagnostics` initially reported 14 missing `agent_traces` columns because it checked schema before running bootstrap. Diagnostics now calls `ensureSchema`, new jobs use 12 total steps, and completed traces get completion timestamps. (codex)
 
 - Context: Benchmark work is deferred until team outputs are merged, so the next product priority is replacing dashboard mock workflow state with persisted execution traces. (codex)
 - Change: Added D1 `agent_traces` schema, Worker trace recording, Worker trace API, MCP trace read tool, and dashboard trace panel. (codex)

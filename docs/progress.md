@@ -76,6 +76,7 @@ Updated: 2026-05-24 (codex dashboard mock clarity)
 - Verification: `npm run typecheck` and `npm run build:web` passed in this session. (codex)
 
 ## codex - Agent Trace Persistence (2026-05-24)
+- Fixed: Diagnostics now runs `ensureSchema` before column checks, so `agent_traces` bootstrap is reflected in `/api/diagnostics`. New jobs now report `totalSteps: 12`, and completed traces receive `completedAt`. (codex)
 
 - Added: `agent_traces` D1 schema support in Worker schema bootstrap and static schema file. (codex)
 - Added: Worker trace writes for Planner, Journal Selector, Search/Retriever, Verifier, Open Access, Storage, Evaluation, Relevance, Ranking, Critic, Report, and Delivery stages. (codex)
