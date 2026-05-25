@@ -2,6 +2,12 @@
 
 Updated: 2026-05-25 (codex blueprint and ranked table layout)
 
+## codex - Research Table Detail Panel Separation (2026-05-25)
+
+- Fixed: Changed the Research dashboard layout so Ranked Papers always uses the full content width and Paper Detail / Recent Jobs render below it in a responsive side-section grid. (codex)
+- Reason: The previous breakpoint still allowed Paper Detail to sit beside the table on wider screens, so the Score column could remain visually covered or compressed. (codex)
+- Verification: `npm run typecheck`, `npm run build:web`, `npm run build`, and `git diff --check` passed in this session. (codex)
+
 ## codex - Blueprint Refresh And Ranked Table Layout (2026-05-25)
 
 - Docs: Refreshed `docs/workflow.md` so the project blueprint matches the current implemented state: D1 `agent_traces`, `critic_flags`, `job_outputs`, R2 CSV/Markdown/XLSX/PDF, and conditional Google Drive OA PDF archive. (codex)

@@ -22,6 +22,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-25 (codex)
 
+- Fixed: Moved the Research dashboard Paper Detail area below the Ranked Papers table so it can no longer obscure the right-side Score column. (codex)
 - Docs: Updated `docs/workflow.md` as the current full blueprint, reflecting D1 traces, critic flags, R2 CSV/Markdown/XLSX/PDF outputs, and conditional Google Drive OA PDF archival. (codex)
 - Fixed: Adjusted the Research dashboard Ranked Papers table sizing, column widths, and responsive stacking so the Status, OA, and Score columns remain visible through horizontal scrolling. (codex)
 - Docs: Cleaned up 2026-05-25 progress/debug headings so PDF, XLSX, dashboard artifact visibility, skeleton persistence, and enrichment trace records are separated for handoff. (codex)

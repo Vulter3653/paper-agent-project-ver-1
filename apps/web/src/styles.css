@@ -558,13 +558,18 @@ h1 {
   align-items: start;
   display: grid;
   gap: 18px;
-  grid-template-columns: minmax(760px, 1fr) minmax(320px, 370px);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .mainColumn,
 .sideColumn {
   display: grid;
   gap: 18px;
+  min-width: 0;
+}
+
+.sideColumn {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .tablePanel,
@@ -858,16 +863,6 @@ dd {
   }
 }
 
-@media (max-width: 1180px) {
-  .contentGrid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sideColumn {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 900px) {
   .toolbar,
   .operationsGrid,
@@ -905,8 +900,7 @@ dd {
     grid-template-columns: 1fr;
   }
 
-  .diagnosticsPanel,
-  .sideColumn {
+  .diagnosticsPanel {
     margin-top: 18px;
   }
 

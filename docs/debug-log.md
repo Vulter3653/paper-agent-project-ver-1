@@ -1,5 +1,12 @@
 # Debug Log
 
+## 2026-05-25 - Research Table Detail Panel Separation
+
+- Context: The first Ranked Papers sizing fix improved the table columns, but Paper Detail still shared the same desktop grid row and could continue to cover or squeeze the Score column. (codex)
+- Change: Removed the desktop two-column content grid for the Research results area. Ranked Papers now occupies the full content width, while Paper Detail and Recent Jobs are placed below it in a responsive grid. (codex)
+- Expected effect: Paper Detail cannot overlap the Ranked Papers table, and users can access Rank through Score in one interactive table area. (codex)
+- Verification: `npm run typecheck`, `npm run build:web`, `npm run build`, and `git diff --check` passed in this session. (codex)
+
 ## 2026-05-25 - Blueprint Refresh And Ranked Table Layout
 
 - Context: The workflow blueprint still described Drive upload, Critic Agent records, XLSX, PDF, and full report artifacts as planned or partial even though the current Worker/Dashboard implementation now exposes those paths. The Research dashboard Ranked Papers table also compressed the main column beside the detail panel, causing the right-side Status/OA/Score columns to be hidden in the interactive screen. (codex)
