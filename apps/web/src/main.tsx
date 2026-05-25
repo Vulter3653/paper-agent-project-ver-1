@@ -708,12 +708,13 @@ function CriticFlagsList({ flags, errorMessage }: { flags: CriticFlag[]; errorMe
 function OutputArtifactsPanel({
   job, outputs, errorMessage, onRefresh
 }: { job: SearchJob | null; outputs: JobOutput[]; errorMessage: string; onRefresh: () => void }) {
+  const displayOutputs = getDisplayOutputs(job, outputs);
   return (
     <section className="diagnosticsPanel outputArtifactsPanel">
       <div className="diagnosticsHeader">
         <div>
           <h2>Output Artifacts</h2>
-          <p>{outputs.length ? String(outputs.length) + " job outputs recorded" : job ? "No output metadata loaded" : "Run or load a job"}</p>
+          <p>{displayOutputs.length ? String(displayOutputs.length) + " download endpoints available" : job ? "No output endpoints loaded" : "Run or load a job"}</p>
         </div>
         <button className="iconButton" onClick={onRefresh} disabled={!job} aria-label="Refresh output artifacts" title="Refresh output artifacts">
           <RefreshCw size={18} />
@@ -721,7 +722,7 @@ function OutputArtifactsPanel({
       </div>
       {errorMessage ? <p className="errorMessage compact">{errorMessage}</p> : null}
       <div className="artifactList">
-        {outputs.length ? outputs.map((output) => (
+        {displayOutputs.length ? displayOutputs.map((output) => (
           <article className="artifactItem" key={output.id}>
             <div>
               <strong>{output.outputType.toUpperCase()}</strong>
@@ -734,6 +735,44 @@ function OutputArtifactsPanel({
       </div>
     </section>
   );
+}
+
+function getDisplayOutputs(job: SearchJob | null, outputs: JobOutput[]): JobOutput[] {
+  if (!job) return outputs;
+  const defaults: JobOutput[] = [
+    buildDefaultOutput(job, "csv", "papers.csv", "text/csv; charset=utf-8", "CSV is available from the Worker endpoint."),
+    buildDefaultOutput(job, "markdown", "report.md", "text/markdown; charset=utf-8", "Markdown report is available from the Worker endpoint."),
+    buildDefaultOutput(job, "xlsx", "papers.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "XLSX workbook is available from the Worker endpoint."),
+    buildDefaultOutput(job, "pdf", "report.pdf", "application/pdf", "PDF report is available from the Worker endpoint.")
+  ];
+  return defaults.map((fallback) => {
+    const existing = outputs.find((output) => output.outputType === fallback.outputType);
+    if (!existing) return fallback;
+    return {
+      ...fallback,
+      ...existing,
+      status: existing.status === "planned" ? fallback.status : existing.status,
+      storage: existing.storage === "planned" ? fallback.storage : existing.storage,
+      urlPath: existing.urlPath || fallback.urlPath,
+      contentType: existing.contentType || fallback.contentType,
+      detail: existing.detail || fallback.detail
+    };
+  });
+}
+
+function buildDefaultOutput(job: SearchJob, outputType: JobOutput["outputType"], fileName: string, contentType: string, detail: string): JobOutput {
+  return {
+    id: job.id + "-output-fallback-" + outputType,
+    jobId: job.id,
+    outputType,
+    status: job.status === "completed" ? "generated" : "planned",
+    storage: "dynamic",
+    objectKey: "",
+    urlPath: "/api/search-jobs/" + job.id + "/" + fileName,
+    contentType,
+    detail,
+    createdAt: job.completedAt ?? job.createdAt
+  };
 }
 
 function JournalRankBadge({ paper }: { paper: PaperSummary }) {

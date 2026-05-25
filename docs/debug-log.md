@@ -1,5 +1,12 @@
 # Debug Log
 
+## 2026-05-25 - Output Artifact PDF Fallback
+
+- Context: PDF generation endpoint worked, but the Output Artifacts panel depended on persisted `job_outputs` metadata. Existing jobs without a PDF metadata row showed no active PDF artifact. (codex)
+- Change: Added dashboard fallback artifact rows for CSV, Markdown, XLSX, and PDF based on the selected job id, while preserving real D1 metadata when present. (codex)
+- Expected effect: PDF download is available in Output Artifacts for completed jobs even if the job predates the PDF output metadata row. (codex)
+- Verification: `npm run typecheck`, `npm run build:web`, `npm run build`, and `git diff --check` passed in this session. (codex)
+
 ## 2026-05-25 - PDF Dashboard Download Actions
 
 - Context: PDF generation and the `/report.pdf` endpoint were implemented, but dashboard users had to find the artifact link or manually open the endpoint. (codex)

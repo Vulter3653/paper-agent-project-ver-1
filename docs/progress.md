@@ -1,6 +1,12 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-25 (codex PDF dashboard download actions)
+Updated: 2026-05-25 (codex output artifact endpoint fallback)
+
+## codex - Output Artifact Endpoint Fallback (2026-05-25)
+
+- Fixed: Output Artifacts now synthesizes default CSV, Markdown, XLSX, and PDF endpoint rows for the active job when D1 output metadata is missing, planned, or lacks a URL. (codex)
+- Context: Older jobs can still generate `report.pdf` dynamically, but their `job_outputs` rows may not include a PDF artifact, leaving the dashboard PDF download inactive. (codex)
+- Verification: `npm run typecheck`, `npm run build:web`, `npm run build`, and `git diff --check` passed in this session. (codex)
 
 ## codex - PDF Dashboard Download Actions (2026-05-25)
 
