@@ -2,6 +2,12 @@
 
 Updated: 2026-05-26 (gemini critic & vectorize)
 
+## codex - Gemini Strict Worker Debug Handoff (2026-05-26)
+
+- Docs: Added `docs/gemini-debug-handoff.md` with exact Worker debug facts, known bad command, correct local commands, decision rules, and required end-of-session debug record. (codex)
+- Docs: Updated `GEMINI.md`, `docs/gemini-session-state.md`, and `docs/local-worker-troubleshooting.md` so Gemini must read the Worker debug handoff before Worker source/config changes. (codex)
+- Verification: `git diff --check`, `npm run typecheck`, and handoff link inspection passed in this session. (codex)
+
 ## codex - Local Worker Troubleshooting (2026-05-26)
 
 - Checked: Production Worker read-only smoke and minimal search smoke passed, including CSV, Markdown, XLSX, and PDF endpoints. (codex)

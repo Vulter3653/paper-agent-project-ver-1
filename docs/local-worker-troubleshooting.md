@@ -4,6 +4,10 @@ Updated: 2026-05-26 (codex)
 
 Use this file when the Worker appears abnormal in local development or after Gemini/Codex refactors.
 
+## Gemini Mandatory Handoff
+
+Gemini must also read `docs/gemini-debug-handoff.md` before changing Worker code or config. The debug handoff records the exact production/local checks that were confirmed by Codex. (codex)
+
 ## Current Confirmed Status
 
 - Production Worker read-only smoke passed against `https://paper-agent-project.shch3653.workers.dev`. (codex)

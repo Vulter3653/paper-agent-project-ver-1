@@ -13,6 +13,8 @@ Read these files before editing:
 - `docs/agent-writing-rules.md`
 - `docs/gemini-handoff-blueprint.md`
 - `docs/gemini-review-feedback.md`
+- `docs/gemini-debug-handoff.md`
+- `docs/local-worker-troubleshooting.md`
 - `docs/progress.md`
 - `docs/debug-log.md`
 - `CHANGELOG.md`
@@ -31,6 +33,7 @@ Read these files before editing:
 - Tracked Wrangler configs currently exclude `AI` and `VECTOR_INDEX` bindings to avoid deployment failure before human setup. (codex)
 - LLM Critic severity values are sanitized before critic flags are persisted. (codex)
 - Local Worker troubleshooting scripts and docs were added after verifying production smoke and local health behavior. (codex)
+- Gemini must classify Worker issues before editing source code: source-code defect, local environment, Cloudflare runtime/config, or expected Wrangler noise. (codex)
 
 ## Required End-Of-Session Snapshot
 

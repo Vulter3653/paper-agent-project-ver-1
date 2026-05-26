@@ -33,6 +33,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-26 (codex)
 
+- Docs: Added `docs/gemini-debug-handoff.md` and strict Worker debug discipline for Gemini so local/production Worker findings are transferred without relying on memory. (codex)
 - Fixed: Relaxed local Worker smoke diagnostics readiness when `REQUIRE_READY=false` so local runs without provider secrets can still verify health, schema, and recent-job routes. (codex)
 - Docs: Added `docs/local-worker-troubleshooting.md` and explicit local Worker dev/smoke scripts after verifying production and local Worker behavior. (codex)
 - Docs: Added `docs/gemini-session-state.md` and Gemini memory-continuity rules so Gemini can resume from repository state instead of unreliable session memory. (codex)

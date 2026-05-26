@@ -1,5 +1,12 @@
 # Debug Log
 
+## 2026-05-26 - Gemini Strict Worker Debug Handoff
+
+- Context: The user requested that the Worker debug findings be transferred strictly to Gemini because Gemini does not reliably remember previous sessions. (codex)
+- Change: Added `docs/gemini-debug-handoff.md` and updated Gemini operating/session/troubleshooting docs to require reading it before Worker code or config changes. (codex)
+- Expected effect: Gemini should classify Worker failures as source-code, local-env, Cloudflare-runtime/config, or expected Wrangler noise before editing source. (codex)
+- Verification: `git diff --check`, `npm run typecheck`, and handoff link inspection passed in this session. (codex)
+
 ## 2026-05-26 - Local Worker Runtime Check
 
 - Context: The user reported continuing Worker abnormalities and requested local confirmation. (codex)
