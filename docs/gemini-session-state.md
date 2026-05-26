@@ -30,6 +30,7 @@ Read these files before editing:
 - Optional LLM Critic and Vectorize code paths are acceptable as code-ready features, but runtime activation remains gated by Cloudflare resource setup. (codex)
 - Tracked Wrangler configs currently exclude `AI` and `VECTOR_INDEX` bindings to avoid deployment failure before human setup. (codex)
 - LLM Critic severity values are sanitized before critic flags are persisted. (codex)
+- Local Worker troubleshooting scripts and docs were added after verifying production smoke and local health behavior. (codex)
 
 ## Required End-Of-Session Snapshot
 

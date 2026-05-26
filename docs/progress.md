@@ -2,6 +2,15 @@
 
 Updated: 2026-05-26 (gemini critic & vectorize)
 
+## codex - Local Worker Troubleshooting (2026-05-26)
+
+- Checked: Production Worker read-only smoke and minimal search smoke passed, including CSV, Markdown, XLSX, and PDF endpoints. (codex)
+- Checked: Local Worker starts with `npm run dev --workspace apps/worker -- --port 8787`; `/api/health` returns `ok: true`. Local diagnostics can show missing provider secrets unless `.dev.vars` is configured. (codex)
+- Fixed: Added explicit `dev:worker:local`, `smoke:worker:local`, Worker workspace `dev:local`, and Worker workspace `smoke:local` scripts to avoid the `wrangler dev 8787` argument-forwarding failure. (codex)
+- Docs: Added `docs/local-worker-troubleshooting.md` with correct commands, expected local diagnostics, optional `.dev.vars`, and Wrangler RPC-noise guidance. (codex)
+- Fixed: Worker smoke script now honors `REQUIRE_READY=false` for local diagnostics without provider secrets. (codex)
+- Verification: production `npm run smoke:worker`, production minimal search smoke, local `npm run smoke:worker:local`, `npm run typecheck`, `npm run build:web`, `npm run build`, and `git diff --check` passed in this session. (codex)
+
 ## codex - Gemini Work Review And Push Prep (2026-05-26)
 
 - Reviewed: Gemini's Worker modularization, optional LLM Critic path, optional Vectorize relevance path, and repository-rule updates were inspected before personal-repo push. (codex)

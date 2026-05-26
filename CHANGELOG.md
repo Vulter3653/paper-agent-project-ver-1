@@ -33,6 +33,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-26 (codex)
 
+- Fixed: Relaxed local Worker smoke diagnostics readiness when `REQUIRE_READY=false` so local runs without provider secrets can still verify health, schema, and recent-job routes. (codex)
+- Docs: Added `docs/local-worker-troubleshooting.md` and explicit local Worker dev/smoke scripts after verifying production and local Worker behavior. (codex)
 - Docs: Added `docs/gemini-session-state.md` and Gemini memory-continuity rules so Gemini can resume from repository state instead of unreliable session memory. (codex)
 - Fixed: Sanitized LLM Critic severity values before adding AI-generated critic flags. (codex)
 - Fixed: Reviewed Gemini Worker modularization, removed unverified Cloudflare AI/Vectorize deployment bindings from tracked Wrangler configs, and added `.gitignore` safeguards for local reference artifacts. (codex)

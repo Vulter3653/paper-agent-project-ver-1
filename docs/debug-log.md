@@ -1,5 +1,15 @@
 # Debug Log
 
+## 2026-05-26 - Local Worker Runtime Check
+
+- Context: The user reported continuing Worker abnormalities and requested local confirmation. (codex)
+- Finding: Production Worker health, diagnostics, recent jobs, minimal search, and CSV/Markdown/XLSX/PDF endpoints passed. Minimal search created job `job-1ce620dd-1588-474c-b07b-61f76010e33b`. (codex)
+- Finding: The incorrect command `npm run dev:worker -- --port 8787` can become `wrangler dev 8787` and fail because Wrangler treats `8787` as an entry-point file. (codex)
+- Finding: The correct local command `npm run dev --workspace apps/worker -- --port 8787` starts the Worker; local `/api/health` returns `ok: true`, while diagnostics report provider secrets missing unless local `.dev.vars` exists. (codex)
+- Change: Added explicit local Worker dev/smoke scripts and `docs/local-worker-troubleshooting.md`. (codex)
+- Fix: Updated Worker smoke script so `REQUIRE_READY=false` allows local diagnostics with missing provider secrets while still checking D1 binding and schema columns. (codex)
+- Verification: production `npm run smoke:worker`, production minimal search smoke, local `npm run smoke:worker:local`, `npm run typecheck`, `npm run build:web`, `npm run build`, and `git diff --check` passed in this session. (codex)
+
 ## 2026-05-26 - Gemini Review Corrections
 
 - Context: Gemini's local work added useful Worker modularization plus AI/Vectorize code paths, but also added production Wrangler bindings before the corresponding Cloudflare resources were confirmed and included local reference artifacts in the local branch history. (codex)
