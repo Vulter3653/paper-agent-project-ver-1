@@ -55,3 +55,11 @@ Add a short summary below before opening a PR.
 - T003 replacements: Hartmann, Exner & Domdey 2025 in `International Journal of Research in Marketing`; Heitmann et al. 2025 in `Journal of Marketing`; Grewal et al. 2024/2025 in `Journal of the Academy of Marketing Science`. Existing G061 Kapoor & Kumar 2025 in `Marketing Science` was preserved. (jin23624)
 - Verification command passed: `npm run benchmark:evaluate-proposed`. Observed macro metrics after gold refinement: Precision@5=0.1333, NDCG@5=0.3579, Gold DOI Hit Rate@5=0.1944, verifiedGold=10, goldMatches=2. (jin23624)
 - Remaining uncertainty: T001 G003 is relevant and DOI-backed but not in the local approved S/A1 allowlist; replace it later if a stronger top-journal AI recruitment/employer-attraction paper is identified. (jin23624)
+
+## 2026-05-27 Gold Refinement (T004-T006)
+
+- Verified all 8 gold labels for T004-T006 (G011-G018). G010 was already verified. (gemini)
+- T004 (Algorithmic Management Trust): Added Parent-Rocheleau & Parker (2022, JAP, S) and Jago & Anicich (2023, JESP, A1) papers. (gemini)
+- T005 (AI Transparency Consumer Trust): Added Shin (2020, CHB, A1), Puntoni et al. (2021, JM, S), and Schilke & Reimann (2025, OBHDP, A1/S) papers. (gemini)
+- T006 (Chatbot Service Failure Satisfaction): Added Rese & Witthohn (2025, JRCS, A1), Liu et al. (2026, JRIM, A1), and Choi, Mattila & Bolton (2021, JSR, S) papers. (gemini)
+- All rows updated with real DOI and verified metadata via Crossref/Google search. (gemini)
