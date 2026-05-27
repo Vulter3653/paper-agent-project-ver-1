@@ -160,6 +160,33 @@ export default {
       }
     }
 
+    if (url.pathname === "/api/benchmark-metrics" && request.method === "GET") {
+      try {
+        // 실제 운영 환경에서는 D1 또는 R2에서 읽어오거나 빌드 시점에 주입되어야 합니다.
+        // 현재는 benchmark/proposed_agent_metrics_summary.json의 최신 데이터를 반환합니다.
+        return json({
+          tasks: 3,
+          results: 15,
+          gold: 10,
+          verifiedGold: 10,
+          goldMatches: 2,
+          doiMatches: 2,
+          macroAverages: {
+            precision_at_k: 0.1333,
+            ndcg_at_k: 0.3579,
+            gold_doi_hit_rate_at_k: 0.1944,
+            doi_accuracy_at_k: 1,
+            paper_validity_rate_at_k: 1,
+            top_journal_precision_at_k: 1,
+            hallucination_rate_at_k: 0,
+            oa_success_rate_at_k: 0
+          }
+        });
+      } catch (error) {
+        return json({ error: getErrorMessage(error) }, 500);
+      }
+    }
+
     if (url.pathname === "/api/search-jobs" && request.method === "GET") {
       try {
         if (!env.DB) return json({ error: "D1 database binding is not configured" }, 503);
