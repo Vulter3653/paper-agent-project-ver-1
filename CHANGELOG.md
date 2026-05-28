@@ -22,6 +22,9 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-27 (codex)
 
+- Docs: Recorded the 2026-05-28 handoff check: personal origin/main is ahead of organization main, member-c has a new baseline branch requiring selective review, and gold-label audit scripting remains the next uncompleted task. (codex)
+
+
 - Fixed: Corrected Gemini benchmark DOI/title mismatches for T012/T019, clarified /api/benchmark-metrics as a static snapshot, and recorded the review in docs/gemini-work-feedback-2026-05-27.md. (codex)
 
 

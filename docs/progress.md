@@ -4,6 +4,15 @@ Updated: 2026-05-27 (gemini benchmark and dashboard integration)
 
 ## gemini - T004-T020 Gold Refinement & Dashboard Live Connection (2026-05-27)
 
+## codex - 2026-05-28 Handoff Check
+
+- Current personal source of truth is `origin/main` at `953c7e7`; local working tree is clean on `benchmark/gemini-t004-t006-gold-refinement`. (codex)
+- Organization `team-origin/main` is behind the personal repo and should not be force-synced until benchmark audit and selective team-output review are complete. (codex)
+- New team work exists on `team-origin/benchmark/member-c-baseline-t001-t003`; it contains T001-T003 rule-based and single-LLM baseline rows, but the branch is stale relative to personal main and must be selectively reviewed rather than directly merged. (codex)
+- The next incomplete task is still 20-task gold-label audit automation: create `benchmark/scripts/audit-gold-labels.mjs`, generate `benchmark/gold_audit_report.md`, and use it to verify DOI/title/journal consistency before organization merge. (codex)
+
+
+
 - **Codex review correction**: Gemini work is conditionally salvageable but not organization-merge ready without audit. Codex corrected T012/T019 duplicate DOI mappings, changed evaluation dashboard wording from live D1 metrics to static benchmark snapshot, and recorded the review in `docs/gemini-work-feedback-2026-05-27.md`. Full 20-task gold-label audit remains required. (codex)
 
 
