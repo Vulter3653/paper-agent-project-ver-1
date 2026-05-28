@@ -98,6 +98,35 @@ The enhanced report reframes the submission around three priorities:
 2. Explicit multi-agent roles and traceable intermediate outputs.
 3. REPRO-Bench-style evaluation comparing Rule-based, Single-LLM, and Proposed Agent workflows.
 
+## Course Requirement Blueprint
+
+This section maps the current project to the final team-project announcement so the team can track what is already implemented, what is partial, and what still needs to be packaged for submission.
+
+| Course requirement | Current implementation | Remaining packaging work |
+| --- | --- | --- |
+| Domain problem definition | Clear domain: literature review automation for academic paper discovery, screening, ranking, and report generation. | Write a concise introduction that states the user, pain point, and why the current manual workflow is inefficient. |
+| Agent architecture | Multi-Agent workflow with Planner, Retriever, Verifier, Journal Selector, Relevance, Ranking, Critic, Report, and MCP inspection. | Make the paper narrative explicit about why each role exists and why a single LLM is not enough. |
+| RAG / Tool use / MCP | WoS, Crossref, Unpaywall, Google Drive, D1, R2, and read-only MCP are integrated. | Document the tool interface, prompts, and failure handling in a reproducible appendix. |
+| Reflection / self-correction | Rule-based critic flags and dashboard review panels exist; LLM Critic is opt-in. | Add a short section explaining the reflection loop and its limitations. |
+| Benchmark design | 20-task benchmark fixture, gold audit, baseline comparison, and auto-review scripts are implemented. | Freeze the benchmark protocol for the final paper and slides, including metric definitions and sample counts. |
+| Baseline comparison | Rule-based, Single-LLM, and Proposed Agent comparison is already available for T001-T003. | Decide whether to report the current T001-T003 control-layer result or extend the full 20-task run before final submission. |
+| Evaluation metrics | Precision@5, NDCG@5, DOI accuracy, top-journal precision, hallucination rate, OA success, latency, and report completeness are tracked. | Present the metrics in a single table with a brief interpretation of strengths and failure modes. |
+| Limitations & ethics | Paywall constraints, quota limits, hallucination risk, and journal bias are already acknowledged in docs. | Turn those notes into a formal Limitations & Ethics section for the paper. |
+| Reproducibility | GitHub repo, npm scripts, benchmark CSV/JSON artifacts, and deployment notes are available. | Add a final "How to run" section with exact commands, required env vars, and expected outputs. |
+| Final deliverables | Paper, slides, live demo, and GitHub repository are all required. | Package the repo README, demo script, and presentation outline for submission. |
+
+## Submission Blueprint
+
+Use the following order when preparing the final submission package:
+
+1. Freeze the implementation snapshot and note which parts are live, partial, and mocked.
+2. Finalize the benchmark story: task set, metric definitions, baseline comparison, and any scope limits.
+3. Draft the paper sections in this order: Abstract, Introduction, Related Work, Method, Experiments, Limitations, Conclusion.
+4. Prepare the slide deck around the same story: problem, architecture, benchmark, results, limitations, demo.
+5. Prepare a short live-demo script that demonstrates search, ranking, trace visibility, and artifact download.
+6. Ensure the GitHub repository contains README, prompts, benchmark files, and run instructions.
+
+
 ## Agent Responsibilities
 
 | Agent | Responsibility | Current Status | Next Implementation |

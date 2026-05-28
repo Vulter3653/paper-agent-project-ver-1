@@ -8,6 +8,12 @@ Updated: 2026-05-28 (codex dashboard Korean copy localization)
 - **Scope**: Updated visible panel titles, empty states, status summaries, table headers, scenario labels, artifact copy, and error fallbacks in apps/web/src/main.tsx, apps/web/src/dashboard/DashboardPages.tsx, and apps/web/src/dashboard/mockData.ts. (codex)
 - **Verification**: npm run typecheck, npm run build:web, and git diff --check passed. (codex)
 
+## codex - Course Blueprint Alignment (2026-05-28)
+
+- **Docs**: Added a course-requirement blueprint to docs/workflow.md that maps the final project announcement to current implementation, benchmark evidence, reproducibility, and final deliverables. (codex)
+- **Scope**: The blueprint now explicitly separates what is implemented, what is partial, and what still needs paper/slides/demo packaging. (codex)
+- **Verification**: Documentation-only update; no runtime behavior changed. (codex)
+
 ## codex - Dashboard Connection Refresh 1-3 (2026-05-28)
 
 - **Ops**: Connected Storage and Runtime cards to live `/api/diagnostics` values for D1 schema, provider readiness, WoS, Crossref, Unpaywall, R2, Drive, and OpenAlex fallback. (codex)
