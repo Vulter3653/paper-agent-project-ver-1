@@ -21,6 +21,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 _No unreleased changes._
 
 ## 2026-05-28 (codex)
+- Docs: Added final submission story, LaTeX paper draft, presentation outlines, and conservative LaTeX/PPT MCP setup guidance for final deliverable packaging. (codex)
+- Infra: Updated `.idx/dev.nix` to request Python, pip, pipx, and a small TeX Live environment required before enabling LaTeX/PPT MCP servers. (codex)
 - Docs: Verified the course blueprint progress against deployed dashboard and Worker APIs, confirming Pages routes, diagnostics, recent jobs, traces, outputs, critic flags, benchmark metrics, and GET artifact downloads. (codex)
 - Added: Added `scripts/validate-history-integrity.mjs`, `npm run validate:history`, and CI enforcement to block deletion of protected history headings, attribution lines, empty sections, and unexpected log truncation. (codex)
 - Docs: Added docs/history-audit-2026-05-28.md with a full tracked-file history audit, verified core ledgers, and documented remaining changelog cleanup risks. (codex)

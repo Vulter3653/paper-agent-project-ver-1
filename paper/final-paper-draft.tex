@@ -1,0 +1,81 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
+
+\title{A Multi-Agent Literature Review Assistant for Traceable Top-Journal Paper Discovery}
+\author{MON AI Team}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper presents Paper Agent, a deployed multi-agent system for business-school literature review automation. The system converts a research keyword into a traceable search job, retrieves candidate papers through scholarly APIs, filters results against an approved top-journal pool, verifies DOI metadata, enriches open-access status, ranks candidate papers, and generates downloadable review artifacts. The prototype is deployed on Cloudflare Pages, Workers, D1, R2, and a read-only MCP Worker. We evaluate the design against rule-based and single-LLM baselines using a repository-controlled benchmark with DOI-backed gold labels. The current results support the reproducibility and traceability of the workflow, while also showing limitations around provider quota, open-access availability, and benchmark coverage.
+\end{abstract}
+
+\section{Introduction}
+
+Literature review is a high-friction task for researchers because search, metadata verification, journal quality screening, open-access discovery, ranking, and report writing are usually performed across disconnected tools. A single LLM response is not sufficient for this task because it can hallucinate papers, misstate DOI metadata, ignore journal constraints, or hide intermediate errors.
+
+Paper Agent addresses this problem through an explicit multi-agent workflow. The system decomposes literature review into visible stages and records each stage as a job trace. This design makes the output easier to inspect, reproduce, and debug than an opaque one-shot response.
+
+\section{Related Work}
+
+The project is related to retrieval-augmented generation, tool-using agents, multi-agent planning, scholarly search systems, and automated evidence synthesis. Unlike a generic chatbot, the system uses external scholarly metadata providers and persistent storage. Unlike a static search dashboard, it exposes agent-level traces and report artifacts that can be audited after execution.
+
+\section{System Overview}
+
+The deployed architecture consists of a Cloudflare Pages dashboard, a Cloudflare Workers backend, Cloudflare D1 persistence, Cloudflare R2 output storage, and a read-only MCP Worker for inspection. The backend supports Web of Science as the primary search provider, OpenAlex as a fallback, Crossref for metadata enrichment, and Unpaywall for open-access metadata.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Component & Role & Status \\
+\midrule
+Pages dashboard & Research, Ops, Evaluation UI & Implemented \\
+Worker backend & Search jobs and report APIs & Implemented \\
+D1 & Jobs, papers, evaluations, traces & Implemented \\
+R2 & CSV, Markdown, XLSX, PDF artifacts & Implemented \\
+MCP Worker & Read-only diagnostics and results & Implemented \\
+Vectorize & Semantic relevance path & Optional \\
+LLM Critic & Qualitative review path & Optional \\
+\bottomrule
+\end{tabular}
+\caption{Current system components.}
+\end{table}
+
+\section{Multi-Agent Workflow}
+
+Paper Agent uses a 12-stage workflow: Planner, Journal Selector, Search/Retriever, Verifier, Open Access, Storage, Evaluation, Relevance, Ranking, Critic, Report, and Dashboard Delivery. Each stage records status, summary, input count, output count, and error fields where applicable.
+
+The separation is important because each step has distinct risks. Search can miss relevant papers, journal filtering can exclude useful evidence, DOI verification can find partial matches, open-access discovery can fail because PDFs are unavailable, and ranking can over-weight metadata features. The trace model helps users see where a result came from and where the workflow is incomplete.
+
+\section{Data And Tools}
+
+The journal pool is restricted to an approved business-school journal list. Candidate metadata is enriched with DOI, title, author, year, source title, citation counts, Crossref fields, and Unpaywall fields. Reports are generated as CSV, Markdown, XLSX, and PDF artifacts. The dashboard displays ranked papers, paper details, report previews, system checks, benchmark comparison, and implementation status labels.
+
+\section{Benchmark Design}
+
+The benchmark includes at least 20 tasks and DOI-backed gold-label files. The current controlled comparison layer uses T001--T003 with Rule-based, Single-LLM, and Proposed Multi-Agent result files. Scripts compute metrics such as Precision@5, NDCG@5, DOI accuracy, paper validity, top-journal precision, hallucination rate, and open-access success.
+
+\section{Results}
+
+The deployed prototype demonstrates that the complete search-to-report workflow can run through Cloudflare infrastructure and produce inspectable outputs. The current benchmark files show reproducible comparison against baselines, but the final performance claim remains bounded because the full 20-task Proposed Agent runtime collection is still pending expansion.
+
+\section{Limitations And Ethics}
+
+The system should not be treated as an authoritative literature review. It depends on external provider availability, API quota, journal-list coverage, metadata quality, DOI matching, and open-access availability. Ranking scores are decision-support signals, not final academic judgments. The system may also reinforce top-journal bias by excluding relevant work outside the approved journal pool. Users must verify important claims manually before citing papers.
+
+\section{Reproducibility}
+
+The repository contains the dashboard, worker, MCP server, benchmark files, scripts, prompts, operational documents, and changelog. Reproducible checks include type checking, dashboard build, benchmark evaluation, baseline comparison, history validation, and MCP smoke testing where the required runtime is available.
+
+\section{Conclusion}
+
+Paper Agent shows how a multi-agent and tool-using architecture can make literature review automation more traceable than a single LLM call. The current prototype implements the core deployed workflow and provides a reproducible benchmark foundation. Future work should expand full benchmark coverage, stabilize optional semantic and LLM critic paths, and improve provider-specific enrichment.
+
+\end{document}

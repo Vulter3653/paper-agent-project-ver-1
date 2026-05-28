@@ -2,6 +2,14 @@
 
 Updated: 2026-05-28 (codex blueprint and dashboard verification)
 
+## codex - Final Submission And LaTeX/PPT MCP Packaging (2026-05-28)
+
+- Added: Created docs/final-submission-story.md to freeze the final project narrative, implemented/partial boundary, benchmark claim boundary, dashboard demo path, and professor-evaluation mapping. (codex)
+- Added: Created paper/final-paper-draft.tex as a repository-native LaTeX draft for the final 8-12 page paper structure. (codex)
+- Added: Created presentation/final-presentation-outline.md and presentation/final-presentation-mcp.md so the 8-minute presentation can be built manually or through a Markdown-to-PPTX MCP. (codex)
+- MCP: Reviewed provided candidates and documented a conservative setup in docs/mcp-latex-ppt-setup.md: Yeok-c/latex-mcp-server for LaTeX workspace operations, takashiishida/arxiv-latex-mcp for optional arXiv source inspection, dmytro-ustynov/pptx-generator-mcp as the preferred Markdown-to-PPTX generator, and GongRzhe/Office-PowerPoint-MCP-Server as archived fallback only. (codex)
+- Infra: Updated .idx/dev.nix to request Python, pip, pipx, and TeX Live before enabling LaTeX/PPT MCP entries. The MCPs are intentionally not inserted into global client config until the runtime commands are verified after workspace restart. (codex)
+
 ## codex - Blueprint And Dashboard Connection Verification (2026-05-28)
 
 - Checked: Compared `docs/workflow.md` course requirement blueprint, agent responsibility table, workflow stages, benchmark status, and remaining planned/partial stages against the current deployed system. (codex)

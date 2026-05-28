@@ -1,5 +1,13 @@
 # Debug Log
 
+## codex - LaTeX/PPT MCP Runtime Guardrail (2026-05-28)
+
+- Context: The user requested LaTeX and PPT MCP support for final paper and presentation production and supplied arxiv-latex-mcp, Office-PowerPoint-MCP-Server, latex-mcp-server, and pptx-generator-mcp candidates. (codex)
+- Finding: The active workspace previously lacked python3, pip, uv/uvx, and pdflatex, so directly enabling these MCP servers in the client would risk the same startup-timeout and handshake failures seen in earlier MCP incidents. (codex)
+- Action: Added prerequisite packages to .idx/dev.nix and documented the installation and smoke-test order in docs/mcp-latex-ppt-setup.md. (codex)
+- Guardrail: Do not add LaTeX/PPT MCP entries to global client config until command -v python3, pip, pipx, uv, uvx, and pdflatex pass after workspace restart. (codex)
+- Note: apply_patch failed again because of the local bwrap sandbox helper issue; file edits were applied with narrow Node file writes and then verified. (codex)
+
 ## 2026-05-28 - Blueprint And Dashboard Connection Verification
 
 - Context: The user asked to confirm the project status against the professor evaluation blueprint and to verify dashboard connectivity. (codex)
