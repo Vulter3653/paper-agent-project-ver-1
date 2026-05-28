@@ -22,6 +22,8 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## 2026-05-28 (codex)
 
+- Benchmark: Added 15 fresh repository-grounded Single-LLM baseline rows for current T001-T003 tasks in benchmark/baseline_single_llm_results.csv. (codex)
+
 - Benchmark: Reviewed stale member-c baseline branch and documented why its CSV rows must not be reused directly; next baseline task is fresh Single-LLM T001-T003 collection. (codex)
 
 - Benchmark: Added benchmark/gold_audit_allowlist.json and separated accepted gold-audit warnings from active issues so controlled exceptions remain visible without blocking benchmark cleanup. (codex)

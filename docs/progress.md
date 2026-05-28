@@ -12,7 +12,8 @@ Updated: 2026-05-27 (gemini benchmark and dashboard integration)
 - Completed the 20-task gold-label audit automation by adding `benchmark/scripts/audit-gold-labels.mjs`, `npm run benchmark:audit-gold`, and generated reports at `benchmark/gold_audit_report.md` and `benchmark/gold_audit_report.json`. The current audit covers 60 rows across 20 tasks with 0 errors, 0 active warnings, and 2 accepted warnings tracked in `benchmark/gold_audit_allowlist.json`. (codex)
 - Fixed five benchmark CSV rows whose comma-containing titles were not quoted, which previously caused DOI/year/status columns to parse incorrectly. (codex)
 - Reviewed stale `team-origin/benchmark/member-c-baseline-t001-t003` outputs and recorded the result in `docs/member-c-baseline-review-2026-05-28.md`; no CSV rows should be reused directly because the branch uses older task topics and schema. (codex)
-- Next incomplete benchmark task: collect fresh Single-LLM baseline rows from current personal main using the current T001-T003 task definitions and current baseline CSV schema. (codex)
+- Collected 15 fresh Single-LLM baseline rows for T001-T003 in `benchmark/baseline_single_llm_results.csv` using the current task definitions and repository DOI-backed gold/proposed metadata as the verification source. (codex)
+- Next incomplete benchmark task: add or update baseline comparison metrics so Rule-based, Single-LLM, and Proposed Agent outputs can be compared in one reproducible summary. (codex)
 - Local environment verification after commit `dee1f1f`: local HEAD and `origin/main` match, working tree was clean, `node --check benchmark/scripts/audit-gold-labels.mjs`, `npm run benchmark:audit-gold`, `npm run benchmark:evaluate-proposed`, and `git diff --check` passed. `apply_patch` remains unreliable because of the local `bwrap` sandbox issue, so future file edits should use the repository filesystem tool or verified shell edits when needed. (codex)
 
 

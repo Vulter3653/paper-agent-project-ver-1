@@ -89,6 +89,13 @@ The benchmark will compare:
 2. Single LLM recommendation baseline
 3. Proposed top-journal-aware multi-agent workflow
 
+Current baseline rows:
+
+| Baseline | T001 | T002 | T003 | Total | Status |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Rule-based | 5 | 5 | 5 | 15 | Integrated from current proposed-agent candidate pool. |
+| Single-LLM | 5 | 5 | 5 | 15 | Fresh repository-grounded Codex single-pass baseline; not copied from stale member-c branch. |
+
 Target metrics:
 
 - Precision@5
@@ -188,7 +195,7 @@ Use the audited gold set as the benchmark control layer:
 
 1. Keep the 2 accepted warnings in `benchmark/gold_audit_allowlist.json` under review, especially if a stronger T001/G003 approved-journal replacement is found.
 2. Re-run `npm run benchmark:evaluate-proposed` after any gold-label or allowlist cleanup.
-3. Collect fresh Single-LLM baselines from current personal `main`; do not selectively reapply the stale member-c rows because `docs/member-c-baseline-review-2026-05-28.md` found older task topics and schema mismatch.
+3. Add or update baseline comparison metrics so Rule-based, Single-LLM, and Proposed Agent rows can be compared in one reproducible summary.
 4. Run the full 20 tasks through the deployed Worker only when ready to spend WoS quota, then update:
 
 ```text

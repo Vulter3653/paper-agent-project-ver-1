@@ -19,6 +19,13 @@
 - Finding: The branch baseline CSVs use an older schema and stale task topics: T001 dynamic capabilities, T002 governance/agency theory, and T003 service quality/customer satisfaction, while current tasks are AI interview employer branding, AI recruitment applicant reaction, and generative AI advertising effectiveness. (codex)
 - Decision: Do not reuse member-c CSV rows directly. Keep the current personal-repo rule-based rows and request or perform fresh Single-LLM baseline rows against the current task definitions. Detailed review saved to `docs/member-c-baseline-review-2026-05-28.md`. (codex)
 
+## 2026-05-28 - Fresh Single-LLM Baseline Collection
+
+- Context: After reviewing stale member-c rows, the next benchmark task was to populate `benchmark/baseline_single_llm_results.csv` from the current personal-repo task definitions. (codex)
+- Action: Added 15 Single-LLM baseline rows, five each for T001, T002, and T003, using the current task prompts and repository DOI-backed gold/proposed metadata as the verification source. (codex)
+- Guardrail: Did not import stale member-c branch rows. Each new row uses the current baseline schema and records whether it is a high-confidence direct fit or an adjacent baseline contrast in `review_note`. (codex)
+- Limitation: This is a repository-grounded Codex single-pass baseline, not an external live model/API run. It is reproducible and conservative, but should be replaced or supplemented if the team later defines a formal model-run baseline protocol. (codex)
+
 ## 2026-05-28 - Local Environment Verification
 
 - Context: The user asked whether the local environment had been checked and then requested that the result be recorded. (codex)
