@@ -1,6 +1,13 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-28 (codex dashboard Korean copy localization)
+Updated: 2026-05-28 (codex history integrity validator)
+
+## codex - History Integrity Validator (2026-05-28)
+
+- Added: Created `scripts/validate-history-integrity.mjs` to compare `CHANGELOG.md`, `docs/progress.md`, and `docs/debug-log.md` against the base branch. (codex)
+- Added: New `npm run validate:history` script and GitHub Actions step under `.github/workflows/agent-rules.yml`. (codex)
+- Enforced: The validator blocks deleted protected files, deleted `##` headings, deleted attribution lines, empty sections, and unexpected line-count drops. (codex)
+- Verification: `node --check scripts/validate-history-integrity.mjs`, `npm run validate:history`, and existing validation/build checks were run in this session. (codex)
 
 ## codex - Repository History Audit (2026-05-28)
 

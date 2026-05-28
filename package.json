@@ -26,6 +26,7 @@
     "smoke:mcp": "npm run smoke --workspace apps/mcp",
     "typecheck": "npm run typecheck --workspaces",
     "validate:agent-rules": "node scripts/validate-agent-rules.mjs",
+    "validate:history": "node scripts/validate-history-integrity.mjs",
     "build:web:staging": "npm run build:staging --workspace apps/web",
     "deploy:web:staging": "npm run deploy:staging --workspace apps/web",
     "deploy:worker:staging": "npm run deploy:staging --workspace apps/worker",

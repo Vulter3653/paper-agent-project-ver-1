@@ -21,6 +21,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 _No unreleased changes._
 
 ## 2026-05-28 (codex)
+- Added: Added `scripts/validate-history-integrity.mjs`, `npm run validate:history`, and CI enforcement to block deletion of protected history headings, attribution lines, empty sections, and unexpected log truncation. (codex)
 - Docs: Added docs/history-audit-2026-05-28.md with a full tracked-file history audit, verified core ledgers, and documented remaining changelog cleanup risks. (codex)
 - Docs: Reviewed Gemini local historical recovery, removed an accidental trailing marker from `docs/progress.md`, and verified core history files have no empty sections. (codex)
 - Docs: Recovered 1,041 lines of lost historical data in `docs/progress.md` from Git history (commit `336e1ea`) and established strict "Zero Deletion" and "Historical Integrity" protocols in `GEMINI.md` and `docs/agent-writing-rules.md`. (gemini)

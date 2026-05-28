@@ -1,5 +1,12 @@
 # Debug Log
 
+## 2026-05-28 - History Integrity Validator
+
+- Context: The user asked whether strict record preservation and data integrity can be maintained, then requested an automated validation script. (codex)
+- Fix: Added `scripts/validate-history-integrity.mjs` to compare protected history files against the base branch and fail on deleted headings, deleted attribution lines, empty sections, protected-file deletion, or unexpected line loss. (codex)
+- CI: Wired the validator into `.github/workflows/agent-rules.yml` after the agent scope validator. (codex)
+- Verification: `node --check scripts/validate-history-integrity.mjs` and `npm run validate:history` were used to verify the script. (codex)
+
 ## 2026-05-28 - Repository History Audit
 
 - Context: The user requested a full-file audit after confirming `CHANGELOG.md` records began on 2026-05-11 and asking whether other files had missing history. (codex)
