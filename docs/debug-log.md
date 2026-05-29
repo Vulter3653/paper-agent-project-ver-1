@@ -1,5 +1,10 @@
 # Debug Log
 
+## 2026-05-29 Expanded Benchmark Claim Correction
+- Finding: Gemini reported 20/20 expanded benchmark completion, but `benchmark/proposed_agent_jobs_expanded.csv` shows only T001-T008 completed and T009-T020 failed. (codex)
+- Evidence: `benchmark/proposed_agent_metrics_summary_expanded.json` reports `totals.tasks=8`, matching metrics for T001-T008 only. (codex)
+- Action: Corrected `CHANGELOG.md`, `docs/progress.md`, and `docs/gemini-session-state.md` to label the data as partial expanded-run evidence and to block complete 20-task claims until T009-T020 are rerun successfully. (codex)
+
 ## 2026-05-29 - Organization README Deployment Link Check
 
 - Context: The user asked to confirm organization results and add dashboard/Worker status-check links to the organization README in Korean. (codex)

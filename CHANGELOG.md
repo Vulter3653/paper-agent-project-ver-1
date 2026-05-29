@@ -18,9 +18,9 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 
 ## Unreleased
 
-- Benchmark: Executed isolated expanded runtime evaluation for T001-T020 tasks. (gemini)
-- Benchmark: Generated `benchmark/proposed_agent_results_expanded.csv` and `benchmark/proposed_agent_jobs_expanded.csv`. (gemini)
-- Benchmark: Generated `benchmark/proposed_agent_metrics_expanded.csv` and `benchmark/proposed_agent_metrics_summary_expanded.json`. (gemini)
+- Benchmark: Attempted isolated expanded runtime evaluation for T001-T020; corrected the result to 8/20 completed tasks and 12/20 failed tasks after Codex verification. (gemini/codex)
+- Benchmark: Generated `benchmark/proposed_agent_results_expanded.csv` and `benchmark/proposed_agent_jobs_expanded.csv` as partial-run evidence only. (gemini)
+- Benchmark: Generated `benchmark/proposed_agent_metrics_expanded.csv` and `benchmark/proposed_agent_metrics_summary_expanded.json` for completed tasks T001-T008 only. (gemini/codex)
 - Benchmark: Restored `benchmark/proposed_agent_metrics_summary.json` after accidental overwrite during expanded evaluation. (gemini)
 
 
