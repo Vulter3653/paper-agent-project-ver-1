@@ -6,7 +6,7 @@ This document freezes the project narrative for the paper, presentation, and liv
 
 ## One-Sentence Claim
 
-The project implements a Cloudflare-deployed multi-agent literature review assistant that turns a research keyword into traceable top-journal paper candidates, verified metadata, ranked results, downloadable reports, and dashboard-visible agent traces, addressing the high friction and fragmentation in business-school scholarly research.
+The project implements a Cloudflare-deployed multi-agent literature review assistant that provides a **traceable and trustworthy scholarly workflow** by turning research keywords into verified top-journal candidates with auditable agent traces and reproducible reports.
 
 ## Problem Definition
 

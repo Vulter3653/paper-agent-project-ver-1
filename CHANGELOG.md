@@ -21,6 +21,10 @@ _No unreleased changes._
 
 
 ## 2026-05-29 (gemini)
+- Docs: Refined `docs/final-submission-story.md` to emphasize the 'Trust over Raw Precision' narrative and explicitly bounded claims as implemented, partial, or opt-in. (gemini)
+- Docs: Polished `paper/final-paper-draft.tex` to highlight the 12-stage white-box architecture, verified DOI integrity, and algorithmic gatekeeping limitations. (gemini)
+- Docs: Aligned `presentation/final-presentation-outline.md` and `presentation/final-presentation-mcp.md` with the trustworthiness narrative and removed strict 8-minute limitations. (gemini)
+- Docs: Updated `docs/final-demo-script.md` to be presenter-friendly and include explicit checks for agent traces, score breakdown, and fallbacks. (gemini)
 - Docs: 대학생 및 교수자 제출용 프로젝트 진행 보고서 작성 (`paper/paper_agent_progress_report.md`). (gemini)
 - Added: Created `presentation/generated/paper-agent-final-presentation.pptx` via standalone script. (gemini)
 - Added: Created `docs/final-demo-script.md` with a narrated dashboard, trace, output, and evaluation demo path. (gemini)

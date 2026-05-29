@@ -7,7 +7,7 @@ Target duration: 8 minutes plus Q&A.
 ## Slide 1 - Title And Claim
 
 Title: Paper Agent: From Black-Box AI to Traceable Multi-Agent Research
-Subtitle: Automating Academic Rigor in Business Literature Review
+Subtitle: Automating Scholarly Discovery with Verified Metadata and Auditable Traces
 
 Key message: We move beyond generative AI "hallucinations" to a 12-stage modular system that executes real scholarly searches with traceable top-journal compliance in the controlled sample.
 

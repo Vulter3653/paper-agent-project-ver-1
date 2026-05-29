@@ -2,7 +2,7 @@
 discipline: AI Agent 기반 도메인 문제 해결 프로젝트
 type: lecture
 module: "Final Team Project"
-lesson: "Paper Agent: From Black-Box AI to Traceable Multi-Agent Research"
+lesson: "Paper Agent: From Black-Box AI to Traceable and Trustworthy Research"
 ---
 
 ## [plan] 발표 구성

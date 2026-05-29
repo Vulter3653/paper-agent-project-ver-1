@@ -6,7 +6,7 @@
 \usepackage{url}
 \pagestyle{plain}
 
-\title{A Multi-Agent Literature Review Assistant for Traceable and Rigorous Scholarly Discovery}
+\title{Paper Agent: A Multi-Agent Framework for Traceable and Trustworthy Scholarly Discovery}
 \author{MON AI Team\\AI Agent Based Domain Problem Solving Project\\Sungkyunkwan University}
 \date{}
 
@@ -14,7 +14,7 @@
 \maketitle
 
 \begin{abstract}
-Early-stage literature review in business domains often suffers from fragmented toolsets and a lack of traceability in paper selection. Generic Large Language Models (LLMs) can accelerate this process but introduce significant risks of hallucination and metadata inaccuracy. This paper presents Paper Agent, a multi-agent system deployed on Cloudflare that automates the transition from research keywords to rigorous, traceable literature synthesis. By decomposing the workflow into 12 specialized agents---from Planner to Critic---we ensure error isolation and explicit decision-making. We evaluate our prototype using a repository-grounded benchmark covering 20 tasks with DOI-backed gold labels. Our controlled evaluation on T001--T003 shows that while naive Single-LLM models can retrieve titles, Paper Agent maintains 100\% top-journal precision and verifiable DOI integrity in the current T001--T003 sample. The system provides a ``White-box'' alternative to the current ``Black-box'' AI research assistants.
+Early-stage literature review in business domains is plagued by tool fragmentation and a significant ``traceability gap'' in automated selection. While generic Large Language Models (LLMs) can retrieve paper titles, they often lack the rigorous metadata verification and journal-quality compliance required for academic standards. This paper presents Paper Agent, a multi-agent system deployed on Cloudflare that automates scholarly search, verification, and synthesis using a 12-stage ``Agent-as-a-Module'' architecture. Our system moves beyond the ``Black-box'' nature of naive LLM prompts by recording explicit agent traces in a persistent database, ensuring that every exclusion and ranking decision is auditable. We evaluate the framework using Paper-Agent-Bench, a repository-grounded benchmark with DOI-backed gold labels. Results on the T001--T003 control layer demonstrate that Paper Agent maintains 100\% top-journal precision and verified DOI integrity, providing a trustworthy alternative to popularity-biased search engines.
 \end{abstract}
 
 

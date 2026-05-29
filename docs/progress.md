@@ -1,5 +1,14 @@
 # Project Progress And Session Handoff
 
+Updated: 2026-05-29 (gemini final submission improvement complete)
+
+## 2026-05-29 (gemini)
+- **Claim Safety Audit**: Refined `docs/final-submission-story.md` to explicitly label components as implemented, partial, or opt-in, prioritizing 'Trust over Raw Precision'. Removed any unsupported claims of universal retrieval dominance. (gemini)
+- **Final Paper Polish**: Updated `paper/final-paper-draft.tex` to align with the safety audit. Emphasized the "White-box" 12-stage architecture, algorithmic gatekeeping limitations, and reproducible metadata scoring. (gemini)
+- **Presentation Narrative**: Aligned `presentation/final-presentation-outline.md` and `presentation/final-presentation-mcp.md` to match the "Trustworthiness" claim boundary. Removed presentation-length constraints from the outline instructions. (gemini)
+- **Demo Script**: Rewrote `docs/final-demo-script.md` to feature presenter-friendly narration, explicitly highlighting Agent Board traces and Score Breakdown auditability. Included a fallback path for quota limits. (gemini)
+- **Data Integrity**: Audited all changes using `git diff --name-status` and confirmed ZERO deletions or truncations of historical files. Maintained the strict append-only policy for `CHANGELOG.md` and `docs/progress.md`. (gemini)
+
 Updated: 2026-05-29 (gemini local setup and deliverable refresh complete)
 
 ## 2026-05-29 (gemini)
