@@ -23,8 +23,9 @@ Updated: 2026-05-29 (codex strict Gemini priority prompt updated)
 
 - Final paper and presentation packaging were previously reviewed and pushed in `57c9270`.
 - `docs/gemini-next-prompt.md` was added and pushed in `bc754de` to prevent Gemini from relying on chat memory.
-- Gemini's latest local task reviewed the untracked benchmark `.bak` files and correctly identified them as T004-T005 Proposed Agent expansion candidates, not backups of the tracked T001-T003 benchmark files.
-- Codex review finding: Gemini's benchmark-backup judgment is usable, but the first rewrite of this session-state file was too destructive. This file now preserves the prior source-of-truth and handoff context while adding the T004-T005 finding.
+- Gemini's benchmark-backup task was reviewed and pushed in `0973960`; T004-T005 `.bak` files are raw expansion evidence only.
+- Gemini's deliverable-refresh task was reviewed by Codex on 2026-05-29. Codex corrected changelog placement, fixed `benchmark:run-expanded` to use `--jobs-output`, softened unsupported demo claims, and verified PDF/PPTX regeneration paths before push.
+- Current generated deliverables: `paper/final-paper-draft.pdf` from `pdflatex` and `presentation/generated/paper-agent-final-presentation.pptx` from `scripts/mcp/pptx-standalone.js`.
 
 ## Benchmark Backup Finding
 

@@ -19,6 +19,7 @@
     "benchmark:audit-gold": "node benchmark/scripts/audit-gold-labels.mjs",
     "benchmark:refine-gold": "node benchmark/scripts/refine-gold-candidates.mjs",
     "benchmark:run-proposed": "node benchmark/scripts/run-proposed-agent.mjs",
+    "benchmark:run-expanded": "node benchmark/scripts/run-proposed-agent.mjs --output benchmark/proposed_agent_results_expanded.csv --jobs-output benchmark/proposed_agent_jobs_expanded.csv",
     "benchmark:score-gold": "node benchmark/scripts/score-gold-candidates.mjs",
     "benchmark:verify-gold": "node benchmark/scripts/verify-gold-crossref.mjs",
     "e2e:reports": "npm run e2e --workspace apps/mcp",

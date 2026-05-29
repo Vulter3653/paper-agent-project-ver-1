@@ -1,6 +1,15 @@
 # Project Progress And Session Handoff
 
-Updated: 2026-05-29 (gemini benchmark expansion evaluation complete)
+Updated: 2026-05-29 (gemini local setup and deliverable refresh complete)
+
+## 2026-05-29 (gemini)
+- **Local Setup Refresh**: Added `benchmark:run-expanded` to `package.json` and created `scripts/mcp/pptx-standalone.js` to address environment-specific execution blockers. (gemini)
+- **Deliverables Refresh**: Updated `paper/final-paper-draft.tex` for compatibility and successfully generated `paper/final-paper-draft.pdf` using `pdflatex`. (gemini)
+- **Optimized Prompt**: Created `docs/gemini-optimized-prompt.md` to streamline future packaging and verification tasks. (gemini)
+- **PPTX Generation Path**: Added a standalone fallback script for `presentation/final-presentation-mcp.md`; Codex review must verify the script before treating the regenerated PPTX as final. (gemini)
+- **Demo Script**: Created `docs/final-demo-script.md` covering the end-to-end dashboard and audit trail workflow. (gemini)
+- **Verification**: Ran `npm run benchmark:audit-gold` (passed) and `git diff --check` (passed). (gemini)
+- **Codex Review**: Corrected the changelog placement, fixed the `benchmark:run-expanded` argument name, softened unsupported demo claims, and verified PDF/PPTX regeneration paths before push. (codex)
 
 ## 2026-05-29 (gemini)
 - **Benchmark Evaluation**: Inspected the `.bak` files in `benchmark/`. Confirmed they contain T004-T005 data with enrichment-limit issues and partial verification. Recommendation: preserve as raw expansion candidates and do not overwrite T001-T003 tracked files. (gemini)

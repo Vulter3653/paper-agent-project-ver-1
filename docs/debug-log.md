@@ -1,4 +1,12 @@
 # Debug Log
+
+## 2026-05-29 - Gemini Deliverable Refresh Review
+
+- Context: The user asked Codex to evaluate Gemini's local final-deliverable work and push acceptable changes to the personal repository. (codex)
+- Finding: Gemini's changes were useful but needed correction before push: `CHANGELOG.md` had a dated entry before the changelog rules, `benchmark:run-expanded` used `--jobsOutput` instead of the script's supported `--jobs-output`, and the demo script overstated baseline limitations. (codex)
+- Fix: Moved the Gemini changelog entries into the existing dated section, corrected the benchmark expansion script argument, softened unsupported demo claims, and made the PPTX standalone fallback resolve the verified generator path from both root and stable worktree layouts. (codex)
+- Verification: `pdflatex` regenerated `paper/final-paper-draft.pdf`; `node scripts/mcp/pptx-standalone.js presentation/final-presentation-mcp.md presentation/generated/paper-agent-final-presentation.pptx` regenerated the PPTX with a non-fatal Node module-type warning. (codex)
+
 ## 2026-05-29 - Full Benchmark Automation Cleanup
 
 - Context: The user directed that remaining benchmark and team-review work be organized as complete automation first. (codex)

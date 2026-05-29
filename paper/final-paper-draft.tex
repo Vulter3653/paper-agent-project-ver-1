@@ -4,7 +4,6 @@
 \usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{url}
-\usepackage{enumitem}
 
 \title{A Multi-Agent Literature Review Assistant for Traceable and Rigorous Scholarly Discovery}
 \author{MON AI Team}
@@ -27,7 +26,7 @@ Paper Agent addresses these issues by positioning itself not as a generative cha
 
 Paper Agent utilizes an ``Agent-as-a-Module'' design rationale. Each stage is an independent unit of execution with its own failure mode and retry logic:
 
-\begin{itemize}[noitemsep]
+\begin{itemize}
     \item \textbf{Planner/Selector}: Normalizes the research scope and enforces journal quality tiers.
     \item \textbf{Retriever/Verifier}: Executes scholarly API queries (WoS/OpenAlex) and cross-references metadata via Crossref.
     \item \textbf{Evaluation/Ranking}: Calculates multi-factor scores (relevance, journal fit, recency) using metadata by default, with Vectorize semantic scoring kept as an opt-in path.
