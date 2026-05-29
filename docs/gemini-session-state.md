@@ -1,6 +1,6 @@
 # Gemini Session State
 
-Updated: 2026-05-29 (gemini benchmark backup review evaluated by codex)
+Updated: 2026-05-29 (codex strict Gemini priority prompt updated)
 
 ## Current Source Of Truth
 - `docs/final-submission-story.md`
@@ -36,15 +36,20 @@ Updated: 2026-05-29 (gemini benchmark backup review evaluated by codex)
 
 ## What Gemini Must Do Next
 
-Gemini must follow `docs/gemini-next-prompt.md` unless the user gives a newer explicit instruction. Current safe next work remains documentation and final-deliverable polishing only.
+Gemini must follow `docs/gemini-next-prompt.md` unless the user gives a newer explicit instruction. The current next prompt is intentionally strict and ordered; do not skip ahead or widen scope on your own. Current safe next work remains documentation, benchmark reproducibility, and final-deliverable polishing only. The next prompt now explicitly includes LaTeX report generation and PPTX generation through the verified MCP or documented fallback path.
 
 Priority order:
 
-1. Polish `paper/final-paper-draft.tex` conservatively for grammar, clarity, and claim safety.
-2. Align `presentation/final-presentation-outline.md` and `presentation/final-presentation-mcp.md` with the paper narrative.
-3. Create or refine `docs/final-demo-script.md` for the live demo flow and fallback job path if it is assigned.
-4. Audit final claims in `docs/final-submission-story.md`, `paper/final-paper-draft.tex`, and `presentation/*`.
-5. Update required records and run verification.
+1. Expand benchmark evidence safely without overwriting controlled T001-T003 CSVs.
+2. Preserve benchmark reproducibility and scripted exception handling.
+3. Keep all claims strictly bounded to repository-backed evidence.
+4. Preserve the final-deliverable narrative in the paper and presentation.
+5. Prepare or refine the demo script.
+6. Harden handoff records in `docs/gemini-session-state.md` and `docs/progress.md`.
+7. Record every meaningful change in `CHANGELOG.md`.
+8. Run required verification commands.
+9. Keep the scope narrow and avoid forbidden files.
+10. End with changed files, verification results, risks, and next action.
 
 Do not edit Worker, dashboard source, Cloudflare config, D1/R2 config, MCP server code, deployment files, or tracked benchmark CSV/JSON files unless the user explicitly reassigns that scope.
 

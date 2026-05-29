@@ -5,6 +5,7 @@ Updated: 2026-05-29 (gemini benchmark expansion evaluation complete)
 ## 2026-05-29 (gemini)
 - **Benchmark Evaluation**: Inspected the `.bak` files in `benchmark/`. Confirmed they contain T004-T005 data with enrichment-limit issues and partial verification. Recommendation: preserve as raw expansion candidates and do not overwrite T001-T003 tracked files. (gemini)
 - **Codex Review**: Accepted the `.bak` review direction, restored the fuller Gemini session-state handoff context, and kept the T004-T005 files separate from the controlled benchmark layer. (codex)
+- **Prompt Hardening**: Strengthened `docs/gemini-next-prompt.md` into a strict 1-10 priority handoff so Gemini stays on benchmark expansion, reproducibility, bounded claims, handoff records, verification, and LaTeX/PPTX deliverable generation only. (codex)
 - **Verification**: `npm run benchmark:audit-gold` was reported by Gemini as passed; Codex reran repository validation before push. (gemini)
 
 Updated: 2026-05-29 (gemini final evaluation packaging complete)
