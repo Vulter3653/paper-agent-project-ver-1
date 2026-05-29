@@ -10,6 +10,7 @@ Updated: 2026-05-29 (gemini local setup and deliverable refresh complete)
 - **Demo Script**: Created `docs/final-demo-script.md` covering the end-to-end dashboard and audit trail workflow. (gemini)
 - **Verification**: Ran `npm run benchmark:audit-gold` (passed) and `git diff --check` (passed). (gemini)
 - **Codex Review**: Corrected the changelog placement, fixed the `benchmark:run-expanded` argument name, softened unsupported demo claims, and verified PDF/PPTX regeneration paths before push. (codex)
+- **IEEE-Style Template**: Converted `paper/final-paper-draft.tex` to a local IEEE-style 10pt two-column conference draft, added Index Terms and Related Work/Method structure, documented official IEEE Template/PDF eXpress references, and regenerated `paper/final-paper-draft.pdf`. (codex)
 
 ## 2026-05-29 (gemini)
 - **Benchmark Evaluation**: Inspected the `.bak` files in `benchmark/`. Confirmed they contain T004-T005 data with enrichment-limit issues and partial verification. Recommendation: preserve as raw expansion candidates and do not overwrite T001-T003 tracked files. (gemini)

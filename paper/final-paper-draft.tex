@@ -1,13 +1,14 @@
-\documentclass[11pt]{article}
+\documentclass[10pt,twocolumn]{article}
 
-\usepackage[margin=1in]{geometry}
+\usepackage[letterpaper,margin=0.75in]{geometry}
 \usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{url}
+\pagestyle{plain}
 
 \title{A Multi-Agent Literature Review Assistant for Traceable and Rigorous Scholarly Discovery}
-\author{MON AI Team}
-\date{May 2026}
+\author{MON AI Team\\AI Agent Based Domain Problem Solving Project\\Sungkyunkwan University}
+\date{}
 
 \begin{document}
 \maketitle
@@ -16,13 +17,22 @@
 Early-stage literature review in business domains often suffers from fragmented toolsets and a lack of traceability in paper selection. Generic Large Language Models (LLMs) can accelerate this process but introduce significant risks of hallucination and metadata inaccuracy. This paper presents Paper Agent, a multi-agent system deployed on Cloudflare that automates the transition from research keywords to rigorous, traceable literature synthesis. By decomposing the workflow into 12 specialized agents---from Planner to Critic---we ensure error isolation and explicit decision-making. We evaluate our prototype using a repository-grounded benchmark covering 20 tasks with DOI-backed gold labels. Our controlled evaluation on T001--T003 shows that while naive Single-LLM models can retrieve titles, Paper Agent maintains 100\% top-journal precision and verifiable DOI integrity in the current T001--T003 sample. The system provides a ``White-box'' alternative to the current ``Black-box'' AI research assistants.
 \end{abstract}
 
+
+\noindent\textbf{Index Terms}--Multi-agent systems, scholarly search, literature review automation, metadata verification, Cloudflare Workers, benchmark evaluation.
+
+
 \section{Introduction}
 
 Scholarly literature review is the cornerstone of academic rigor. However, researchers in business schools face a three-fold challenge: (1) fragmented access across databases like Web of Science (WoS) and OpenAlex, (2) the tedious manual overhead of verifying journal rankings and open-access paths, and (3) the opaque nature of search-ranking algorithms. While AI assistants promise speed, they often lack the accountability required for academic work.
 
 Paper Agent addresses these issues by positioning itself not as a generative chat interface, but as a modular execution pipeline. The core problem we solve is the ``Traceability Gap'' in automated research. By recording every intermediate agent decision in a persistent log, we allow researchers to audit the search path, understand exclusion criteria, and reproduce the workflow through a consistent audit trail.
+\section{Related Work}
 
-\section{System Architecture: The 12-Stage Pipeline}
+Paper Agent is positioned at the intersection of scholarly retrieval systems, tool-using AI agents, and reproducible evaluation. Generic LLM assistants can summarize or recommend papers, but their recommendations are difficult to audit unless the retrieval source, metadata checks, and ranking criteria are exposed. Prior retrieval-augmented generation workflows improve grounding by consulting external documents; this project extends that principle by using scholarly APIs, DOI verification, journal allowlists, and persistent agent traces as first-class evidence.
+
+\section{Method}
+
+\subsection{System Architecture: The 12-Stage Pipeline}
 
 Paper Agent utilizes an ``Agent-as-a-Module'' design rationale. Each stage is an independent unit of execution with its own failure mode and retry logic:
 
@@ -45,7 +55,7 @@ Our controlled comparison for T001--T003 evaluates three models: (1) Rule-based,
 
 Table 1 summarizes our findings on the T001--T003 control layer.
 
-\begin{table}[h]
+\begin{table*}[t]
 \centering
 \begin{tabular}{lcccc}
 \toprule
@@ -57,7 +67,7 @@ Single-LLM (Baseline) & 0.6667 & 0.9949 & 0.9333 & 1.0000 \\
 \bottomrule
 \end{tabular}
 \caption{Benchmark results for T001--T003. Current controlled sample reports top-journal compliance and DOI presence.}
-\end{table}
+\end{table*}
 
 The Single-LLM baseline shows higher exact overlap with gold labels because it is repository-grounded and biased toward well-known papers. The Proposed Multi-Agent and Rule-based rows both report 100\% top-journal precision in this sample, while the Proposed Multi-Agent workflow additionally provides traceable job stages, verification fields, and downloadable artifacts from live scholarly searches. This supports the claim that the multi-agent approach improves auditability and quality-control enforcement, not that it universally outperforms every baseline.
 

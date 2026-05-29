@@ -30,6 +30,7 @@ _No unreleased changes._
 - Docs: Added `docs/proposed-agent-bak-review-2026-05-29.md` and updated `docs/gemini-session-state.md` with the Codex-reviewed handoff decision. (gemini)
 
 ## 2026-05-29 (codex)
+- Changed: Applied a local IEEE-style 10pt two-column conference draft layout to `paper/final-paper-draft.tex`, added Index Terms and Related Work/Method structure, documented IEEE Template/PDF eXpress follow-up, and regenerated `paper/final-paper-draft.pdf`. (codex)
 - Fixed: Reviewed Gemini local deliverable refresh, corrected changelog placement, fixed `benchmark:run-expanded` to use `--jobs-output`, softened unsupported demo claims, and verified LaTeX/PPTX generation paths. (codex)
 - Docs: Tightened `docs/gemini-next-prompt.md` so Gemini must keep benchmark expansion, reproducibility, bounded claims, handoff records, verification, and LaTeX/PPTX deliverable generation in a strict 1-10 priority order. (codex)
 - Docs: Added `docs/gemini-next-prompt.md` and linked it from Gemini startup/session state so the next Gemini task is limited to final paper, presentation, demo script, and claim-audit work. (codex)

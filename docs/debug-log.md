@@ -1,5 +1,12 @@
 # Debug Log
 
+## 2026-05-29 - IEEE Template Application
+
+- Context: The user requested IEEE/ACM/AI conference template application and provided IEEE Article Template, IEEE PDF eXpress, and practical IEEE/LaTeX authoring references. (codex)
+- Finding: `IEEEtran.cls` and `acmart.cls` were not available in the current TeX Live `scheme-small` environment, so using those classes directly would break local reproducibility. (codex)
+- Fix: Converted `paper/final-paper-draft.tex` to a stable 10pt two-column IEEE-style conference draft using installed LaTeX packages, added Index Terms plus Related Work/Method structure, and documented the official IEEE PDF eXpress follow-up in `docs/ieee-template-checklist.md`. (codex)
+- Verification: `pdflatex -interaction=nonstopmode -output-directory=paper paper/final-paper-draft.tex` completed and regenerated `paper/final-paper-draft.pdf`; only non-blocking underfull box warnings remain. (codex)
+
 ## 2026-05-29 - Gemini Deliverable Refresh Review
 
 - Context: The user asked Codex to evaluate Gemini's local final-deliverable work and push acceptable changes to the personal repository. (codex)
