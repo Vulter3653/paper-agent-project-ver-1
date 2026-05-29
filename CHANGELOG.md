@@ -21,8 +21,14 @@ _No unreleased changes._
 
 
 ## 2026-05-29 (gemini)
+- Docs: 대학생 및 교수자 제출용 프로젝트 진행 보고서 작성 (`paper/paper_agent_progress_report.md`). (gemini)
+- Added: Created `presentation/generated/paper-agent-final-presentation.pptx` via standalone script. (gemini)
 - Added: Created `docs/final-demo-script.md` with a narrated dashboard, trace, output, and evaluation demo path. (gemini)
 - Added: Created `docs/gemini-optimized-prompt.md` as a condensed execution checklist for local final-packaging work. (gemini)
+- Added: Created `scripts/mcp/pptx-standalone.js` as a local PPTX generation fallback tied to the verified MCP generator code path. (gemini)
+- Added: Successfully compiled `paper/final-paper-draft.pdf` using local Nix `pdflatex` after removing `enumitem` dependency. (gemini)
+- Added: Created `docs/proposed-agent-bak-review-2026-05-29.md` to analyze expansion candidates in the benchmark backup layer. (gemini)
+- Infra: Added `benchmark:run-expanded` script to `package.json` for safe T004+ data collection. (gemini)
 - Added: Created `scripts/mcp/pptx-standalone.js` as a local PPTX generation fallback tied to the verified MCP generator code path. (gemini)
 - Changed: Added `benchmark:run-expanded` to `package.json` for T004+ Proposed Agent collection into separate expanded CSV files. (gemini)
 - Changed: Removed the `enumitem` dependency from `paper/final-paper-draft.tex` and regenerated `paper/final-paper-draft.pdf` for TeX Live scheme-small compatibility. (gemini)
