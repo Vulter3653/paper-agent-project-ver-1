@@ -1,6 +1,13 @@
 # Debug Log
 
 ## 2026-05-29 - Local Gemini/Rebase Work Evaluation
+## 2026-05-29 - Root Rebase Cleanup
+
+- Context: After selective promotion of safe local work, the root directory still held an interrupted rebase with conflict markers in protected history files. (codex)
+- Action: Ran `git rebase --abort` in `/home/user/monaiteamproject` to remove the conflicted rebase state and return the root to branch `benchmark/gemini-t004-t006-gold-refinement`. (codex)
+- Result: Root no longer has unmerged files. It is still not the active baseline because it is ahead of and behind `origin/main`; use `.worktrees/agent-traces` for current personal-main development. (codex)
+- Remaining local note: Two untracked `.bak` benchmark files remain in root and should be reviewed or removed only if explicitly needed. (codex)
+
 
 - Context: The user requested that all locally progressed work be evaluated and reflected into the personal repository. (codex)
 - Finding: The root worktree was in an interrupted rebase with unresolved conflicts in `CHANGELOG.md`, `docs/progress.md`, and `docs/debug-log.md`; it also staged benchmark CSV changes that deleted existing proposed-agent result rows. (codex)

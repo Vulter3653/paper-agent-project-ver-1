@@ -1,6 +1,14 @@
 # Project Progress And Session Handoff
 
 Updated: 2026-05-28 (codex blueprint and dashboard verification)
+Updated: 2026-05-29 (codex root rebase cleanup)
+
+## codex - Root Rebase Cleanup (2026-05-29)
+
+- Cleaned: Aborted the interrupted root rebase after the safe parts of `7bd41e4` had been manually reimplemented and pushed on personal `origin/main`. (codex)
+- Current local layout: `/home/user/monaiteamproject/.worktrees/agent-traces` remains the stable `main` worktree at `743e80f`; `/home/user/monaiteamproject` is back on `benchmark/gemini-t004-t006-gold-refinement` with only two untracked `.bak` benchmark files. (codex)
+- Decision: Do not use the root benchmark branch as the active baseline; continue personal repo development from `.worktrees/agent-traces` unless the branch is explicitly reviewed again. (codex)
+
 Updated: 2026-05-29 (codex local work evaluation)
 
 ## codex - Local Work Evaluation And Selective Promotion (2026-05-29)

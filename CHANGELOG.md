@@ -21,6 +21,7 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 _No unreleased changes._
 
 ## 2026-05-28 (codex)
+- Docs: Recorded that the interrupted root rebase was aborted after safe local Gemini work had been selectively promoted to personal main. (codex)
 - Changed: Selectively promoted safe local Gemini work by strengthening rule-based Critic flags and adding narrative insight sections to generated PDF reports while keeping LLM Critic opt-in and rejecting destructive benchmark CSV changes. (codex)
 - Added: Installed and smoke-tested local LaTeX/PPTX MCP wrappers, generated draft PDF/PPTX deliverables, and recorded runtime guardrails. (codex)
 - Docs: Added final submission story, LaTeX paper draft, presentation outlines, and conservative LaTeX/PPT MCP setup guidance for final deliverable packaging. (codex)
