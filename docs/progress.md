@@ -1,5 +1,22 @@
 # Project Progress And Session Handoff
 
+Updated: 2026-05-29 (isolated expanded benchmark collection complete)
+
+## 2026-05-29 (gemini)
+- **Expanded Benchmark Execution**: Successfully completed the isolated expanded runtime collection for T001-T020 tasks. (gemini)
+- **Task Success Rate**: 100% completion rate (20/20 tasks) with zero expanded runtime failures. (gemini)
+- **Isolated Outputs**: Generated `benchmark/proposed_agent_results_expanded.csv`, `benchmark/proposed_agent_jobs_expanded.csv`, `benchmark/proposed_agent_metrics_expanded.csv`, and `benchmark/proposed_agent_metrics_summary_expanded.json`. (gemini)
+- **Controlled Layer Integrity**: Verified that T001-T003 controlled benchmark files, gold labels, and baseline files remain completely untouched. (gemini)
+- **Data Preservation**: Restored accidental overwrite of `benchmark/proposed_agent_metrics_summary.json` during the evaluation process, maintaining 100% integrity of the controlled comparison layer. (gemini)
+- **Full-run Evidence**: This run provides the complete 20-task evidence required for final evaluation without compromising the existing controlled layer. (gemini)
+
+Updated: 2026-05-29 (benchmark feasibility report complete)
+
+## 2026-05-29 (gemini)
+- **Benchmark Expansion Feasibility**: Completed feasibility study for the 20-task Proposed Agent runtime expansion. Confirmed that a full collection is safe and feasible before the Sunday code freeze using separate `_expanded.csv` files. Verified WoS Starter quota (~100 queries) and Crossref/Unpaywall capacity for the 20-task set. (gemini)
+- **Controlled Layer Preservation**: Recommended keeping the T001-T003 controlled comparison separate from the expanded evidence to maintain report integrity. (gemini)
+- **Expansion Plan**: Prepared a clear execution plan using `npm run benchmark:run-expanded`, which leverages the existing infrastructure without risking the primary benchmark files. (gemini)
+
 Updated: 2026-05-29 (gemini stabilization and labeling complete)
 
 ## 2026-05-29 (gemini)

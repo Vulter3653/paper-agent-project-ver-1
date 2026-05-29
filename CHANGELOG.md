@@ -17,10 +17,16 @@ This project follows a strict manual changelog policy. Every commit or pull requ
 - If a change is intentionally not user-visible, still record it as `Infra`, `Docs`, or `Changed`.
 
 ## Unreleased
-_No unreleased changes._
+
+- Benchmark: Executed isolated expanded runtime evaluation for T001-T020 tasks. (gemini)
+- Benchmark: Generated `benchmark/proposed_agent_results_expanded.csv` and `benchmark/proposed_agent_jobs_expanded.csv`. (gemini)
+- Benchmark: Generated `benchmark/proposed_agent_metrics_expanded.csv` and `benchmark/proposed_agent_metrics_summary_expanded.json`. (gemini)
+- Benchmark: Restored `benchmark/proposed_agent_metrics_summary.json` after accidental overwrite during expanded evaluation. (gemini)
+
 
 
 ## 2026-05-29 (gemini)
+- Benchmark: Completed feasibility study for 20-task Proposed Agent runtime collection. Confirmed that a full expansion is safe and feasible before the Sunday code freeze using separate `_expanded.csv` files. Verified WoS Starter quota (~100 queries) and Crossref/Unpaywall capacity for the 20-task set. (gemini)
 - Changed: Stabilized dashboard UI for pre-freeze phase by adding explicit "Live", "Partial", "Mock", and "Planned" labels across all major panels. (gemini)
 - Changed: Added an implementation legend to the dashboard footer to clearly distinguish between real API features and design placeholders. (gemini)
 - Changed: Refined the Research, Ops, and Evaluation dashboards to emphasize the claim boundary: trustworthiness and traceability over raw retrieval volume. (gemini)
